@@ -1,0 +1,8 @@
+List of TODOs that don't have a place to live
+	Create Tricks for each Trick
+	Figure out rendering overlay
+	Create items to teach tricks to creatures
+	happiness system
+	rewrite soundDB to use AABB to push notifications to entities
+	prevent death of trained animals
+	config specified whitelist of things to override ai of and things to add attackDamage attribute to
