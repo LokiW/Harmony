@@ -23,6 +23,9 @@
 /*.iws
 /*.iml
 
+## Vim
+*.swp
+
 ## Private Stuffs
 /private.properties
 
