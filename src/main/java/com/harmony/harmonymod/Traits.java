@@ -8,9 +8,12 @@ import java.util.UUID;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.*;
 import java.io.Serializable;
+import java.util.Random;
+import java.util.List;
 
 public class Traits implements Serializable {
 	private static final long serialVersionUID = 1L;
+	private static Random r = new Random();
 
 	//Always add traits to end of existing traits for backward compatibility
 	public static enum TRAIT {JUMP, FAST, HARDY, VICIOUS, NONE};
@@ -22,22 +25,20 @@ public class Traits implements Serializable {
 	public Traits(EntityLiving pet) {
 		m_traits = new MAGICAL_TRAIT[] {MAGICAL_TRAIT.NONE, MAGICAL_TRAIT.NONE, MAGICAL_TRAIT.NONE};
 
-		// Setup Breed Actions / Traits
-		if (pet instanceof EntitySheep) {
-			traits = new TRAIT[] {TRAIT.HARDY, TRAIT.HARDY, TRAIT.HARDY};
-		} else if (pet instanceof EntityPig) {
-			traits = new TRAIT[] {TRAIT.FAST, TRAIT.FAST, TRAIT.FAST};
-		} else if (pet instanceof EntityWolf) {
-			traits = new TRAIT[] {TRAIT.VICIOUS, TRAIT.VICIOUS, TRAIT.VICIOUS};
-		} else {
-			traits = new TRAIT[0];
-		}
-
 		// Setup random start traits
-		// TODO
+		traits = new TRAIT[3];
+
+		String key = pet.getClass().getSimpleName().toLowerCase();
+		List<TRAIT> l;
+		l = HarmonyMod.slot1.get(key);
+		traits[0] = l.get(r.nextInt(l.size()));
+
+		l = HarmonyMod.slot2.get(key);
+		traits[1] = l.get(r.nextInt(l.size()));
+
+		l = HarmonyMod.slot3.get(key);
+		traits[2] = l.get(r.nextInt(l.size()));
 		
-
-
 		// Apply traits in minecraft engine
 		for (int i = 0; i < traits.length; i++) {
 			switch (traits[i]) {

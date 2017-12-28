@@ -154,14 +154,12 @@ public class HarmonyProps implements IExtendedEntityProperties {
 			if(e.entity instanceof EntityLiving && !(e.entity instanceof EntityPlayer)) {
 
 				EntityLiving animal = (EntityLiving)e.entity;
-				if(animal.getExtendedProperties(PROP_NAME) == null) {
+				String className = animal.getClass().getSimpleName().toLowerCase();
+				if(HarmonyMod.harmonyMobs.contains(className) && animal.getExtendedProperties(PROP_NAME) == null) {
 					animal.registerExtendedProperties(PROP_NAME, new HarmonyProps(animal));
 
 					// Register attacking for passive mobs
-					// TODO make this list configurable
-					if (animal instanceof EntityCow || animal instanceof EntityPig ||
-							animal instanceof EntitySheep || animal instanceof EntityChicken ||
-							animal instanceof EntityWolf) {
+					if (HarmonyMod.needsAttackAttr.contains(className)) {
 						BaseAttributeMap bam = animal.getAttributeMap();
 						bam.registerAttribute(SharedMonsterAttributes.attackDamage);
 						animal.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(1.0);

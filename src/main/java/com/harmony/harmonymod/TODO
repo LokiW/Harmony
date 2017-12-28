@@ -1,29 +1,42 @@
-List of TODOs that don't have a place to live
-	Create Tricks for each Trick
-		flee
+Needed Features
+	Teaching tricks
+	Trait inheritance
+	Trick-teaching items
+	Configuration
+	Tricks
 		jump
-		detect trait
-		detect ore
-		detect node
-		galvanize
+		detect traits
 		shepherd
-		Some fixed locations
-			spawn
-			ender portal
-			where I died
-			where I'm looking
+		spawn
+		where I died
+		where I'm looking
 		sit
 		stop
 		breed
+
+High Value
+	Noteblock whistles
+	Rendering overlay
+	More traits
+	Happiness system
+	Prevent death of trained animals
+	Config based traits
+	Tricks
+		flee
+		detect ore
+		detect node
+		galvanize
 		dig
+		bark
+
+
+Medium Value
+	Holding Items
+	Owner authenticated notes
+	Tricks
 		fetch
 		activate
+		ender portal
 		place
 		laydown/backflip/rollover
-	Holding items
-	Trait inheritance
-	Figure out rendering overlay
-	Create items to teach tricks to creatures
-	happiness system
-	prevent death of trained animals
-	config specified whitelist of things to override ai of and things to add attackDamage attribute to
+
