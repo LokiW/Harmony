@@ -132,6 +132,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		// TODO do these get preserved?
 		tricks = new HashMap<InstrumentSound, ActionSet>();
 		actions = new ActionSet(0);
+		SoundDB soundDB = SoundDB.getSoundDB();
 		
     	if (e instanceof EntityCow) {
 	   		EntityCow cow = (EntityCow)e;
@@ -143,7 +144,6 @@ public class HarmonyProps implements IExtendedEntityProperties {
 			TrickHandler th = new TrickHandler(cow);
 			cow.tasks.addTask(0, th);
 			cow.tasks.addTask(1, new EntityAISwimming(cow));
-			SoundDB soundDB = SoundDB.getSoundDB();
 			ActionSet t1 = new ActionSet(TrickEnum.GO);
 			tricks.put(soundDB.getSound(Instrument.BASSDRUM, Note.A), t1);
 			ActionSet t2 = new ActionSet(TrickEnum.LEARNED_LOCATION_1);
@@ -151,7 +151,12 @@ public class HarmonyProps implements IExtendedEntityProperties {
 			ActionSet t3 = new ActionSet(TrickEnum.ATTACK);
 			tricks.put(soundDB.getSound(Instrument.BASSDRUM, Note.F_SHARP), t3);
 			this.yLearned1 = 64;
-	   	}
+	   	} else if (e instanceof EntitySheep) {
+			EntitySheep sheep = (EntitySheep) e;
+			sheep.tasks.addTask(0, new TrickHandler(sheep));
+			ActionSet t1 = new ActionSet(TrickEnum.GUARD);
+			tricks.put(soundDB.getSound(Instrument.PIANO, Note.F_SHARP), t1);
+		}
  
     }
 

@@ -59,6 +59,8 @@ public class ActionSet {
 				return new LocationTrick(hp.xLearned1, hp.yLearned1, hp.zLearned1, false);
 			case TrickEnum.ATTACK:
 				return new Attack();
+			case TrickEnum.GUARD:
+				return new Guard();
 			default:
 				break;
 		}
