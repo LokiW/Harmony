@@ -18,11 +18,6 @@ public class TrickHandler extends EntityAIBase
 {
 	private EntityCreature pet;
 
-	// InstrumentSound pointer or pointer to Entity
-	// last two sounds processed by TrickHandler
-	private Object firstSound;
-	private Object secondSound;
-
 	private Trick currentTrick;
 
 	public  TrickHandler(EntityCreature pet) {
@@ -32,24 +27,28 @@ public class TrickHandler extends EntityAIBase
 
 	private void updateCurrentTrick() {
 		Object sound = SoundDB.getSoundDB().getLastHeard(pet);
-		if(sound != null) {
+		if (sound != null) {
 			System.out.println("HarmonyMod: heard sound " + sound);
-			if(sound instanceof InstrumentSound) {
+			if (sound instanceof InstrumentSound) {
 				HarmonyProps hp = HarmonyProps.get(pet);
 				ActionSet as = hp.tricks.get((InstrumentSound)sound);
 	
-				if(as != null) {
+				Trick newTrick = null;
+				if (as != null) {
 					System.out.println("HarmonyProps: ActionSet found for heard sound");
-					currentTrick = as.getTrick(pet);
+					newTrick = as.getTrick(pet);
 				} else {
 					//TODO try something new when unknown sound
 				}
-				if (currentTrick != null)
-					currentTrick.setupTrick(pet, firstSound, secondSound);
+				if (newTrick != null) {
+					newTrick.setupTrick(pet, currentTrick);
+					if (newTrick.isInstant()) {
+						newTrick.act();
+					} else if (currentTrick == null || !currentTrick.consume(newTrick)) {
+						currentTrick = newTrick;
+					}
+				}
 			}
-
-			secondSound = firstSound;
-			firstSound = sound;
 		}
 	}
 

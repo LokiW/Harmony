@@ -16,39 +16,49 @@ import java.util.*;
 import com.harmony.harmonymod.HarmonyProps;
 import com.harmony.harmonymod.sounds.SoundDB.InstrumentSound;
 
-public class Attack implements Trick {
-    private EntityCreature pet;
-	//private Entity target;
-	private boolean targetSpecified;
+public class Attack extends Trick {
     private int delayCounter;
 
-    public Attack() {
-		this.targetSpecified = false;
-    }
-
-	public void setupTrick(EntityCreature pet, Object firstSound, Object secondSound) {
+	public void setupTrick(EntityCreature pet, Trick currentTrick) {
 		this.pet = pet;
-
-		if(firstSound instanceof EntityLivingBase) {
-			this.pet.setAttackTarget((EntityLivingBase) firstSound);
-			// target = (Entity) firstSound;
-			this.targetSpecified = true;
+		if (currentTrick instanceof EntityTrick) {
+			EntityTrick eTrick = (EntityTrick) currentTrick;
+			this.pet.setAttackTarget((EntityLivingBase) eTrick.target);
 		}
 	}
 
 	public boolean act() {
 		if (--this.delayCounter <= 0) {
 			this.delayCounter = 10;
-			if (!this.targetSpecified && (this.pet.getAttackTarget() == null)) {
+			if (this.pet.getAttackTarget() == null) {
 				// Find target to attack
 				setNewAttackTarget();
 			}
 			attackTarget();
 			// check if specified target killed, if so stop trying to attack things
-			if (this.pet.getAttackTarge() != null && this.pet.getAttackTarget().isDead)
+			if (this.pet.getAttackTarget() == null || this.pet.getAttackTarget().isDead) {
+				PathNavigate petPathfinder = this.pet.getNavigator();
+				if (petPathfinder != null)
+					petPathfinder.clearPathEntity();
 				return false;
+			}
 		}
 		return true;
+	}
+
+	public boolean isInstant() {
+		return false;
+	}
+
+	public boolean consume(Trick newTrick) {
+		if (newTrick instanceof Attack) {
+			return true;
+		} else if (newTrick instanceof EntityTrick) {
+			EntityTrick eTrick = (EntityTrick) newTrick;
+			this.pet.setAttackTarget((EntityLivingBase) eTrick.target);
+			return true;
+		}
+		return false;
 	}
 
 	private void setNewAttackTarget() {
@@ -73,29 +83,5 @@ public class Attack implements Trick {
 		if (closest instanceof EntityMob)
 			this.pet.setAttackTarget((EntityMob) closest);
 
-	}
-
-	private void attackTarget() {
-		EntityLivingBase target = (EntityLivingBase) this.pet.getAttackTarget();
-		if (target == null)
-			return;
-
-		this.pet.getLookHelper().setLookPositionWithEntity(target, 10.0F, (float)this.pet.getVerticalFaceSpeed());
-
-		PathNavigate petPathfinder = this.pet.getNavigator();
-
-		petPathfinder.tryMoveToEntityLiving(target, 1.0);
-		if (this.pet.getDistanceSqToEntity(target) <= 5.0D) {
-			// Attack it
-			IAttributeInstance damageAttr = this.pet.getEntityAttribute(SharedMonsterAttributes.attackDamage);
-			float damage = 0;
-			if (damageAttr != null) {
-				damage = (float) damageAttr.getAttributeValue();
-			} else {
-				System.out.println("HarmonyMod: Couldn't find attackAttribute for animal D: ");
-			}
-
-			target.attackEntityFrom(DamageSource.causeMobDamage(this.pet), damage);
-		}
 	}
 }

@@ -9,16 +9,12 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import java.lang.Math;
 
-public class LocationTrick extends Trick {
-    public double targetX;
-	public double targetY;
-	public double targetZ;
+public class EntityTrick extends Trick {
+	public Entity target;
 	public boolean teleport;
 
-    public LocationTrick(double x, double y, double z, boolean teleport) {
-		this.targetX = x;
-		this.targetY = y;
-		this.targetZ = z;
+    public EntityTrick(Entity e, boolean teleport) {
+		this.target = e;
 		this.teleport = teleport;
     }
 
@@ -35,8 +31,8 @@ public class LocationTrick extends Trick {
 	}
 
 	public boolean act() {
-		System.out.println("HarmonyMod: Act in LocationTrick");
-		this.pet.getLookHelper().setLookPosition(this.targetX, this.targetY, this.targetZ, 20.0F, (float)this.pet.getVerticalFaceSpeed());
+		System.out.println("HarmonyMod: Act in EntityTrick");
+		this.pet.getLookHelper().setLookPositionWithEntity(this.target, 10.0F, (float)this.pet.getVerticalFaceSpeed());
 		return true;
     }
 }
