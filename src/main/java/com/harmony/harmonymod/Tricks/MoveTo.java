@@ -7,13 +7,12 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import java.lang.Math;
 import com.harmony.harmonymod.HarmonyProps;
-import com.harmony.harmonymod.sounds.SoundDB.InstrumentSound;
 
 public class MoveTo extends Trick {
     private int delayCounter;
 	public Trick targetTrick;
 
-	public void setupTrick(EntityCreature pet, Trick currentTrick) {
+	public void setupTrick(EntityLiving pet, Trick currentTrick) {
 		this.pet = pet;
 		this.targetTrick = currentTrick;
 	}

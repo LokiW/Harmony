@@ -14,13 +14,12 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import java.lang.Math;
 import java.util.*;
 import com.harmony.harmonymod.HarmonyProps;
-import com.harmony.harmonymod.sounds.SoundDB.InstrumentSound;
 
 public class Guard extends Trick {
     private int delayCounter;
 	private Trick guardTarget;
 
-	public void setupTrick(EntityCreature pet, Trick currentTrick) {
+	public void setupTrick(EntityLiving pet, Trick currentTrick) {
 		this.pet = pet;
 		if (currentTrick instanceof LocationTrick || currentTrick instanceof EntityTrick) {
 			this.guardTarget = currentTrick;	

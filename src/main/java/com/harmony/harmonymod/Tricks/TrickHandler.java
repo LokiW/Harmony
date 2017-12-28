@@ -1,7 +1,5 @@
 package com.harmony.harmonymod.tricks;
 
-import com.harmony.harmonymod.sounds.SoundDB;
-import com.harmony.harmonymod.sounds.SoundDB.InstrumentSound;
 import com.harmony.harmonymod.HarmonyProps;
 import net.minecraft.entity.ai.*;
 import net.minecraft.entity.ai.attributes.*;
@@ -11,88 +9,124 @@ import net.minecraft.world.*;
 import net.minecraft.pathfinding.*;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import java.lang.Math;
 import java.util.*;
+import java.io.Serializable;
 
-public class TrickHandler extends EntityAIBase
-{
-	private EntityCreature pet;
+//TODO remove with test AI behaviours
+import net.minecraftforge.event.world.NoteBlockEvent.Instrument;
+import com.harmony.harmonymod.sounds.SoundDB;
 
-	private Trick currentTrick;
+public class TrickHandler extends EntityAIBase implements Serializable {
+	private static final long serialVersionUID = 1L;
+	public transient EntityLiving pet;
 
-	public  TrickHandler(EntityCreature pet) {
+	public Trick currentTrick;
+	public ActionSet actions;
+	public Map<Integer, ActionSet> tricks;
+
+	// These are for setting pet known locations at non-preset locations
+	// like other actions these are taught with specific items
+	public double xLearned1; public double yLearned1; public double zLearned1;
+	public double xLearned2; public double yLearned2; public double zLearned2;
+	public double xLearned3; public double yLearned3; public double zLearned3;
+
+	public  TrickHandler(EntityLiving pet) {
 		this.pet = pet;
+		
+		this.currentTrick = null;
+		this.actions = new ActionSet(0); //TODO initialize better
+		this.tricks = new HashMap<Integer, ActionSet>();
+
+		registerAI();
+
+		//TODO remove test AI behaviours
+		SoundDB soundDB = SoundDB.getSoundDB();	
+    	if (pet instanceof EntityCow) {
+			ActionSet t1 = new ActionSet(TrickEnum.GO);
+			tricks.put(soundDB.getSound(Instrument.BASSDRUM, 3), t1);
+			ActionSet t2 = new ActionSet(TrickEnum.LEARNED_LOCATION_1);
+			tricks.put(soundDB.getSound(Instrument.BASSDRUM, 6), t2);
+			ActionSet t3 = new ActionSet(TrickEnum.ATTACK);
+			tricks.put(soundDB.getSound(Instrument.BASSDRUM, 0), t3);
+	   	} else if (pet instanceof EntitySheep) {
+			ActionSet t1 = new ActionSet(TrickEnum.GUARD);
+			tricks.put(soundDB.getSound(Instrument.PIANO, 0), t1);
+		}
+ 
+
 		this.setMutexBits(3);
 	}
 
-	private void updateCurrentTrick() {
-		Object sound = SoundDB.getSoundDB().getLastHeard(pet);
-		if (sound != null) {
-			System.out.println("HarmonyMod: heard sound " + sound);
-			if (sound instanceof InstrumentSound) {
-				HarmonyProps hp = HarmonyProps.get(pet);
-				ActionSet as = hp.tricks.get((InstrumentSound)sound);
-	
-				Trick newTrick = null;
-				if (as != null) {
-					System.out.println("HarmonyProps: ActionSet found for heard sound");
-					newTrick = as.getTrick(pet);
-				} else {
-					//TODO try something new when unknown sound
-				}
-				if (newTrick != null) {
-					newTrick.setupTrick(pet, currentTrick);
-					if (newTrick.isInstant()) {
-						newTrick.act();
-					} else if (currentTrick == null || !currentTrick.consume(newTrick)) {
-						currentTrick = newTrick;
-					}
-				}
+	public void registerAI() {
+		pet.tasks.addTask(0,this);
+	}
+
+	/*
+	 * Interface for updating current trick
+	 */
+	public void updateCurrentTrick(int note) {
+		HarmonyProps hp = HarmonyProps.get(pet);
+		ActionSet as = tricks.get(note);
+
+		// See if we know that sound
+		Trick newTrick = null;
+		if (as != null) {
+			newTrick = as.getTrick(pet);
+		} else {
+			//TODO try something new when unknown sound
+		}
+		updateCurrentTrick(newTrick);
+	}
+
+	/*
+	 * Interface for updating current trick
+	 */
+	public void updateCurrentTrick(Trick newTrick) {
+		if (newTrick != null) {
+			System.out.println("HarmonyMod: " + pet + " doing trick " + newTrick);
+			newTrick.setupTrick(pet, currentTrick);
+			if (newTrick.isInstant()) {
+				newTrick.act();
+			} else if (currentTrick == null || !currentTrick.consume(newTrick)) {
+				currentTrick = newTrick;
 			}
 		}
 	}
 
 
-	/**
-	 * Returns whether the EntityAIBase should begin execution.
+	/*
+	 * Returns whether the TrickHandler wishes to execute
 	 */
 	@Override
 	public  boolean shouldExecute() {
-		//TODO check happiness level
-		updateCurrentTrick();
 		return currentTrick != null;
 	}
 
-	/**
-	 * Returns whether an in-progress EntityAIBase should continue executing
+	/*
+	 * Returns whether the Trickhandler wishes to execute
 	 */
 	@Override
-	public  boolean continueExecuting() {
+	public boolean continueExecuting() {
 		return currentTrick != null;
 	}
 
-	/**
-	 * Execute a one shot task or start executing a continuous task
+	/*
+	 * Runs Once every game tick this task is active
 	 */
 	@Override
-	public  void startExecuting() {
-	}
-
-	/**
-	 * Resets the task
-	 */
-	@Override
-	public  void resetTask() {
-	}
-
-	/**
-	 * Updates the task
-	 */
-	@Override
-	public  void updateTask() {
-		updateCurrentTrick();
+	public void updateTask() {
 		boolean continueTrick = currentTrick.act();
 		if (!continueTrick)
 			currentTrick = null;
 	}
+
+	/*
+	 * Unused required overrides
+	 */
+	@Override
+	public void resetTask() {}
+	@Override
+	public void startExecuting() {}
 }
+
+

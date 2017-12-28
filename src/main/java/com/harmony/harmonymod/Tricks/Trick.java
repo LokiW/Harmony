@@ -8,9 +8,11 @@ import net.minecraft.world.World;
 import net.minecraft.util.DamageSource;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import java.lang.Math;
+import java.io.Serializable;
 
-public abstract class Trick {
-	EntityCreature pet;
+public abstract class Trick implements Serializable {
+	private static final long serialVersionUID = 1L;
+	public transient EntityLiving pet;
 
 	/*
 	 * Call to have entity perform trick.
@@ -23,7 +25,7 @@ public abstract class Trick {
 	/*
 	 * Should be called immediately after construction, before act()
 	 */
-	public abstract void setupTrick(EntityCreature entity, Trick currentTrick);
+	public abstract void setupTrick(EntityLiving entity, Trick currentTrick);
 
 
 	/*

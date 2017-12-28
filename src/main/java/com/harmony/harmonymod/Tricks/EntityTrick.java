@@ -18,7 +18,7 @@ public class EntityTrick extends Trick {
 		this.teleport = teleport;
     }
 
-	public void setupTrick(EntityCreature pet, Trick currentTrick) {
+	public void setupTrick(EntityLiving pet, Trick currentTrick) {
 		this.pet = pet;
 	}
 

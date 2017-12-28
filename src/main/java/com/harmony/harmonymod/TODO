@@ -1,8 +1,29 @@
 List of TODOs that don't have a place to live
 	Create Tricks for each Trick
+		flee
+		jump
+		detect trait
+		detect ore
+		detect node
+		galvanize
+		shepherd
+		Some fixed locations
+			spawn
+			ender portal
+			where I died
+			where I'm looking
+		sit
+		stop
+		breed
+		dig
+		fetch
+		activate
+		place
+		laydown/backflip/rollover
+	Holding items
+	Trait inheritance
 	Figure out rendering overlay
 	Create items to teach tricks to creatures
 	happiness system
-	rewrite soundDB to use AABB to push notifications to entities
 	prevent death of trained animals
 	config specified whitelist of things to override ai of and things to add attackDamage attribute to

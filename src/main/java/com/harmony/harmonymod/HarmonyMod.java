@@ -1,5 +1,6 @@
 package com.harmony.harmonymod;
 
+import com.harmony.harmonymod.sounds.SoundDB;
 import net.minecraft.init.Blocks;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -63,6 +64,7 @@ public class HarmonyMod
 	{
 		//add crafting recipes and event handlers
         HarmonyProps.register();
+		SoundDB.getSoundDB();
 	}
 
 
