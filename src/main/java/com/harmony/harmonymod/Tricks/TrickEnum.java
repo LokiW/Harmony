@@ -11,4 +11,5 @@ public class TrickEnum {
 	public static final int LEARNED_LOCATION_2 = 1 << 3;
 	public static final int LEARNED_LOCATION_3 = 1 << 4;
 	public static final int ATTACK = 1 << 5;
+	public static final int GUARD = 1 << 6;
 }
