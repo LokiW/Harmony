@@ -1,6 +1,8 @@
 package com.harmony.harmonymod;
 
-import net.minecraftforge.common.*;
+// import net.minecraftforge.common.*;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.event.entity.*;
 import net.minecraftforge.common.util.*;
 import net.minecraft.entity.*;
