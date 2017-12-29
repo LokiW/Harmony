@@ -65,7 +65,6 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	 * Interface for updating current trick
 	 */
 	public void updateCurrentTrick(int note) {
-		HarmonyProps hp = HarmonyProps.get(pet);
 		ActionSet as = tricks.get(note);
 
 		// See if we know that sound

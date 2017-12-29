@@ -45,10 +45,14 @@ public class Traits implements Serializable {
 				case JUMP:
 					break;
 				case FAST:
-					applyAttr(pet, 2, 1, SharedMonsterAttributes.movementSpeed, i);
+					applyAttr(pet, 0.15, 0, SharedMonsterAttributes.movementSpeed, i);
 					break;
 				case HARDY:
-					applyAttr(pet, 2, 0, SharedMonsterAttributes.maxHealth, i);
+					applyAttr(pet, 1, 2, SharedMonsterAttributes.maxHealth, i);
+					IAttributeInstance attrInst = pet.getEntityAttribute(SharedMonsterAttributes.maxHealth);
+					if (attrInst != null) {
+						pet.setHealth((float) attrInst.getAttributeValue());
+					}
 					break;
 				case VICIOUS:
 					applyAttr(pet, 2, 1, SharedMonsterAttributes.attackDamage, i);
