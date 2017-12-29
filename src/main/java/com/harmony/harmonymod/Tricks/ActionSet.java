@@ -62,6 +62,8 @@ public class ActionSet implements Serializable {
 				return new Attack();
 			case TrickEnum.GUARD:
 				return new Guard();
+			case TrickEnum.JUMP:
+				return new Jump();
 			default:
 				break;
 		}

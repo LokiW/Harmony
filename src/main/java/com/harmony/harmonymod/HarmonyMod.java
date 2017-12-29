@@ -73,6 +73,7 @@ public class HarmonyMod
 		//add crafting recipes and event handlers
         HarmonyProps.register();
 		SoundDB.getSoundDB();
+		Traits.register();
 	}
 
 
@@ -92,7 +93,7 @@ public class HarmonyMod
 			}
 
 			for(String s : config.getCategoryNames()) {
-				if(s.equals("harmony") {
+				if(s.equals("harmony")) {
 					//general config values
 				} else {
 					//for each mob
@@ -125,9 +126,9 @@ public class HarmonyMod
 
 	private static void generateConfig() {
 
-		config.get("EntityCow", "slot1", "JUMP");
-		config.get("EntityCow", "slot2", "JUMP");
-		config.get("EntityCow", "slot3", "JUMP");
+		config.get("EntityCow", "slot1", "VICIOUS");
+		config.get("EntityCow", "slot2", "VICIOUS");
+		config.get("EntityCow", "slot3", "VICIOUS");
 		config.get("EntityCow", "needsAttackAttr", true);
 
 		config.get("EntitySheep", "slot1", "HARDY");
@@ -142,9 +143,9 @@ public class HarmonyMod
 		config.get("EntityPig", "needsAttackAttr", true);
 
 
-		config.get("EntityChicken", "slot1", "VICIOUS");
-		config.get("EntityChicken", "slot2", "VICIOUS");
-		config.get("EntityChicken", "slot3", "VICIOUS");
+		config.get("EntityChicken", "slot1", "JUMP");
+		config.get("EntityChicken", "slot2", "JUMP");
+		config.get("EntityChicken", "slot3", "JUMP");
 		config.get("EntityChicken", "needsAttackAttr", true);
 
 
