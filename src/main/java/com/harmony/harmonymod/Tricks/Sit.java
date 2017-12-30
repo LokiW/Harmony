@@ -20,37 +20,14 @@ import com.harmony.harmonymod.HarmonyProps;
 import com.harmony.harmonymod.Traits;
 import com.harmony.harmonymod.Traits.MAGICAL_TRAIT;
 
-public class Jump extends Trick {
-	private static Method jumper;
-	private int delayCounter;
-
-	public Jump () {
-		delayCounter = 0;
-	}	
-
+public class Sit extends Trick {
+	
 	public void setupTrick(EntityLiving pet, Trick currentTrick) {
 		this.pet = pet;
 	}
 
 	public boolean act() {
-		if (this.delayCounter == 0) {
-			if (this.pet.onGround || canFly()) {
-				try {
-					if (jumper == null) {
-						// Reflections
-						jumper = Class.forName("net.minecraft.entity.EntityLivingBase").getDeclaredMethod("jump");
-						jumper.setAccessible(true);
-					}
-					jumper.invoke(this.pet);
-				} catch (Exception e) {
-					System.out.println("HarmonyMod: ERROR threw Exception " + e + " when trying to do Jump Trick");
-				}
-			}
-		} else if (this.delayCounter == LEARNING_DELAY) {
-			return false;
-		}
-
-		delayCounter++;
+		// TODO animate sitting if not already done
 		return true;
 	}
 
@@ -59,17 +36,6 @@ public class Jump extends Trick {
 	}
 
 	public boolean consume(Trick newTrick) {
-		return false;
-	}
-
-	private boolean canFly() {
-		HarmonyProps hp = HarmonyProps.get(this.pet);
-		Traits traits = hp.traits;
-		for (MAGICAL_TRAIT mt : traits.m_traits) {
-			if (mt == MAGICAL_TRAIT.FLY)
-				return true;
-		}
-
 		return false;
 	}
 }
