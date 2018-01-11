@@ -9,6 +9,8 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import java.lang.Math;
 import java.io.Serializable;
+import java.lang.*;
+import java.lang.reflect.*;
 
 public abstract class Trick implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -164,4 +166,20 @@ public abstract class Trick implements Serializable {
 		return true;
 	}
 
+	public void updatePet(EntityLiving pet) {
+		this.pet = pet;
+
+		try {
+			Field[] fs = this.getClass().getDeclaredFields();
+
+			for(Field f : fs) {
+				if(this.getClass().isAssignableFrom(f.getType())) {
+					Trick childTrick = (Trick) f.get(this);
+					childTrick.updatePet(pet);
+				}
+			}
+		} catch(Exception ex) {
+			System.out.println("HarmonyMod: Couldn't reinitialize current trick state, hopefully transient");
+		}
+	}
 }

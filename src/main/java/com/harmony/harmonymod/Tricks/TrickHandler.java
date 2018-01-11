@@ -1,7 +1,10 @@
 package com.harmony.harmonymod.tricks;
 
 import com.harmony.harmonymod.HarmonyProps;
+import com.harmony.harmonymod.BreedingAI;
+import com.harmony.harmonymod.Traits.TRAIT;
 import net.minecraft.entity.ai.*;
+import net.minecraft.entity.ai.EntityAITasks.EntityAITaskEntry;
 import net.minecraft.entity.ai.attributes.*;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.*;
@@ -58,6 +61,21 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	}
 
 	public void registerAI() {
+		//replace breeding task
+		boolean canBreed = false;
+		List<EntityAITaskEntry> t = pet.tasks.taskEntries;
+		for(int i = 0; i < t.size(); i++) {
+			if(t.get(i).action instanceof EntityAIMate) {
+				t.remove(i);
+				canBreed = true;
+				i--;
+			}
+		}
+		if(canBreed) {
+			pet.tasks.addTask(1,new BreedingAI((EntityAnimal)pet));
+		}
+
+		//add tricks
 		pet.tasks.addTask(0,this);
 	}
 

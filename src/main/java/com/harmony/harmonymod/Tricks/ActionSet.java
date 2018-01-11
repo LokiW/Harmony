@@ -57,7 +57,7 @@ public class ActionSet implements Serializable {
 			case TrickEnum.GO:
 				return new MoveTo();
 			case TrickEnum.LEARNED_LOCATION_1:
-				return new LocationTrick(hp.tricks.xLearned1, hp.tricks.yLearned1, hp.tricks.zLearned1, false);
+				return new LocationTrick(hp.tricks.xLearned1, hp.tricks.yLearned1, hp.tricks.zLearned1);
 			case TrickEnum.ATTACK:
 				return new Attack();
 			case TrickEnum.GUARD:

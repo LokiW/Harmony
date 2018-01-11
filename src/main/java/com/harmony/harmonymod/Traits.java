@@ -16,18 +16,36 @@ public class Traits implements Serializable {
 	private static Random r = new Random();
 
 	//Always add traits to end of existing traits for backward compatibility
-	public static enum TRAIT {JUMP, FAST, HARDY, VICIOUS, NONE};
+	public static enum TRAIT {JUMP, FAST, HARDY, VICIOUS, FERTILE, NONE};
 	public static enum MAGICAL_TRAIT {NONE};
 
 	public TRAIT[] traits;
 	public MAGICAL_TRAIT[] m_traits;
+
+	public Traits(EntityLiving pet, EntityLiving parent1, EntityLiving parent2) {
+		m_traits = new MAGICAL_TRAIT[] {MAGICAL_TRAIT.NONE, MAGICAL_TRAIT.NONE, MAGICAL_TRAIT.NONE};
+
+		traits = new TRAIT[3];
+
+		HarmonyProps hp1 = HarmonyProps.get(parent1);
+		HarmonyProps hp2 = HarmonyProps.get(parent2);
+		for(int i = 0; i < 3; i++) {
+			if(r.nextBoolean()) {
+				traits[i] = hp1.traits.traits[i]; 
+			} else {
+				traits[i] = hp2.traits.traits[i];
+			}
+		}
+
+		applyTraits(pet);
+	}
 
 	public Traits(EntityLiving pet) {
 		m_traits = new MAGICAL_TRAIT[] {MAGICAL_TRAIT.NONE, MAGICAL_TRAIT.NONE, MAGICAL_TRAIT.NONE};
 
 		// Setup random start traits
 		traits = new TRAIT[3];
-
+		
 		String key = pet.getClass().getSimpleName().toLowerCase();
 		List<TRAIT> l;
 		l = HarmonyMod.slot1.get(key);
@@ -38,6 +56,14 @@ public class Traits implements Serializable {
 
 		l = HarmonyMod.slot3.get(key);
 		traits[2] = l.get(r.nextInt(l.size()));
+
+		applyTraits(pet);
+	}
+
+	/*
+	 * Call after trait array has been initialized
+	 */
+	private void applyTraits(EntityLiving pet) {
 		
 		// Apply traits in minecraft engine
 		for (int i = 0; i < traits.length; i++) {

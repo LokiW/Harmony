@@ -38,11 +38,15 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	/*
 	 * Initialize default traits and behviour for e
 	 */
-	public void constructProperties(Entity e) {
+	public void constructProperties() {
 		traits = new Traits(pet);
 		tricks = new TrickHandler(pet);
 	}
 
+	public void constructProperties(EntityLiving p1, EntityLiving p2) {
+		traits = new Traits(pet, p1, p2);
+		tricks = new TrickHandler(pet);
+	}
 
 	public Boolean isInitialized() {
 		return traits != null;
@@ -93,7 +97,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 			tricks.registerAI();
 
 			if(tricks.currentTrick != null) {
-				tricks.currentTrick.pet = this.pet;
+				tricks.currentTrick.updatePet(this.pet);
 				System.out.println("HarmonyMod: loaded active trick " + tricks.currentTrick);
 			}
 		}
@@ -175,7 +179,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		public void entityJoin(EntityJoinWorldEvent e) {
 			HarmonyProps props = HarmonyProps.get(e.entity);
 			if(props != null && !props.isInitialized()) {
-				props.constructProperties(e.entity);
+				props.constructProperties();
 			}
 
 	   }

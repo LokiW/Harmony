@@ -2,7 +2,6 @@ Needed Features
 	Teaching tricks
 	Trait inheritance
 	Trick-teaching items
-	Configuration
 	Tricks
 		jump
 		detect traits
@@ -20,7 +19,6 @@ High Value
 	More traits
 	Happiness system
 	Prevent death of trained animals
-	Config based traits
 	Tricks
 		flee
 		detect ore

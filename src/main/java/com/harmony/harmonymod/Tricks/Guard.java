@@ -24,7 +24,7 @@ public class Guard extends Trick {
 		if (currentTrick instanceof LocationTrick || currentTrick instanceof EntityTrick) {
 			this.guardTarget = currentTrick;	
 		} else {
-			this.guardTarget = new LocationTrick(this.pet.posX, this.pet.posY, this.pet.posZ, false);
+			this.guardTarget = new LocationTrick(this.pet.posX, this.pet.posY, this.pet.posZ);
 		}
 	}
 

@@ -23,10 +23,10 @@ public class MoveTo extends Trick {
 			
 			if (this.targetTrick instanceof EntityTrick) {
 				EntityTrick targetE = (EntityTrick) this.targetTrick;
-				return moveToEntity(targetE.target, targetE.teleport);
+				return moveToEntity(targetE.target, false);
 			} else if (this.targetTrick instanceof LocationTrick) {
 				LocationTrick targetL = (LocationTrick) this.targetTrick;
-				return moveToPoint(targetL.targetX, targetL.targetY, targetL.targetZ, targetL.teleport);
+				return moveToPoint(targetL.targetX, targetL.targetY, targetL.targetZ, false);
 			} else {
 				return randomTeleport();
 			}

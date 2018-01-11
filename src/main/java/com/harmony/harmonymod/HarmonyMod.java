@@ -29,14 +29,24 @@ public class HarmonyMod
 	public static final String MODID = "harmony";
 	public static final String VERSION = "1.0";
 
+	/**
+	 * Configuration fields, referenced by other parts of the code as constants
+	 */
 	public static Configuration config;
 
+	//default traits that can appear on wild animals
 	public static Map<String, List<TRAIT>> slot1 = new HashMap<String, List<TRAIT>>();
 	public static Map<String, List<TRAIT>> slot2 = new HashMap<String, List<TRAIT>>();
 	public static Map<String, List<TRAIT>> slot3 = new HashMap<String, List<TRAIT>>();
 	
+	//whether we need to add an attack damage attribute to a creature
 	public static Set<String> needsAttackAttr = new HashSet<String>();
+	//whether this mob needs harmony props
 	public static Set<String> harmonyMobs = new HashSet<String>();
+
+	//constants related to breeding's interactions with happiness
+	public static int breedingHappiness;
+	public static int breedingCost;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -92,7 +102,7 @@ public class HarmonyMod
 			}
 
 			for(String s : config.getCategoryNames()) {
-				if(s.equals("harmony") {
+				if(s.equals("harmony")) {
 					//general config values
 				} else {
 					//for each mob
