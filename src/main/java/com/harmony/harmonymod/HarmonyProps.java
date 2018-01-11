@@ -28,6 +28,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 
 	public TrickHandler tricks;
 	public Traits traits;
+	public int happiness;
 
 	public transient EntityLiving pet;
 
