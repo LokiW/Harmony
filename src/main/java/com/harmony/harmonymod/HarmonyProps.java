@@ -34,6 +34,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 
 	public HarmonyProps(Entity e) {
 		this.pet = (EntityLiving) e;
+		happiness = 10;
 	}
 
 	/*

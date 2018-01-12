@@ -83,6 +83,7 @@ public class HarmonyMod
 		//add crafting recipes and event handlers
         HarmonyProps.register();
 		SoundDB.getSoundDB();
+
 	}
 
 
@@ -102,8 +103,13 @@ public class HarmonyMod
 			}
 
 			for(String s : config.getCategoryNames()) {
-				if(s.equals("harmony")) {
+				if(s.equals(MODID)) {
 					//general config values
+					Property p;
+					p = config.get(MODID, "breedingHappiness", 10);
+					breedingHappiness = p.getInt();
+					p = config.get(MODID, "breedingCost", 5);
+					breedingCost = p.getInt();
 				} else {
 					//for each mob
 					Property p;
@@ -135,6 +141,9 @@ public class HarmonyMod
 
 	private static void generateConfig() {
 
+		config.get(MODID, "breedingHappiness", 10, "required happiness to breed naturally");
+		config.get(MODID, "breedingCost", 5, "penalty for successfully breeding");
+
 		config.get("EntityCow", "slot1", "JUMP");
 		config.get("EntityCow", "slot2", "JUMP");
 		config.get("EntityCow", "slot3", "JUMP");
@@ -152,9 +161,9 @@ public class HarmonyMod
 		config.get("EntityPig", "needsAttackAttr", true);
 
 
-		config.get("EntityChicken", "slot1", "VICIOUS");
-		config.get("EntityChicken", "slot2", "VICIOUS");
-		config.get("EntityChicken", "slot3", "VICIOUS");
+		config.get("EntityChicken", "slot1", "FERTILE");
+		config.get("EntityChicken", "slot2", "FERTILE");
+		config.get("EntityChicken", "slot3", "FERTILE");
 		config.get("EntityChicken", "needsAttackAttr", true);
 
 
