@@ -51,8 +51,14 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 			tricks.put(soundDB.getSound(Instrument.BASSDRUM, 6), t2);
 			ActionSet t3 = new ActionSet(TrickEnum.ATTACK);
 			tricks.put(soundDB.getSound(Instrument.BASSDRUM, 0), t3);
+
 	   	} else if (pet instanceof EntitySheep) {
 			ActionSet t1 = new ActionSet(TrickEnum.GUARD);
+			tricks.put(soundDB.getSound(Instrument.PIANO, 0), t1);
+			ActionSet t2 = new ActionSet(TrickEnum.JUMP);
+			tricks.put(soundDB.getSound(Instrument.PIANO, 3), t2);
+		} else if (pet instanceof EntityChicken) {
+			ActionSet t1 = new ActionSet(TrickEnum.JUMP);
 			tricks.put(soundDB.getSound(Instrument.PIANO, 0), t1);
 		}
  
@@ -83,7 +89,6 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	 * Interface for updating current trick
 	 */
 	public void updateCurrentTrick(int note) {
-		HarmonyProps hp = HarmonyProps.get(pet);
 		ActionSet as = tricks.get(note);
 
 		// See if we know that sound

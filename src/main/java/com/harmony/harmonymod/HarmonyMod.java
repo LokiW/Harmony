@@ -85,7 +85,7 @@ public class HarmonyMod
 		//add crafting recipes and event handlers
         HarmonyProps.register();
 		SoundDB.getSoundDB();
-
+		Traits.register();
 	}
 
 
@@ -146,9 +146,9 @@ public class HarmonyMod
 		config.get(MODID, "breedingHappiness", 10, "required happiness to breed naturally");
 		config.get(MODID, "breedingCost", 5, "penalty for successfully breeding");
 
-		config.get("EntityCow", "slot1", "JUMP");
-		config.get("EntityCow", "slot2", "JUMP");
-		config.get("EntityCow", "slot3", "JUMP");
+		config.get("EntityCow", "slot1", "VICIOUS");
+		config.get("EntityCow", "slot2", "VICIOUS");
+		config.get("EntityCow", "slot3", "VICIOUS");
 		config.get("EntityCow", "needsAttackAttr", true);
 
 		config.get("EntitySheep", "slot1", "HARDY");

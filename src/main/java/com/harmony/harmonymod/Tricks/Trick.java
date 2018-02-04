@@ -15,6 +15,7 @@ import java.lang.reflect.*;
 public abstract class Trick implements Serializable {
 	private static final long serialVersionUID = 1L;
 	public transient EntityLiving pet;
+	protected static final int LEARNING_DELAY = 100;
 
 	/*
 	 * Call to have entity perform trick.

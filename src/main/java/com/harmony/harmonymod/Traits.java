@@ -1,9 +1,12 @@
 package com.harmony.harmonymod;
 
 
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import java.util.UUID;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.*;
@@ -17,7 +20,7 @@ public class Traits implements Serializable {
 
 	//Always add traits to end of existing traits for backward compatibility
 	public static enum TRAIT {JUMP, FAST, HARDY, VICIOUS, FERTILE, NONE};
-	public static enum MAGICAL_TRAIT {NONE};
+	public static enum MAGICAL_TRAIT {FLY, NONE};
 
 	public TRAIT[] traits;
 	public MAGICAL_TRAIT[] m_traits;
@@ -71,10 +74,14 @@ public class Traits implements Serializable {
 				case JUMP:
 					break;
 				case FAST:
-					applyAttr(pet, 2, 1, SharedMonsterAttributes.movementSpeed, i);
+					applyAttr(pet, 0.15, 0, SharedMonsterAttributes.movementSpeed, i);
 					break;
 				case HARDY:
-					applyAttr(pet, 2, 0, SharedMonsterAttributes.maxHealth, i);
+					applyAttr(pet, 1, 2, SharedMonsterAttributes.maxHealth, i);
+					IAttributeInstance attrInst = pet.getEntityAttribute(SharedMonsterAttributes.maxHealth);
+					if (attrInst != null) {
+						pet.setHealth((float) attrInst.getAttributeValue());
+					}
 					break;
 				case VICIOUS:
 					applyAttr(pet, 2, 1, SharedMonsterAttributes.attackDamage, i);
@@ -105,4 +112,30 @@ public class Traits implements Serializable {
 	}
 
 
+	public static void register() {
+		MinecraftForge.EVENT_BUS.register(new TraitEventHandler());
+	}
+	
+
+	public static class TraitEventHandler {
+		/*
+		 * Modify jumps if creature has jump trait
+		 */
+		@SubscribeEvent
+		public void handleJumps (LivingJumpEvent jumpEvent) {
+			EntityLivingBase e = jumpEvent.entityLiving;
+			HarmonyProps hp = HarmonyProps.get(e);
+
+			if(hp != null) {
+				double multiplier = 1.0;
+				Traits traits = hp.traits;
+				for (TRAIT t : traits.traits) {
+					if (t == TRAIT.JUMP) {
+						multiplier *= 1.4;
+					}
+				}
+				e.motionY *= multiplier;
+			}
+		}
+	}
 }

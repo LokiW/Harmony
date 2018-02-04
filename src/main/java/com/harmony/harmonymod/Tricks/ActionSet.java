@@ -53,7 +53,7 @@ public class ActionSet implements Serializable {
 		// Convert action bits to Trick
 		switch (a) {
 			case TrickEnum.STOP:
-				break;
+				return new Stop();
 			case TrickEnum.GO:
 				return new MoveTo();
 			case TrickEnum.LEARNED_LOCATION_1:
@@ -62,6 +62,10 @@ public class ActionSet implements Serializable {
 				return new Attack();
 			case TrickEnum.GUARD:
 				return new Guard();
+			case TrickEnum.JUMP:
+				return new Jump();
+			case TrickEnum.SIT:
+				return new Sit();
 			default:
 				break;
 		}
