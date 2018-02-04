@@ -72,6 +72,8 @@ public class HarmonyMod
       
 	    GameRegistry.registerItem(armor_bundle, "armor_bundle");
 	     */
+
+	    Item itemDiag = new ItemDiag("Diagnostics");
 	}
 
 	/*

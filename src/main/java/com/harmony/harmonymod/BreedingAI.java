@@ -32,7 +32,6 @@ public class BreedingAI extends EntityAIBase
 			pet.worldObj.setEntityState(pet, (byte)0);
 			hp = HarmonyProps.get(pet);
 			hp.happiness += 5; //TODO this shouldn't be hardcoded
-			((EntityAnimal)pet).setGrowingAge(6000);
 		}
 
 		delayCounter++;
@@ -43,7 +42,6 @@ public class BreedingAI extends EntityAIBase
 		if(hp != null && hp.happiness >= HarmonyMod.breedingHappiness) {
 			breedTrick = new Breed(HarmonyMod.breedingHappiness);
 			breedTrick.setupTrick(pet, null);
-			System.out.println("starting breed ai");
 			return true;
 		}
 		return false;
