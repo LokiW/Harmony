@@ -1,23 +1,23 @@
 package com.harmony.harmonymod;
 
-// import net.minecraftforge.common.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.IExtendedEntityProperties;
-import net.minecraftforge.event.entity.*;
-import net.minecraftforge.common.util.*;
-import net.minecraft.entity.*;
-import net.minecraft.entity.passive.*;
+import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.common.util.Constants;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.*;
-import net.minecraft.util.*;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.event.entity.player.*;
-import cpw.mods.fml.common.eventhandler.*;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.entity.ai.attributes.BaseAttributeMap;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import com.harmony.harmonymod.tricks.TrickHandler;
+import com.harmony.harmonymod.aitasks.BreedingAI;
 import java.io.*;
 
 
@@ -45,11 +45,13 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	public void constructProperties() {
 		traits = new Traits(pet);
 		tricks = new TrickHandler(pet);
+		registerAI();
 	}
 
 	public void constructProperties(EntityLiving p1, EntityLiving p2) {
 		traits = new Traits(pet, p1, p2);
 		tricks = new TrickHandler(pet);
+		registerAI();
 	}
 
 	public Boolean isInitialized() {
@@ -98,13 +100,19 @@ public class HarmonyProps implements IExtendedEntityProperties {
 			byte[] nbtTricks = data.getByteArray("tricks");
 			tricks = (TrickHandler)fromBytes(nbtTricks);
 			tricks.pet = this.pet;
-			tricks.registerAI();
+			tricks.registerTask();
 
 			if(tricks.currentTrick != null) {
 				tricks.currentTrick.updatePet(this.pet);
 				System.out.println("HarmonyMod: loaded active trick " + tricks.currentTrick);
 			}
+
+			registerAI();
 		}
+	}
+
+	private void registerAI() {
+		BreedingAI.registerTask(this.pet);
 	}
 
 	private byte[] toBytes(Object o) {

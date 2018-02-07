@@ -2,6 +2,7 @@ package com.harmony.harmonymod;
 
 import com.harmony.harmonymod.sounds.SoundDB;
 import com.harmony.harmonymod.Traits.TRAIT;
+import com.harmony.harmonymod.items.ItemDiagnostic;
 import net.minecraft.init.Blocks;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -13,10 +14,13 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
-import net.minecraft.item.*;
-import net.minecraft.world.*;
-import net.minecraft.entity.player.*;
-import java.util.*;
+import net.minecraft.item.Item;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 
 /*
@@ -73,7 +77,7 @@ public class HarmonyMod
 	    GameRegistry.registerItem(armor_bundle, "armor_bundle");
 	     */
 
-	    Item itemDiag = new ItemDiag("Diagnostics");
+	    Item itemDiag = new ItemDiagnostic("Diagnostics");
 	}
 
 	/*

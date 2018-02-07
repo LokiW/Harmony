@@ -1,7 +1,8 @@
-package com.harmony.harmonymod;
+package com.harmony.harmonymod.items;
 
 import java.util.List;
 import com.harmony.harmonymod.Traits.*;
+import com.harmony.harmonymod.HarmonyProps;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -11,9 +12,9 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.util.*;
 import cpw.mods.fml.relauncher.*;
 
-public class ItemDiag extends HarmonyItem {
+public class ItemDiagnostic extends HarmonyItem {
     
-    public ItemDiag(String name) {
+    public ItemDiagnostic(String name) {
         super(name);
     }
 
