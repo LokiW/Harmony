@@ -54,30 +54,30 @@ public class HarmonyMod
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-	    //Read in configuration values
-	    config = new Configuration(event.getSuggestedConfigurationFile());
-	    syncConfig();
+		//Read in configuration values
+		config = new Configuration(event.getSuggestedConfigurationFile());
+		syncConfig();
 
-	    //add blocks and items
-	    /*
-	     * Example Item
-	    Item skillpoint = new Item() {
+		//add blocks and items
+		/*
+		 * Example Item
+		Item skillpoint = new Item() {
 		public ItemStack onItemRightClick(ItemStack is, World w, EntityPlayer p) {
 			return is;
 		}
-	    }.setUnlocalizedName("skill_point").setCreativeTab(CreativeTabs.tabMisc);
-	    GameRegistry.registerItem(skillpoint, "skill_point");
-	     */
+		}.setUnlocalizedName("skill_point").setCreativeTab(CreativeTabs.tabMisc);
+		GameRegistry.registerItem(skillpoint, "skill_point");
+		 */
 
-	    /*
-	     * Armor bundle WIP
-	    Item armor_bundle = new ItemArmorBundle().setUnlocalizedName("armor_bundle").setCreativeTab(CreativeTabs.tabMisc);
-	    armor_bundle.setTextureName(ExampleMod.MODID + ":" + "ArmorBag");
-      
-	    GameRegistry.registerItem(armor_bundle, "armor_bundle");
-	     */
+		/*
+		 * Armor bundle WIP
+		Item armor_bundle = new ItemArmorBundle().setUnlocalizedName("armor_bundle").setCreativeTab(CreativeTabs.tabMisc);
+		armor_bundle.setTextureName(ExampleMod.MODID + ":" + "ArmorBag");
 
-	    Item itemDiag = new ItemDiagnostic("Diagnostics");
+		GameRegistry.registerItem(armor_bundle, "armor_bundle");
+		 */
+
+		Item itemDiag = new ItemDiagnostic("Diagnostics");
 	}
 
 	/*
@@ -87,7 +87,7 @@ public class HarmonyMod
 	public void init(FMLInitializationEvent event)
 	{
 		//add crafting recipes and event handlers
-        HarmonyProps.register();
+		HarmonyProps.register();
 		SoundDB.getSoundDB();
 		Traits.register();
 	}
@@ -96,13 +96,13 @@ public class HarmonyMod
 	/*
 	 * Load configuration data from file
 	 */
-    public static void syncConfig() {
-        try {
-            config.load();
+	public static void syncConfig() {
+		try {
+			config.load();
 			//useful methods
-            //config.get("category name","key","default value","comment");
-            //config.getCategoryNames();
-            //config.hasKey(c,Integer.toString(i)))
+			//config.get("category name","key","default value","comment");
+			//config.getCategoryNames();
+			//config.hasKey(c,Integer.toString(i)))
 			
 			if(config.getCategoryNames().size() < 2) {
 				generateConfig();
@@ -135,15 +135,14 @@ public class HarmonyMod
 					harmonyMobs.add(s);
 				}
 			}
-        } catch (Exception e) {
-            System.out.println("Could not find config for " + MODID + " using defaults");
-            e.printStackTrace();
-        } finally {
-            if(config.hasChanged()) {
-                config.save();
-            }
-        }  
-    }
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if(config.hasChanged()) {
+				config.save();
+			}
+		}
+	}
 
 	private static void generateConfig() {
 

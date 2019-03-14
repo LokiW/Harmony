@@ -18,6 +18,7 @@ import net.minecraft.entity.ai.attributes.BaseAttributeMap;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import com.harmony.harmonymod.tricks.TrickHandler;
 import com.harmony.harmonymod.aitasks.BreedingAI;
+import com.harmony.harmonymod.aitasks.HarmonyWanderAI;
 import java.io.*;
 
 
@@ -36,7 +37,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 
 	public HarmonyProps(Entity e) {
 		this.pet = (EntityLiving) e;
-		happiness = 10;
+		happiness = 0;
 	}
 
 	/*
@@ -113,6 +114,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 
 	private void registerAI() {
 		BreedingAI.registerTask(this.pet);
+		HarmonyWanderAI.registerTask(this.pet);
 	}
 
 	private byte[] toBytes(Object o) {
