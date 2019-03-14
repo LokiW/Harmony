@@ -1,4 +1,4 @@
-package com.harmony.harmonymod;
+package com.harmony.harmonymod.items;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.item.Item;
@@ -8,6 +8,7 @@ import net.minecraft.util.IIcon;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
+import com.harmony.harmonymod.HarmonyMod;
 
 import java.util.*;
 

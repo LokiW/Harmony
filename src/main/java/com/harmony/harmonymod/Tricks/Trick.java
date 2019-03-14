@@ -79,8 +79,6 @@ public abstract class Trick implements Serializable {
 		PathNavigate petPathfinder = this.pet.getNavigator();
 
 		if (!petPathfinder.tryMoveToEntityLiving(target, 1.0)) {
-			System.out.println("fail to trymove");
-
 			// Teleport to location near owner if too far away
 			if (teleport) {
 				if (this.pet.getDistanceSqToEntity(target) >= 144.0D) {
@@ -95,7 +93,7 @@ public abstract class Trick implements Serializable {
 	 * Moves to the given point as best it can. If it cannot, will teleport if allowed.
 	 */
 	protected boolean moveToPoint(double targetX, double targetY, double targetZ, boolean teleport) {
-       this.pet.getLookHelper().setLookPosition(targetX, targetY, targetZ, 20.0F, (float)this.pet.getVerticalFaceSpeed());
+	   this.pet.getLookHelper().setLookPosition(targetX, targetY, targetZ, 20.0F, (float)this.pet.getVerticalFaceSpeed());
 		
 		PathNavigate petPathfinder = pet.getNavigator();
 
@@ -127,7 +125,7 @@ public abstract class Trick implements Serializable {
 					return teleportHelper(targetX, targetY, targetZ);					
 				}
 			}
-        }
+		}
 
 		if (this.pet.getDistanceSq(targetX, targetY, targetZ) <= 2.0D) {
 			petPathfinder.clearPathEntity();
@@ -135,7 +133,7 @@ public abstract class Trick implements Serializable {
 		}
 
 		return true;
-    }
+	}
 
 
 	/*

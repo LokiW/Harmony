@@ -1,11 +1,16 @@
-package com.harmony.harmonymod;
+package com.harmony.harmonymod.aitasks;
 
 import com.harmony.harmonymod.tricks.Breed;
+import com.harmony.harmonymod.HarmonyMod;
+import com.harmony.harmonymod.HarmonyProps;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.ai.EntityAIMate;
+import net.minecraft.entity.ai.EntityAITasks.EntityAITaskEntry;
 import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
 
 public class BreedingAI extends EntityAIBase
@@ -67,6 +72,25 @@ public class BreedingAI extends EntityAIBase
 	public void updateTask() {
 		if(!breedTrick.act()) {
 			breedTrick = null;
+		}
+	}
+
+	public static void registerTask(EntityLiving pet) {
+		//replace breeding task
+		if (!(pet instanceof EntityAnimal))
+			return;
+
+		boolean canBreed = false;
+		List<EntityAITaskEntry> t = pet.tasks.taskEntries;
+		for(int i = 0; i < t.size(); i++) {
+			if(t.get(i).action instanceof EntityAIMate) {
+				t.remove(i);
+				canBreed = true;
+				i--;
+			}
+		}
+		if(canBreed) {
+			pet.tasks.addTask(1,new BreedingAI((EntityAnimal)pet));
 		}
 	}
 }

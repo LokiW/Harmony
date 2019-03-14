@@ -1,7 +1,7 @@
 package com.harmony.harmonymod.tricks;
 
 import com.harmony.harmonymod.HarmonyProps;
-import com.harmony.harmonymod.BreedingAI;
+import com.harmony.harmonymod.aitasks.BreedingAI;
 import com.harmony.harmonymod.Traits.TRAIT;
 import net.minecraft.entity.ai.*;
 import net.minecraft.entity.ai.EntityAITasks.EntityAITaskEntry;
@@ -40,7 +40,7 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 		this.actions = new ActionSet(0); //TODO initialize better
 		this.tricks = new HashMap<Integer, ActionSet>();
 
-		registerAI();
+		registerTask();
 
 		//TODO remove test AI behaviours
 		SoundDB soundDB = SoundDB.getSoundDB();	
@@ -66,23 +66,9 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 		this.setMutexBits(3);
 	}
 
-	public void registerAI() {
-		//replace breeding task
-		boolean canBreed = false;
-		List<EntityAITaskEntry> t = pet.tasks.taskEntries;
-		for(int i = 0; i < t.size(); i++) {
-			if(t.get(i).action instanceof EntityAIMate) {
-				t.remove(i);
-				canBreed = true;
-				i--;
-			}
-		}
-		if(canBreed) {
-			pet.tasks.addTask(1,new BreedingAI((EntityAnimal)pet));
-		}
-
+	public void registerTask() {
 		//add tricks
-		pet.tasks.addTask(0,this);
+		this.pet.tasks.addTask(0, this);
 	}
 
 	/*

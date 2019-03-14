@@ -1,4 +1,4 @@
-package com.harmony.harmonymod;
+package com.harmony.harmonymod.items;
 
 import java.util.List;
 
