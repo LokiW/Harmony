@@ -17,16 +17,27 @@ public class ActionSet implements Serializable {
 		this.actions = actions;
 	}
 
+	public ActionSet(ActionSet other) {
+		this.actions = other.actions;
+	}
+
 	public void addAction(long action) {
 		this.actions |= action;
 	}
 
+	public void removeAction(long action) {
+		this.actions &= ~action;
+	}
 
 	/*
-	 * Get Trick in actionSet 
+	 * Get Trick in actionSet
 	 * Not all actions are a trick, in this case null is returned.
 	 */
 	public Trick getTrick(EntityLiving pet) {
+		return convertRawAction(getAction(pet), pet);
+	}
+
+	public long getAction(EntityLiving pet) {
 		int max = Long.bitCount(actions);
 		long gotAction = 3;
 		if (max == 1) {
@@ -41,12 +52,32 @@ public class ActionSet implements Serializable {
 				}
 			}
 		}
-		
-		return convertRawAction(gotAction, pet);
+		return gotAction;
 	}
 
+	/*
+	 * Update action set so that this action is more likely,
+	 *   by removing other actions.
+	 */
+	public void learnTrick(long action) {
+		this.addAction(action);
+		int max = Long.bitCount(actions);
+		if (max == 1)
+			return;
+
+		// TODO even the slightest varification this works
+		long otherActions = this.actions & ~action;
+		int dist = rand.nextInt(max-1);
+		for (int i = 0; i < 64; i++) {
+			dist -= (otherActions >> i) & 1;
+			if ( dist < 0) {
+				this.removeAction(1 << i);
+				break;
+			}
+		}
+	}
 	
-	private Trick convertRawAction(long action, EntityLiving pet) {
+	public Trick convertRawAction(long action, EntityLiving pet) {
 		int a = (int) action;
 		int b = (int) (action >> 32);
 		HarmonyProps hp = HarmonyProps.get(pet);

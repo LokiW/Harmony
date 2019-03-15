@@ -26,6 +26,7 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	public Trick currentTrick;
 	public ActionSet actions;
 	public Map<Integer, ActionSet> tricks;
+	public TrickLearner isLearning;
 
 	// These are for setting pet known locations at non-preset locations
 	// like other actions these are taught with specific items
@@ -37,6 +38,7 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 		this.pet = pet;
 		
 		this.currentTrick = null;
+		this.isLearning = null;
 		this.actions = new ActionSet(0); //TODO initialize better
 		this.tricks = new HashMap<Integer, ActionSet>();
 
@@ -61,7 +63,6 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 			ActionSet t1 = new ActionSet(TrickEnum.JUMP);
 			tricks.put(soundDB.getSound(Instrument.PIANO, 0), t1);
 		}
- 
 
 		this.setMutexBits(3);
 	}
@@ -74,15 +75,20 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	/*
 	 * Interface for updating current trick
 	 */
-	public void updateCurrentTrick(int note) {
-		ActionSet as = tricks.get(note);
+	public void updateCurrentTrick(int noteID) {
+		ActionSet as = tricks.get(noteID);
 
 		// See if we know that sound
 		Trick newTrick = null;
 		if (as != null) {
 			newTrick = as.getTrick(pet);
-		} else {
-			//TODO try something new when unknown sound
+
+		// Sound unrecongized but wants to learn
+		} else if (isLearning != null) {
+			// choose a random action from known actions
+			long newAction = actions.getAction(pet);
+			newTrick = actions.convertRawAction(newAction, pet);
+			isLearning.setAttempt(noteID, newAction);
 		}
 		updateCurrentTrick(newTrick);
 	}
@@ -130,12 +136,48 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	}
 
 	/*
+	 * Animal rewarded for current trick, make it more likely
+	 *   to happen from last sound.
+	 */
+	public void learnTrick() {
+		if (this.isLearning != null && this.isLearning.currentAttempt()) {
+			ActionSet newActionSet = new ActionSet(this.actions);
+			newActionSet.learnTrick(this.isLearning.action);
+
+			this.tricks.put(this.isLearning.noteID, newActionSet);
+
+			this.isLearning = null;
+		} else {
+			this.isLearning = new TrickLearner();
+		}	
+	}
+
+	/*
 	 * Unused required overrides
 	 */
 	@Override
 	public void resetTask() {}
 	@Override
 	public void startExecuting() {}
+
+	/*
+	 * Learning struct, which stores last heard sound and action tried
+	 *  to that sound. If animal is not primed to learn they will have a
+	 *  null value for their TrickLearner.
+	 */
+	private static class TrickLearner {
+		public int noteID = -1;
+		public long action;
+
+		public void setAttempt(int noteID, long action) {
+			this.noteID = noteID;
+			this.action = action;		
+		}
+
+		public boolean currentAttempt() {
+			return noteID > 0;
+		}
+	}
 }
 
 
