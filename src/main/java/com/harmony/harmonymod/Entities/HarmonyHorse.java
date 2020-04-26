@@ -1,4 +1,4 @@
-package com.harmony.harmonymod.tricks;
+package com.harmony.harmonymod.entities;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityHorse;

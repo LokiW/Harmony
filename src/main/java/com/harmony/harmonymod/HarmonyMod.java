@@ -3,6 +3,8 @@ package com.harmony.harmonymod;
 import com.harmony.harmonymod.sounds.SoundDB;
 import com.harmony.harmonymod.Traits.TRAIT;
 import com.harmony.harmonymod.items.ItemDiagnostic;
+import com.harmony.harmonymod.items.GenericEntitySpawnEgg;
+import com.harmony.harmonymod.entities.HarmonyHorse;
 import com.harmony.harmonymod.FeedAnimal;
 import com.harmony.harmonymod.RespawnAnimal;
 import net.minecraft.init.Blocks;
@@ -12,6 +14,7 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.common.registry.EntityRegistry;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -60,6 +63,8 @@ public class HarmonyMod
 		config = new Configuration(event.getSuggestedConfigurationFile());
 		syncConfig();
 
+		int mobID = 0;
+
 		//add blocks and items
 		/*
 		 * Example Item
@@ -80,6 +85,14 @@ public class HarmonyMod
 		 */
 
 		Item itemDiag = new ItemDiagnostic("Diagnostics");
+
+		// add Entities
+		EntityRegistry.registerModEntity(HarmonyHorse.class, "HarmonyHorse", mobID++, this, 80, 3, false);
+
+		Item horseSpawnEgg = new GenericEntitySpawnEgg("HarmonyHorse", 0xE18519, 0x000000)
+			.setUnlocalizedName("spawn_egg_harmony_horse")
+			.setTextureName("harmonyhorse:spawn_egg");
+		GameRegistry.registerItem(horseSpawnEgg, "spawnEggHarmonyHorse");
 	}
 
 	/*
