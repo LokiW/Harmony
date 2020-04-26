@@ -40,7 +40,7 @@ public class RespawnAnimal {
 						dying.rotationYaw,
 						dying.rotationPitch);
 
-			dying.setHealth(dying.getMaxHealth() / 2.0);
+			dying.setHealth(dying.getMaxHealth());
 		}
 	}
 }

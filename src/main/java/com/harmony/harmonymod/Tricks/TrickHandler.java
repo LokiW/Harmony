@@ -1,23 +1,11 @@
 package com.harmony.harmonymod.tricks;
 
-import com.harmony.harmonymod.HarmonyProps;
-import com.harmony.harmonymod.aitasks.BreedingAI;
-import com.harmony.harmonymod.Traits.TRAIT;
-import net.minecraft.entity.ai.*;
-import net.minecraft.entity.ai.EntityAITasks.EntityAITaskEntry;
-import net.minecraft.entity.ai.attributes.*;
-import net.minecraft.entity.*;
-import net.minecraft.entity.passive.*;
-import net.minecraft.world.*;
-import net.minecraft.pathfinding.*;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.World;
-import java.util.*;
+import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.EntityLiving;
+import java.util.Map;
+import java.util.HashMap;
 import java.io.Serializable;
 
-//TODO remove with test AI behaviours
-import net.minecraftforge.event.world.NoteBlockEvent.Instrument;
-import com.harmony.harmonymod.sounds.SoundDB;
 
 public class TrickHandler extends EntityAIBase implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -48,26 +36,6 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 
 		registerTask();
 
-		//TODO remove test AI behaviours
-		SoundDB soundDB = SoundDB.getSoundDB();	
-    	if (pet instanceof EntityCow) {
-			ActionSet t1 = new ActionSet(TrickEnum.GO);
-			tricks.put(soundDB.getSound(Instrument.BASSDRUM, 3), t1);
-			ActionSet t2 = new ActionSet(TrickEnum.LEARNED_LOCATION_1);
-			tricks.put(soundDB.getSound(Instrument.BASSDRUM, 6), t2);
-			ActionSet t3 = new ActionSet(TrickEnum.ATTACK);
-			tricks.put(soundDB.getSound(Instrument.BASSDRUM, 0), t3);
-
-	   	} else if (pet instanceof EntitySheep) {
-			ActionSet t1 = new ActionSet(TrickEnum.GUARD);
-			tricks.put(soundDB.getSound(Instrument.PIANO, 0), t1);
-			ActionSet t2 = new ActionSet(TrickEnum.JUMP);
-			tricks.put(soundDB.getSound(Instrument.PIANO, 3), t2);
-		} else if (pet instanceof EntityChicken) {
-			ActionSet t1 = new ActionSet(TrickEnum.JUMP);
-			tricks.put(soundDB.getSound(Instrument.PIANO, 0), t1);
-		}
-
 		this.setMutexBits(3);
 	}
 
@@ -80,7 +48,6 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	 * Interface for updating current trick
 	 */
 	public void updateCurrentTrick(int noteID) {
-		System.out.println("HarmonyMod: Updating trick for noteID: " + noteID);
 		ActionSet as = tricks.get(noteID);
 
 		// See if we know that sound or should learn it
@@ -99,7 +66,6 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	
 		if (isLearning != null) {
 			isLearning.setAttempt(noteID, newAction);
-			System.out.println("HarmonyMod: updated isLearning. Currently thinks learning " + isLearning.currentAttempt());
 		}
 
 		updateCurrentTrick(newTrick);
@@ -110,7 +76,6 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	 */
 	public void updateCurrentTrick(Trick newTrick) {
 		if (newTrick != null) {
-			//TODO remove debug statement
 			System.out.println("HarmonyMod: " + pet + " doing trick " + newTrick);
 			newTrick.setupTrick(pet, currentTrick);
 			if (newTrick.isInstant()) {
@@ -144,8 +109,9 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	@Override
 	public void updateTask() {
 		boolean continueTrick = currentTrick.act();
-		if (!continueTrick)
+		if (!continueTrick) {
 			currentTrick = null;
+		}
 	}
 
 	/*
@@ -153,9 +119,7 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	 *   to happen from last sound.
 	 */
 	public void learnTrick() {
-		System.out.println("HarmonyMod: Animal is learning " + this.isLearning);
 		if (this.isLearning != null && this.isLearning.currentAttempt()) {
-			System.out.println("HarmonyMod: Rewarded for action " + actions.getTrickNameForAction(this.isLearning.action));
 			ActionSet newActionSet = tricks.get(this.isLearning.noteID);
 			if (newActionSet == null) {
 				newActionSet = new ActionSet(this.actions);
@@ -167,7 +131,6 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 
 			this.isLearning = null;
 		} else {
-			System.out.println("HarmonyMod: Will try to Learn a Trick");
 			this.isLearning = new TrickLearner();
 		}	
 	}

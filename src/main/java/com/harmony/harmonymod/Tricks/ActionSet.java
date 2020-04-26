@@ -29,12 +29,10 @@ public class ActionSet implements Serializable {
 	}
 
 	public void addAction(long action) {
-		System.out.println("HarmonyMod: adding action " + this.getTrickNameForAction(action));
 		this.actions |= action;
 	}
 
 	public void removeAction(long action) {
-		System.out.println("HarmonyMod: removing action " + this.getTrickNameForAction(action));
 		this.actions &= ~action;
 	}
 
@@ -71,20 +69,15 @@ public class ActionSet implements Serializable {
 	public void learnTrick(long action) {
 		this.addAction(action);
 		int max = Long.bitCount(actions);
-		System.out.println("HarmonyMod: " + max + " actions exist in this action set.");
 		if (max == 1) {
-			System.out.println("HarmonyMod: No other actions to remove for learning trick.");
 			return;
 		}
 
-		// TODO even the slightest varification this works
 		long otherActions = this.actions & ~action;
 		int dist = rand.nextInt(max-1);
-		System.out.println("HarmonyMod: trying to remove the " + dist + " action from the action set.");
 		for (int i = 0; i < 64; i++) {
 			dist -= (otherActions >> i) & 1;
 			if ( dist < 0) {
-				System.out.println("HarmonyMod: actually removing action " + i);
 				this.removeAction(1 << i);
 				break;
 			}

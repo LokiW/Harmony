@@ -1,16 +1,16 @@
 package com.harmony.harmonymod.tricks;
 
-import net.minecraft.entity.*;
-import net.minecraft.world.*;
-import net.minecraft.pathfinding.*;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.util.DamageSource;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import java.lang.Math;
 import java.io.Serializable;
-import java.lang.*;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
 
 public abstract class Trick implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -51,8 +51,9 @@ public abstract class Trick implements Serializable {
 	 */
 	protected void attackTarget() {
 		EntityLivingBase target = (EntityLivingBase) this.pet.getAttackTarget();
-		if (target == null || target.isDead)
+		if (target == null || target.isDead) {
 			return;
+		}
 		
 		moveToEntity(target, false);
 
@@ -103,11 +104,11 @@ public abstract class Trick implements Serializable {
 
 		// Can't path more than 10 blocks away, reduce path down if can't teleport
 		if (!teleport) {
-			double x_divisor = Math.abs((targetX - this.pet.posX) / 8.0);
-			double y_divisor = Math.abs((targetY - this.pet.boundingBox.minY) / 8.0);
-			double z_divisor = Math.abs((targetZ - this.pet.posZ) / 8.0);
+			double xDivisor = Math.abs((targetX - this.pet.posX) / 8.0);
+			double yDivisor = Math.abs((targetY - this.pet.boundingBox.minY) / 8.0);
+			double zDivisor = Math.abs((targetZ - this.pet.posZ) / 8.0);
 
-			double divisor = Math.max(Math.max(x_divisor, y_divisor), z_divisor);
+			double divisor = Math.max(Math.max(xDivisor, yDivisor), zDivisor);
 			if (divisor > 1.0) {
 				tempTargetX = (targetX - this.pet.posX) / divisor + this.pet.posX;
 				tempTargetY = (targetY - this.pet.boundingBox.minY) / divisor + this.pet.boundingBox.minY;
