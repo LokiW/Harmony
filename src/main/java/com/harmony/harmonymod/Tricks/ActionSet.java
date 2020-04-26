@@ -10,6 +10,9 @@ import com.harmony.harmonymod.HarmonyProps;
 import com.harmony.harmonymod.tricks.*;
 
 public class ActionSet implements Serializable {
+	// "actions" uses bit manipulation to store actions to
+	// reducememory load when many pets are loaded.
+	// This is premature optimization but exists anyways.
     private long actions;
 	private static Random rand = new Random();
 
@@ -17,16 +20,31 @@ public class ActionSet implements Serializable {
 		this.actions = actions;
 	}
 
+	public ActionSet() {
+		this.actions = TrickEnum.ALL_TRICKS;
+	}
+
+	public ActionSet(ActionSet other) {
+		this.actions = other.actions;
+	}
+
 	public void addAction(long action) {
 		this.actions |= action;
 	}
 
+	public void removeAction(long action) {
+		this.actions &= ~action;
+	}
 
 	/*
-	 * Get Trick in actionSet 
+	 * Get Trick in actionSet
 	 * Not all actions are a trick, in this case null is returned.
 	 */
 	public Trick getTrick(EntityLiving pet) {
+		return convertRawAction(getAction(pet), pet);
+	}
+
+	public long getAction(EntityLiving pet) {
 		int max = Long.bitCount(actions);
 		long gotAction = 3;
 		if (max == 1) {
@@ -41,12 +59,32 @@ public class ActionSet implements Serializable {
 				}
 			}
 		}
-		
-		return convertRawAction(gotAction, pet);
+		return gotAction;
 	}
 
+	/*
+	 * Update action set so that this action is more likely,
+	 *   by removing other actions.
+	 */
+	public void learnTrick(long action) {
+		this.addAction(action);
+		int max = Long.bitCount(actions);
+		if (max == 1) {
+			return;
+		}
+
+		long otherActions = this.actions & ~action;
+		int dist = rand.nextInt(max-1);
+		for (int i = 0; i < 64; i++) {
+			dist -= (otherActions >> i) & 1;
+			if ( dist < 0) {
+				this.removeAction(1 << i);
+				break;
+			}
+		}
+	}
 	
-	private Trick convertRawAction(long action, EntityLiving pet) {
+	public Trick convertRawAction(long action, EntityLiving pet) {
 		int a = (int) action;
 		int b = (int) (action >> 32);
 		HarmonyProps hp = HarmonyProps.get(pet);
@@ -58,6 +96,10 @@ public class ActionSet implements Serializable {
 				return new MoveTo();
 			case TrickEnum.LEARNED_LOCATION_1:
 				return new LocationTrick(hp.tricks.xLearned1, hp.tricks.yLearned1, hp.tricks.zLearned1);
+			case TrickEnum.LEARNED_LOCATION_2:
+				return new LocationTrick(hp.tricks.xLearned2, hp.tricks.yLearned2, hp.tricks.zLearned2);
+			case TrickEnum.LEARNED_LOCATION_3:
+				return new LocationTrick(hp.tricks.xLearned3, hp.tricks.yLearned3, hp.tricks.zLearned3);
 			case TrickEnum.ATTACK:
 				return new Attack();
 			case TrickEnum.GUARD:
@@ -66,9 +108,41 @@ public class ActionSet implements Serializable {
 				return new Jump();
 			case TrickEnum.SIT:
 				return new Sit();
+			case TrickEnum.RESPAWN_LOCATION:
+				return new LocationTrick(hp.tricks.xRespawn, hp.tricks.yRespawn, hp.tricks.zRespawn);
 			default:
 				break;
 		}
 		return null;
+	}
+
+	public String getTrickNameForAction(long action) {
+		int a = (int) action;
+		int b = (int) (action >> 32);	
+		switch (a) {
+			case TrickEnum.STOP:
+				return "STOP";
+			case TrickEnum.GO:
+				return "GO";
+			case TrickEnum.LEARNED_LOCATION_1:
+				return "LEARNED_LOCATION_1";
+			case TrickEnum.LEARNED_LOCATION_2:
+				return "LEARNED_LOCATION_2";
+			case TrickEnum.LEARNED_LOCATION_3:
+				return "LEARNED_LOCATION_3";
+			case TrickEnum.ATTACK:
+				return "ATTACK";
+			case TrickEnum.GUARD:
+				return "GUARD";
+			case TrickEnum.JUMP:
+				return "JUMP";
+			case TrickEnum.SIT:
+				return "SIT";
+			case TrickEnum.RESPAWN_LOCATION:
+				return "RESPAWN_LOCATION";
+			default:
+				break;
+		}
+		return "UNKNOWN " + a;
 	}
 }

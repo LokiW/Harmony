@@ -60,7 +60,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	}
 
 	public static void register() {
-		MinecraftForge.EVENT_BUS.register(new Handler());
+		MinecraftForge.EVENT_BUS.register(new EntityCreationHandler());
 	}
 
 	public static HarmonyProps get(Entity e) {
@@ -162,7 +162,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	/*
 	 * Hooks to Minecraft engine to add HarmonyProps to entities
 	 */
-	public static class Handler {
+	public static class EntityCreationHandler {
 
 		/*
 		 * Create a HarmonyProps for non-player livings entities
