@@ -115,6 +115,8 @@ public class ActionSet implements Serializable {
 				return new Jump();
 			case TrickEnum.SIT:
 				return new Sit();
+			case TrickEnum.RESPAWN_LOCATION:
+				return new LocationTrick(hp.tricks.xRespawn, hp.tricks.yRespawn, hp.tricks.zRespawn);
 			default:
 				break;
 		}
@@ -143,6 +145,8 @@ public class ActionSet implements Serializable {
 				return "JUMP";
 			case TrickEnum.SIT:
 				return "SIT";
+			case TrickEnum.RESPAWN_LOCATION:
+				return "RESPAWN_LOCATION";
 			default:
 				break;
 		}

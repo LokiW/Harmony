@@ -4,6 +4,7 @@ import com.harmony.harmonymod.sounds.SoundDB;
 import com.harmony.harmonymod.Traits.TRAIT;
 import com.harmony.harmonymod.items.ItemDiagnostic;
 import com.harmony.harmonymod.FeedAnimal;
+import com.harmony.harmonymod.RespawnAnimal;
 import net.minecraft.init.Blocks;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -91,6 +92,7 @@ public class HarmonyMod
 		HarmonyProps.register();
 		SoundDB.getSoundDB();
 		FeedAnimal.register();
+		RespawnAnimal.register();
 		Traits.register();
 	}
 

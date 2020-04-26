@@ -45,12 +45,11 @@ public class FeedAnimal {
 
 		String itemName = held_items.getUnlocalizedName();
 		boolean removeItem = false;
-		HarmonyProps hp;
+		HarmonyProps hp = HarmonyProps.get(target);
 
 		// TODO make our own items for learning tricks, differentiate based on animal
 		// If interacting with a speckled melon, indicate animal should begin to learn trick
 		if ("item.speckledMelon".equals(itemName)) {
-			hp = HarmonyProps.get(target);
 			if (hp == null) {
 				System.out.println("HarmonyMod: HarmonyProps are null for " + target);
 				return;
@@ -62,7 +61,11 @@ public class FeedAnimal {
 		// If interacting with a golden apple, animal should save current location and
 		//  teleport back to current location instead of dying.
 		} else if ("item.appleGold".equals(itemName)) {
-			// TODO
+			hp.tricks.xRespawn = target.posX;
+			hp.tricks.yRespawn = target.posY;
+			hp.tricks.zRespawn = target.posZ;
+			removeItem = true;
+			System.out.println("HarmonyMod: Set respawn location.");
 		}
 
 		if (removeItem) {

@@ -14,8 +14,9 @@ public class TrickEnum {
 	public static final int GUARD = 1 << 6;
 	public static final int JUMP = 1 << 7;
 	public static final int SIT = 1 << 8;
+	public static final int RESPAWN_LOCATION = 1 << 9;
 
 	// This is used for action initialization and should be updated
 	// for each new trick added to this enum
-	public static final int ALL_TRICKS = (1 << 9) - 1;
+	public static final int ALL_TRICKS = (1 << 10) - 1;
 }

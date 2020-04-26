@@ -29,10 +29,14 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	public transient TrickLearner isLearning;
 
 	// These are for setting pet known locations at non-preset locations
-	// like other actions these are taught with specific items
-	public double xLearned1; public double yLearned1; public double zLearned1;
-	public double xLearned2; public double yLearned2; public double zLearned2;
-	public double xLearned3; public double yLearned3; public double zLearned3;
+	// the actual values are set by feeding a pet specific items
+	// but knowing these locations on a note is taught like other tricks
+	public double xLearned1; public double yLearned1 = -1.0; public double zLearned1;
+	public double xLearned2; public double yLearned2 = -1.0; public double zLearned2;
+	public double xLearned3; public double yLearned3 = -1.0; public double zLearned3;
+
+	// Respawn on death location to be taught with a different item
+	public double xRespawn; public double yRespawn = -1.0; public double zRespawn;
 
 	public  TrickHandler(EntityLiving pet) {
 		this.pet = pet;
