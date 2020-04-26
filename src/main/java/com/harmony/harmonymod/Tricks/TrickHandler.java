@@ -76,6 +76,7 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	 * Interface for updating current trick
 	 */
 	public void updateCurrentTrick(int noteID) {
+		System.out.println("HarmonyMod: Updating trick for noteID: " + noteID);
 		ActionSet as = tricks.get(noteID);
 
 		// See if we know that sound or should learn it
@@ -94,6 +95,7 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	
 		if (isLearning != null) {
 			isLearning.setAttempt(noteID, newAction);
+			System.out.println("HarmonyMod: updated isLearning. Currently thinks learning " + isLearning.currentAttempt());
 		}
 
 		updateCurrentTrick(newTrick);
@@ -147,8 +149,8 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	 *   to happen from last sound.
 	 */
 	public void learnTrick() {
+		System.out.println("HarmonyMod: Animal is learning " + this.isLearning);
 		if (this.isLearning != null && this.isLearning.currentAttempt()) {
-			System.out.println("HarmonyMod: Animal is learning " + this.isLearning);
 			System.out.println("HarmonyMod: Rewarded for action " + actions.getTrickNameForAction(this.isLearning.action));
 			ActionSet newActionSet = tricks.get(this.isLearning.noteID);
 			if (newActionSet == null) {
@@ -189,7 +191,7 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 		}
 
 		public boolean currentAttempt() {
-			return noteID > 0;
+			return noteID > -1;
 		}
 	}
 }

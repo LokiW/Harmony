@@ -71,15 +71,20 @@ public class ActionSet implements Serializable {
 	public void learnTrick(long action) {
 		this.addAction(action);
 		int max = Long.bitCount(actions);
-		if (max == 1)
+		System.out.println("HarmonyMod: " + max + " actions exist in this action set.");
+		if (max == 1) {
+			System.out.println("HarmonyMod: No other actions to remove for learning trick.");
 			return;
+		}
 
 		// TODO even the slightest varification this works
 		long otherActions = this.actions & ~action;
 		int dist = rand.nextInt(max-1);
+		System.out.println("HarmonyMod: trying to remove the " + dist + " action from the action set.");
 		for (int i = 0; i < 64; i++) {
 			dist -= (otherActions >> i) & 1;
 			if ( dist < 0) {
+				System.out.println("HarmonyMod: actually removing action " + i);
 				this.removeAction(1 << i);
 				break;
 			}
@@ -98,6 +103,10 @@ public class ActionSet implements Serializable {
 				return new MoveTo();
 			case TrickEnum.LEARNED_LOCATION_1:
 				return new LocationTrick(hp.tricks.xLearned1, hp.tricks.yLearned1, hp.tricks.zLearned1);
+			case TrickEnum.LEARNED_LOCATION_2:
+				return new LocationTrick(hp.tricks.xLearned2, hp.tricks.yLearned2, hp.tricks.zLearned2);
+			case TrickEnum.LEARNED_LOCATION_3:
+				return new LocationTrick(hp.tricks.xLearned3, hp.tricks.yLearned3, hp.tricks.zLearned3);
 			case TrickEnum.ATTACK:
 				return new Attack();
 			case TrickEnum.GUARD:
@@ -122,6 +131,10 @@ public class ActionSet implements Serializable {
 				return "GO";
 			case TrickEnum.LEARNED_LOCATION_1:
 				return "LEARNED_LOCATION_1";
+			case TrickEnum.LEARNED_LOCATION_2:
+				return "LEARNED_LOCATION_2";
+			case TrickEnum.LEARNED_LOCATION_3:
+				return "LEARNED_LOCATION_3";
 			case TrickEnum.ATTACK:
 				return "ATTACK";
 			case TrickEnum.GUARD:
