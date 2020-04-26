@@ -100,6 +100,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 
 			byte[] nbtTricks = data.getByteArray("tricks");
 			tricks = (TrickHandler)fromBytes(nbtTricks);
+			System.out.println("HarmonyMod: " + tricks);
 			tricks.pet = this.pet;
 			tricks.registerTask();
 

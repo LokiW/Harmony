@@ -10,6 +10,9 @@ import com.harmony.harmonymod.HarmonyProps;
 import com.harmony.harmonymod.tricks.*;
 
 public class ActionSet implements Serializable {
+	// "actions" uses bit manipulation to store actions to
+	// reducememory load when many pets are loaded.
+	// This is premature optimization but exists anyways.
     private long actions;
 	private static Random rand = new Random();
 
@@ -17,15 +20,21 @@ public class ActionSet implements Serializable {
 		this.actions = actions;
 	}
 
+	public ActionSet() {
+		this.actions = TrickEnum.ALL_TRICKS;
+	}
+
 	public ActionSet(ActionSet other) {
 		this.actions = other.actions;
 	}
 
 	public void addAction(long action) {
+		System.out.println("HarmonyMod: adding action " + this.getTrickNameForAction(action));
 		this.actions |= action;
 	}
 
 	public void removeAction(long action) {
+		System.out.println("HarmonyMod: removing action " + this.getTrickNameForAction(action));
 		this.actions &= ~action;
 	}
 
@@ -101,5 +110,29 @@ public class ActionSet implements Serializable {
 				break;
 		}
 		return null;
+	}
+
+	public String getTrickNameForAction(long action) {
+		int a = (int) action;
+		int b = (int) (action >> 32);	
+		switch (a) {
+			case TrickEnum.STOP:
+				return "STOP";
+			case TrickEnum.GO:
+				return "GO";
+			case TrickEnum.LEARNED_LOCATION_1:
+				return "LEARNED_LOCATION_1";
+			case TrickEnum.ATTACK:
+				return "ATTACK";
+			case TrickEnum.GUARD:
+				return "GUARD";
+			case TrickEnum.JUMP:
+				return "JUMP";
+			case TrickEnum.SIT:
+				return "SIT";
+			default:
+				break;
+		}
+		return "UNKNOWN " + a;
 	}
 }

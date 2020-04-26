@@ -56,7 +56,7 @@ public class SoundDB {
 		List<EntityLiving> entities = w.getEntitiesWithinAABB(EntityLiving.class, aabb);
 		for(EntityLiving ent : entities) {
 			HarmonyProps hp = HarmonyProps.get(ent);
-			if(hp != null && hp.tricks != null) {
+			if(hp != null && hp.tricks != null && !w.isRemote) {
 				hp.tricks.updateCurrentTrick(note);
 			}
 		}

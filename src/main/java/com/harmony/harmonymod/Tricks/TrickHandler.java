@@ -26,7 +26,7 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	public Trick currentTrick;
 	public ActionSet actions;
 	public Map<Integer, ActionSet> tricks;
-	public TrickLearner isLearning;
+	public transient TrickLearner isLearning;
 
 	// These are for setting pet known locations at non-preset locations
 	// like other actions these are taught with specific items
@@ -39,7 +39,7 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 		
 		this.currentTrick = null;
 		this.isLearning = null;
-		this.actions = new ActionSet(0); //TODO initialize better
+		this.actions = new ActionSet(); //TODO initialize better
 		this.tricks = new HashMap<Integer, ActionSet>();
 
 		registerTask();
@@ -78,18 +78,24 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	public void updateCurrentTrick(int noteID) {
 		ActionSet as = tricks.get(noteID);
 
-		// See if we know that sound
-		Trick newTrick = null;
-		if (as != null) {
-			newTrick = as.getTrick(pet);
+		// See if we know that sound or should learn it
+		if (as == null && isLearning == null) {
+			return;
+		}
 
-		// Sound unrecongized but wants to learn
-		} else if (isLearning != null) {
-			// choose a random action from known actions
-			long newAction = actions.getAction(pet);
-			newTrick = actions.convertRawAction(newAction, pet);
+		// Set actions to all known actions if the sound hasn't been taught
+		if (as == null) {
+			as = actions;
+		}
+
+		// choose a random action from known actions
+		long newAction = as.getAction(pet);
+		Trick newTrick = as.convertRawAction(newAction, pet);
+	
+		if (isLearning != null) {
 			isLearning.setAttempt(noteID, newAction);
 		}
+
 		updateCurrentTrick(newTrick);
 	}
 
@@ -98,6 +104,7 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	 */
 	public void updateCurrentTrick(Trick newTrick) {
 		if (newTrick != null) {
+			//TODO remove debug statement
 			System.out.println("HarmonyMod: " + pet + " doing trick " + newTrick);
 			newTrick.setupTrick(pet, currentTrick);
 			if (newTrick.isInstant()) {
@@ -141,13 +148,20 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 	 */
 	public void learnTrick() {
 		if (this.isLearning != null && this.isLearning.currentAttempt()) {
-			ActionSet newActionSet = new ActionSet(this.actions);
+			System.out.println("HarmonyMod: Animal is learning " + this.isLearning);
+			System.out.println("HarmonyMod: Rewarded for action " + actions.getTrickNameForAction(this.isLearning.action));
+			ActionSet newActionSet = tricks.get(this.isLearning.noteID);
+			if (newActionSet == null) {
+				newActionSet = new ActionSet(this.actions);
+			}
+
 			newActionSet.learnTrick(this.isLearning.action);
 
 			this.tricks.put(this.isLearning.noteID, newActionSet);
 
 			this.isLearning = null;
 		} else {
+			System.out.println("HarmonyMod: Will try to Learn a Trick");
 			this.isLearning = new TrickLearner();
 		}	
 	}

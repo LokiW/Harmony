@@ -1,31 +1,31 @@
 Needed Features
 	Teaching tricks
-	Trait inheritance
+	Prevent death of trained animals
 	Trick-teaching items
+	Animals Follow You if isLearning
 	Tricks
-		jump
 		detect traits
 		shepherd
-		spawn
+		player spawn
+		animal spawn
 		where I died
 		where I'm looking
 		sit
-		stop
-		breed
+		stop - test?
 
 High Value
+	Acheivements/Acheivment Tutorials
 	Noteblock whistles
 	Rendering overlay
 	More traits
-	Happiness system
-	Prevent death of trained animals
+	Happiness system - implemented but needs more tweeking
 	Tricks
 		flee
 		detect ore
 		detect node
 		galvanize
 		dig
-		bark
+		bark/animal sound
 
 
 Medium Value
@@ -33,6 +33,7 @@ Medium Value
 	Owner authenticated notes
 	Tricks
 		fetch
+		collect (items)
 		activate
 		ender portal
 		place
