@@ -84,14 +84,14 @@ public class HarmonyMod
 		GameRegistry.registerItem(armor_bundle, "armor_bundle");
 		 */
 
-		Item itemDiag = new ItemDiagnostic("Diagnostics");
+		// Item itemDiag = new ItemDiagnostic("Diagnostics");
 
 		// add Entities
 		EntityRegistry.registerModEntity(HarmonyHorse.class, "HarmonyHorse", mobID++, this, 80, 3, false);
 
 		Item horseSpawnEgg = new GenericEntitySpawnEgg("HarmonyHorse", 0xE18519, 0x000000)
 			.setUnlocalizedName("spawn_egg_harmony_horse")
-			.setTextureName("harmonyhorse:spawn_egg");
+			.setTextureName(HarmonyMod.MODID+":spawn_egg");
 		GameRegistry.registerItem(horseSpawnEgg, "spawnEggHarmonyHorse");
 	}
 
@@ -134,6 +134,7 @@ public class HarmonyMod
 					p = config.get(MODID, "breedingCost", 5);
 					breedingCost = p.getInt();
 				} else {
+					System.out.println("HarmonyMod: config setup for " + s);
 					//for each mob
 					Property p;
 					p = config.get(s, "slot1", "");
@@ -193,6 +194,11 @@ public class HarmonyMod
 		config.get("EntityWolf", "slot2", "JUMP,HARDY,FAST,VICIOUS");
 		config.get("EntityWolf", "slot3", "JUMP,HARDY,FAST,VICIOUS");
 		config.get("EntityWolf", "needsAttackAttr", true);
+
+		config.get("EntityHorse", "slot1", "HARDY");
+		config.get("EntityHorse", "slot2", "HARDY");
+		config.get("EntityHorse", "slot3", "HARDY");
+		config.get("EntityHorse", "needsAttackAttr", true);
 
 		config.save();
 

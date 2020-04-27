@@ -24,8 +24,7 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
-public class GenericEntitySpawnEgg extends ItemMonsterPlacer
-{
+public class GenericEntitySpawnEgg extends ItemMonsterPlacer {
     @SideOnly(Side.CLIENT)
     private IIcon theIcon;
     protected int colorBase = 0x000000;
@@ -39,14 +38,15 @@ public class GenericEntitySpawnEgg extends ItemMonsterPlacer
     }
 
     public GenericEntitySpawnEgg(String parEntityToSpawnName, int parPrimaryColor, int parSecondaryColor){
-        setHasSubtypes(false);
-        maxStackSize = 64;
-        setCreativeTab(CreativeTabs.tabMisc);
-        setEntityToSpawnName(parEntityToSpawnName);
-        colorBase = parPrimaryColor;
-        colorSpots = parSecondaryColor;
+        super();
+        this.setHasSubtypes(false);
+        this.maxStackSize = 64;
+        this.setCreativeTab(CreativeTabs.tabMisc);
+        this.setEntityToSpawnName(parEntityToSpawnName);
+        this.colorBase = parPrimaryColor;
+        this.colorSpots = parSecondaryColor;
         // DEBUG
-        System.out.println("Spawn egg constructor for "+entityToSpawnName);
+        System.out.println("HarmonyMod: Spawn egg constructor for "+entityToSpawnName);
     }
 
     /**
@@ -72,7 +72,7 @@ public class GenericEntitySpawnEgg extends ItemMonsterPlacer
                 d0 = 0.5D;
             }
 
-            Entity entity = spawnEntity(par3World, par4 + 0.5D, par5 + d0, par6 + 0.5D);
+            Entity entity = this.spawnEntity(par3World, par4 + 0.5D, par5 + d0, par6 + 0.5D);
 
             if (entity != null) {
                 if (entity instanceof EntityLivingBase && par1ItemStack.hasDisplayName()) {
@@ -117,7 +117,7 @@ public class GenericEntitySpawnEgg extends ItemMonsterPlacer
                     }
 
                     if (par2World.getBlock(i, j, k) instanceof BlockLiquid) {
-                        Entity entity = spawnEntity(par2World, i, j, k);
+                        Entity entity = this.spawnEntity(par2World, i, j, k);
 
                         if (entity != null) {
                             if (entity instanceof EntityLivingBase && par1ItemStack.hasDisplayName()) {
@@ -188,7 +188,7 @@ public class GenericEntitySpawnEgg extends ItemMonsterPlacer
     // Doing this override means that there is no localization for language
     // unless you specifically check for localization here and convert
     public String getItemStackDisplayName(ItemStack par1ItemStack) {
-        return "Spawn "+entityToSpawnName;
+        return "Spawn " + entityToSpawnName;
     }
 
 
@@ -196,7 +196,7 @@ public class GenericEntitySpawnEgg extends ItemMonsterPlacer
     @SideOnly(Side.CLIENT)
     public void registerIcons(IIconRegister par1IconRegister) {
         super.registerIcons(par1IconRegister);
-        theIcon = par1IconRegister.registerIcon(getIconString() + "_overlay");
+        theIcon = par1IconRegister.registerIcon(this.getIconString() + "_overlay");
     }
 
     /**
@@ -209,20 +209,20 @@ public class GenericEntitySpawnEgg extends ItemMonsterPlacer
     }
 
     public void setColors(int parColorBase, int parColorSpots) {
-     colorBase = parColorBase;
-     colorSpots = parColorSpots;
+     this.colorBase = parColorBase;
+     this.colorSpots = parColorSpots;
     }
 
     public int getColorBase() {
-     return colorBase;
+     return this.colorBase;
     }
 
     public int getColorSpots() {
-     return colorSpots;
+     return this.colorSpots;
     }
 
     public void setEntityToSpawnName(String parEntityToSpawnName) {
-        entityToSpawnName = parEntityToSpawnName;
-        entityToSpawnNameFull = HarmonyMod.MODID+"."+entityToSpawnName;
+        this.entityToSpawnName = parEntityToSpawnName;
+        this.entityToSpawnNameFull = HarmonyMod.MODID+"."+entityToSpawnName;
     }
 }

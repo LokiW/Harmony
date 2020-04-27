@@ -47,15 +47,14 @@ public class FeedAnimal {
 		boolean removeItem = false;
 		HarmonyProps hp = HarmonyProps.get(target);
 
+		if (hp == null) {
+			System.out.println("HarmonyMod: HarmonyProps are null for " + target);
+			return;
+		}
+
 		// TODO make our own items for learning tricks, differentiate based on animal
 		// If interacting with a speckled melon, indicate animal should begin to learn trick
 		if ("item.speckledMelon".equals(itemName)) {
-			if (hp == null) {
-				System.out.println("HarmonyMod: HarmonyProps are null for " + target);
-				return;
-			}
-
-			System.out.println("HarmonyProps: " + hp.tricks);
 			hp.tricks.learnTrick();
 			removeItem = true;
 		// If interacting with a golden apple, animal should save current location and

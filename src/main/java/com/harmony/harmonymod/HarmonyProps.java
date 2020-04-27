@@ -170,20 +170,8 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		@SubscribeEvent
 		public void entityConstructing(EntityEvent.EntityConstructing e) {
 			if(e.entity instanceof EntityLiving && !(e.entity instanceof EntityPlayer)) {
-
-				EntityLiving animal = (EntityLiving)e.entity;
-				String className = animal.getClass().getSimpleName().toLowerCase();
-				if(HarmonyMod.harmonyMobs.contains(className) && animal.getExtendedProperties(PROP_NAME) == null) {
-					animal.registerExtendedProperties(PROP_NAME, new HarmonyProps(animal));
-
-					// Register attacking for passive mobs
-					if (HarmonyMod.needsAttackAttr.contains(className)) {
-						BaseAttributeMap bam = animal.getAttributeMap();
-						bam.registerAttribute(SharedMonsterAttributes.attackDamage);
-						animal.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(1.0);
-					}
-				}
-			} 
+				HarmonyProps.addHarmonyProperties((EntityLiving)e.entity);
+			}
 		}
 
 		/*
@@ -198,6 +186,20 @@ public class HarmonyProps implements IExtendedEntityProperties {
 
 	   }
 
+	}
+
+	public static void addHarmonyProperties(EntityLiving pet) {
+		String className = pet.getClass().getSimpleName().toLowerCase();
+		if(HarmonyMod.harmonyMobs.contains(className) && pet.getExtendedProperties(PROP_NAME) == null) {
+			pet.registerExtendedProperties(PROP_NAME, new HarmonyProps(pet));
+
+			// Register attacking for passive mobs
+			if (HarmonyMod.needsAttackAttr.contains(className)) {
+				BaseAttributeMap bam = pet.getAttributeMap();
+				bam.registerAttribute(SharedMonsterAttributes.attackDamage);
+				pet.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(1.0);
+			}
+		}
 	}
 
 	// Required to implement, never called
