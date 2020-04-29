@@ -30,7 +30,6 @@ public class HarmonyHorse extends EntityHorse {
     public void moveEntityWithHeading(float strafe, float forward) {
         if (this.riddenByEntity != null && this.riddenByEntity instanceof EntityLivingBase && this.isHorseSaddled())
         {
-            System.out.println("HarmonyMod: moveEntityWithHeading on HarmonyHorse called with rider");
             this.prevRotationYaw = this.rotationYaw = this.riddenByEntity.rotationYaw;
             this.rotationPitch = this.riddenByEntity.rotationPitch * 0.5F;
             this.setRotation(this.rotationYaw, this.rotationPitch);
@@ -81,11 +80,12 @@ public class HarmonyHorse extends EntityHorse {
                 // to reduce jitter we can update them from the client but the client often runs
                 // faster than the server meaning we can't update them as fast as the server.
                 // So we reduce the movement speed based on server ping to smooth horses.
-                this.setAIMoveSpeed((float)this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue()*0.5F);
-            } else {
                 this.setAIMoveSpeed((float)this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue());
+                this.moveEntityWithHeadingBasic(strafe, forward);
+            } /*else {
+                this.setAIMoveSpeed((float)this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue()*0.5F);
             }
-            this.moveEntityWithHeadingBasic(strafe, forward);
+            this.moveEntityWithHeadingBasic(strafe, forward);*/
 
             if (this.onGround)
             {

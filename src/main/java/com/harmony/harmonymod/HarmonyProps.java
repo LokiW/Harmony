@@ -179,8 +179,6 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		public void entityConstructing(EntityEvent.EntityConstructing e) {
 			if(e.entity instanceof EntityLiving && !(e.entity instanceof EntityPlayer)) {
 				HarmonyProps.addHarmonyProperties((EntityLiving)e.entity);
-				//TEMP REMOVE
-				HarmonyProps.updateRiddingToClientSide((EntityLiving) e.entity);
 			}
 		}
 
@@ -210,38 +208,6 @@ public class HarmonyProps implements IExtendedEntityProperties {
 				bam.registerAttribute(SharedMonsterAttributes.attackDamage);
 				pet.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(1.0);
 			}
-		}
-	}
-
-	public static void updateRiddingToClientSide(EntityLiving pet) {
-		if (HarmonyMod.isRiddingUpdated || pet == null || pet.worldObj == null) {
-			return;
-		}
-		
-        if (!pet.worldObj.isRemote && pet.worldObj instanceof WorldServer)
-        {
-            MinecraftServer server = ((WorldServer)pet.worldObj).func_73046_m();
-			// Mutilate the server so that the NetHandlerPlayServer is HarmonyHandlePlayServer
-			// so that horses are handled on client side.
-			NetworkSystem netSystem = server.func_147137_ag();
-			try {
-				Field managerF = Class.forName("net.minecraft.network.NetworkSystem")
-									  .getDeclaredField("networkManagers");
-				managerF.setAccessible(true);
-				List<NetworkManager> netManagers = (List<NetworkManager>) managerF.get(netSystem);
-				for (NetworkManager manager : netManagers) {
-					if (manager.getNetHandler() instanceof NetHandlerPlayServer &&
-							!(manager.getNetHandler() instanceof NetHandlerPlayAndRideServer)) {
-						NetHandlerPlayServer oldHandler = (NetHandlerPlayServer) manager.getNetHandler();
-						manager.setNetHandler(new NetHandlerPlayAndRideServer(server, manager, oldHandler.playerEntity));
-						System.out.println("HarmonyMod: Replaced NetHandlerPlayServer network handler!!");
-					}
-				}
-
-			} catch(Exception ex) {
-				System.out.println("HarmonyMod: Couldn't reinitialize current trick state, hopefully transient");
-			}
-			HarmonyMod.isRiddingUpdated = false;
 		}
 	}
 

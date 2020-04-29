@@ -118,9 +118,6 @@ public class HarmonyWanderAI extends EntityAIBase
 
 		List<EntityAITaskEntry> t = pet.tasks.taskEntries;
 		for(int i = 0; i < t.size(); i++) {
-			if (pet instanceof EntityHorse) {
-				System.out.println("HarmonyMod: ai task " + t.get(i).action);
-			}
 			if(t.get(i).action instanceof EntityAIWander) {
 				t.remove(i);
 				i--;
