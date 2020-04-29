@@ -116,18 +116,12 @@ public class HarmonyWanderAI extends EntityAIBase
 		if (!(pet instanceof EntityAnimal))
 			return;
 
-		if (pet instanceof EntityHorse) {
-			System.out.println("HarmonyMod: modifying AI for a Horse");
-		}
 		List<EntityAITaskEntry> t = pet.tasks.taskEntries;
 		for(int i = 0; i < t.size(); i++) {
 			if (pet instanceof EntityHorse) {
 				System.out.println("HarmonyMod: ai task " + t.get(i).action);
 			}
-			if(t.get(i).action instanceof EntityAIWander || t.get(i).action instanceof EntityAIControlledByPlayer) {
-				if (pet instanceof EntityHorse && t.get(i).action instanceof EntityAIControlledByPlayer) {
-					System.out.println("HarmonyMod: removed EntityAIControlledByPlayer Ai from horse");
-				}
+			if(t.get(i).action instanceof EntityAIWander) {
 				t.remove(i);
 				i--;
 			}

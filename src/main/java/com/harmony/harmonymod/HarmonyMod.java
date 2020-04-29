@@ -57,6 +57,8 @@ public class HarmonyMod
 	public static int breedingHappiness;
 	public static int breedingCost;
 
+	public static boolean isRiddingUpdated;
+
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		//Read in configuration values
@@ -108,7 +110,6 @@ public class HarmonyMod
 		RespawnAnimal.register();
 		Traits.register();
 	}
-
 
 	/*
 	 * Load configuration data from file

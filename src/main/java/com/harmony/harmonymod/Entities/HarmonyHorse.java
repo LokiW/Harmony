@@ -30,6 +30,7 @@ public class HarmonyHorse extends EntityHorse {
     public void moveEntityWithHeading(float strafe, float forward) {
         if (this.riddenByEntity != null && this.riddenByEntity instanceof EntityLivingBase && this.isHorseSaddled())
         {
+            System.out.println("HarmonyMod: moveEntityWithHeading on HarmonyHorse called with rider");
             this.prevRotationYaw = this.rotationYaw = this.riddenByEntity.rotationYaw;
             this.rotationPitch = this.riddenByEntity.rotationPitch * 0.5F;
             this.setRotation(this.rotationYaw, this.rotationPitch);
@@ -37,8 +38,7 @@ public class HarmonyHorse extends EntityHorse {
             strafe = ((EntityLivingBase)this.riddenByEntity).moveStrafing * 0.5F;
             forward = ((EntityLivingBase)this.riddenByEntity).moveForward;
 
-            if (forward <= 0.0F)
-            {
+            if (forward <= 0.0F) {
                 forward *= 0.25F;
             }
 
@@ -49,8 +49,7 @@ public class HarmonyHorse extends EntityHorse {
                 forward = 0.0F;
             }
             */
-            if (this.jumpPower > 0.0F && !this.isHorseJumping() && this.onGround)
-            {
+            if (this.jumpPower > 0.0F && !this.isHorseJumping() && this.onGround) {
                 this.motionY = this.getHorseJumpStrength() * (double)this.jumpPower;
 
                 if (this.isPotionActive(Potion.jump))
@@ -76,7 +75,16 @@ public class HarmonyHorse extends EntityHorse {
             this.stepHeight = 1.0F;
             this.jumpMovementFactor = this.getAIMoveSpeed() * 0.1F;
 
-            this.setAIMoveSpeed((float)this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue());
+            if (this.worldObj.isRemote) {
+                // This is where the "magic" (hacks) happens
+                // Horses jitter because they are only updated form the server normally,
+                // to reduce jitter we can update them from the client but the client often runs
+                // faster than the server meaning we can't update them as fast as the server.
+                // So we reduce the movement speed based on server ping to smooth horses.
+                this.setAIMoveSpeed((float)this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue()*0.5F);
+            } else {
+                this.setAIMoveSpeed((float)this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue());
+            }
             this.moveEntityWithHeadingBasic(strafe, forward);
 
             if (this.onGround)

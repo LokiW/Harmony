@@ -13,6 +13,16 @@ Needed Features
 		sit
 		stop - test?
 
+Busy work
+	Fix Configs
+	Configure Happiness
+	Jumpy animals should take less fall damage
+	Animal Sounds off?
+
+Bugs
+	Sit doesn't sit
+	Animals scared of water
+
 High Value
 	Acheivements/Acheivment Tutorials
 	Noteblock whistles
@@ -26,9 +36,12 @@ High Value
 		galvanize
 		dig
 		bark/animal sound
+	Trick indicators
+		attack change wolf texture, don't attack sheep unless instructed
 
 
 Medium Value
+	Animals eat grass to gain happiness
 	Holding Items
 	Owner authenticated notes
 	Tricks
