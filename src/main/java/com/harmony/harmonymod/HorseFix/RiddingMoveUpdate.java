@@ -56,8 +56,9 @@ public class RiddingMoveUpdate {
 			}
 			NetHandlerPlayClient netQueue = RiddingMoveUpdate.playerNetworkQueues.get(player);
 
+			System.out.println("HarmonyMod: sending player packet with x " + player.posX + " z " + player.posZ + " min bby " + -1.0*player.boundingBox.minY);
 			netQueue.addToSendQueue(new C03PacketPlayer.C06PacketPlayerPosLook(player.posX,
-					player.boundingBox.minY,
+					-1.0*player.boundingBox.minY,
 					player.posY,
 					player.posZ,
 					player.rotationYaw,
