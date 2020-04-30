@@ -22,18 +22,6 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
     }
 
     /*
-    @Override
-    public void processInput(C0CPacketInput inputPacket) {
-        Entity mount = this.playerEntity.ridingEntity;
-        this.playerEntity.ridingEntity = null;
-
-        super.processInput(inputPacket);
-
-        this.playerEntity.ridingEntity = mount;
-    }*/
-
-
-    /*
      * Override process player which would normally only get player
      * location from the client when not ridding an entity.
      * Change it to set entitly location from client too.
@@ -41,14 +29,10 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
     @Override
     public void processPlayer(C03PacketPlayer playerPacket) {
         Entity mount = this.playerEntity.ridingEntity;
-
-        if (mount == null) {
-            super.processPlayer(playerPacket);
-            return;
-        }
-
         boolean hasMoved = playerPacket.func_149466_j();
-        if (!hasMoved) {
+
+        if (mount == null || !hasMoved) {
+            super.processPlayer(playerPacket);
             return;
         }
 
@@ -64,6 +48,20 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
             packetYaw = playerPacket.func_149462_g();
             packetPitch = playerPacket.func_149470_h();
         }
+
+        this.playerEntity.setPositionAndRotation(packetX, packetY, packetZ, packetYaw, packetPitch);
+        this.playerEntity.updateRidden();
+
+        super.processPlayer(playerPacket);
+
+        /*
+        double mountY = packetY - (mount.getMountedYOffset() + this.playerEntity.getYOffset());
+
+        mount.setPosition(packetX, mountY, packetZ);
+        super.processPlayer(playerPacket);*/
+
+        /*
+        mount.updateRiderPosition();
 
         System.out.println("HarmonyMod: player packet: " + packetX +
                             ", " + packetY + "," + packetZ + " has moved: " + hasMoved);
@@ -93,6 +91,7 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
         world.updateEntity(mount);
 
         super.processPlayer(playerPacket);
+        */
 
         //System.out.println("HarmonyMod: player post packet: "+ this.playerEntity.posX +
         //                    ", " + this.playerEntity.posY + "," + this.playerEntity.posZ);
