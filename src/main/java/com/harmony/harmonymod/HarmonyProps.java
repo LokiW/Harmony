@@ -20,13 +20,6 @@ import com.harmony.harmonymod.tricks.TrickHandler;
 import com.harmony.harmonymod.aitasks.BreedingAI;
 import com.harmony.harmonymod.aitasks.HarmonyWanderAI;
 import com.harmony.harmonymod.horsefix.NetHandlerPlayAndRideServer;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.WorldServer;
-import net.minecraft.network.NetworkSystem;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.NetHandlerPlayServer;
-import java.lang.reflect.Field;
-import java.util.List;
 import java.io.*;
 
 

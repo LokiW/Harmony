@@ -7,6 +7,7 @@ import com.harmony.harmonymod.items.GenericEntitySpawnEgg;
 import com.harmony.harmonymod.entities.HarmonyHorse;
 import com.harmony.harmonymod.FeedAnimal;
 import com.harmony.harmonymod.RespawnAnimal;
+import com.harmony.harmonymod.horsefix.RiddingMoveUpdate;
 import net.minecraft.init.Blocks;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -108,6 +109,7 @@ public class HarmonyMod
 		SoundDB.getSoundDB();
 		FeedAnimal.register();
 		RespawnAnimal.register();
+		RiddingMoveUpdate.register();
 		Traits.register();
 	}
 
