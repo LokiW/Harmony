@@ -65,10 +65,10 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
         }
 
         this.x = packetX; this.y = packetY; this.z = packetZ;
-        this.setPlayerLocation(packetX, minBoundingBoxY, packetZ, packetYaw, packetPitch);
+        // this.setPlayerLocation(packetX, minBoundingBoxY, packetZ, packetYaw, packetPitch);
         mount.setPosition(packetX, minBoundingBoxY - mount.getMountedYOffset() - this.playerEntity.getYOffset(), packetZ);
 
-        world.updateEntity(this.playerEntity);
+        // world.updateEntity(this.playerEntity);
         //this.playerEntity.updateRidden();
         world.updateEntity(mount);
 
