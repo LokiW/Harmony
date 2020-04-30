@@ -37,7 +37,6 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
         Entity mount = this.playerEntity.ridingEntity;
 
         if (mount == null) {
-            System.out.println("HarmonyMod: Player Not Mounted");
             super.processPlayer(playerPacket);
             return;
         }
@@ -50,7 +49,7 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
         double packetY = playerPacket.func_149471_f();
 
         boolean hasMoved = playerPacket.func_149466_j();
-        if (!hasMoved || packetY == -999.0D || minBoundingBoxY == -999.0D || minBoundingBoxY >= 0.0) {
+        if (!hasMoved || packetY == -999.0D || minBoundingBoxY == -999.0D) {
             return;
         }
         minBoundingBoxY = Math.abs(minBoundingBoxY);
@@ -64,21 +63,20 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
             packetPitch = playerPacket.func_149470_h();
         }
 
+        double playerX = this.playerEntity.posX;
+        double playerY = this.playerEntity.posY;
+        double playerZ = this.playerEntity.posZ;
+        System.out.println("HarmonyMod: packetX " + packetX + " vs playerX " +playerX +
+                            " packetY " + packetY + " vs playerY " + playerY +
+                            " packetZ " + packetZ + " vs playerZ " + playerZ);
+
         this.x = packetX; this.y = packetY; this.z = packetZ;
-        // this.setPlayerLocation(packetX, minBoundingBoxY, packetZ, packetYaw, packetPitch);
         mount.setPosition(packetX, minBoundingBoxY - mount.getMountedYOffset() - this.playerEntity.getYOffset(), packetZ);
 
-        // world.updateEntity(this.playerEntity);
-        //this.playerEntity.updateRidden();
+        this.playerEntity.updateRidden();
+        world.updateEntity(this.playerEntity);
         world.updateEntity(mount);
 
-        super.processPlayer(new C03PacketPlayer.C06PacketPlayerPosLook(packetX,
-					minBoundingBoxY,
-					packetY,
-					packetZ,
-					packetYaw,
-					packetPitch,
-					playerPacket.func_149465_i()));
-
+        super.processPlayer(playerPacket);
     }
 }

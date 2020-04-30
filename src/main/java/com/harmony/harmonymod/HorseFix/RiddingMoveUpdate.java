@@ -7,6 +7,8 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.network.NetworkSystem;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.client.multiplayer.WorldClient;
@@ -47,7 +49,8 @@ public class RiddingMoveUpdate {
 			}
         } else {
 			if (!RiddingMoveUpdate.playerNetworkQueues.containsKey(player)) {
-				RiddingMoveUpdate.updatePlayerClientNetworkQueue(player);
+				//RiddingMoveUpdate.updatePlayerClientNetworkQueue(player);
+				RiddingMoveUpdate.setPlayerClientNetworkQueue(player);
 			}
 			if (!RiddingMoveUpdate.playerNetworkQueues.containsKey(player)) {
 				// Wasn't found in updatePlayerClientNetworkQueue
@@ -55,10 +58,9 @@ public class RiddingMoveUpdate {
 				return;
 			}
 			NetHandlerPlayClient netQueue = RiddingMoveUpdate.playerNetworkQueues.get(player);
-
-			System.out.println("HarmonyMod: sending player packet with x " + player.posX + " z " + player.posZ + " min bby " + -1.0*player.boundingBox.minY);
+			
 			netQueue.addToSendQueue(new C03PacketPlayer.C06PacketPlayerPosLook(player.posX,
-					-1.0*player.boundingBox.minY,
+					player.boundingBox.minY,
 					player.posY,
 					player.posZ,
 					player.rotationYaw,
@@ -89,6 +91,89 @@ public class RiddingMoveUpdate {
 			} catch (Exception e) {
 				System.out.println("HarmonyMod: Failed to update network queue for client player with exception " + e);
 			}
+		}
+	}
+
+	public static void setPlayerClientNetworkQueue(EntityPlayer player) {
+		if (player == null || player.worldObj == null) {
+			return;
+		}
+
+        if (!player.worldObj.isRemote || !(player.worldObj instanceof WorldClient)) {
+			return;
+		}
+		try {
+			WorldClient worldClient = (WorldClient) player.worldObj;
+			Field[] fields = worldClient.getClass().getDeclaredFields();
+			Field netHandlerField = null;
+			Minecraft mc = null;
+			for (Field field : fields) {
+				if (field.getType() == NetHandlerPlayClient.class) {
+					field.setAccessible(true);
+					netHandlerField = field;
+				} else if (field.getType() == Minecraft.class) {
+					field.setAccessible(true);
+					mc = (Minecraft) field.get(worldClient);
+					System.out.println("HarmonyMod: found Minecraft object in worldClient");
+				}
+			}
+
+			NetHandlerPlayClient netQueue = (NetHandlerPlayClient) netHandlerField.get(worldClient);
+			NetworkManager manager = null;
+			NetHandlerPlayAndRideClient newNetHandler = new NetHandlerPlayAndRideClient(mc, mc.currentScreen, manager);
+
+			Field[] newFields = newNetHandler.getClass().getDeclaredFields();
+			Field[] queueFields = netQueue.getClass().getDeclaredFields();
+			for (Field oldField : queueFields) {
+				if (oldField.getType() == NetworkManager.class) {
+					oldField.setAccessible(true);
+					manager = (NetworkManager) oldField.get(netQueue);
+				}
+				try {
+					oldField.setAccessible(true);
+					oldField.set(newNetHandler, oldField.get(netQueue));
+					System.out.println("HarmonyMod: set value " + oldField.getName());
+				} catch (Exception e) {
+					System.out.println("HarmonyMod: DID NOT set value " + oldField.getName());
+				}
+			}
+
+			if (manager != null && mc != null) {
+				manager.setNetHandler(newNetHandler);
+				netHandlerField.set(worldClient, newNetHandler);
+				netQueue = newNetHandler;
+				Field[] playerFields = mc.thePlayer.getClass().getDeclaredFields();
+				for (Field field : playerFields) {
+					if(field.getType() == NetHandlerPlayClient.class) {
+						field.setAccessible(true);
+						field.set(mc.thePlayer, newNetHandler);
+						break;
+					}
+				}
+				Field[] mcFields = mc.getClass().getDeclaredFields();
+				for (Field field : mcFields) {
+					if(field.getType() == NetworkManager.class) {
+						field.setAccessible(true);
+						NetworkManager mcManager = (NetworkManager) field.get(mc);
+						if (mcManager != null) {
+							mcManager.setNetHandler(newNetHandler);
+						} else {
+							field.set(mc, manager);
+						}
+						break;
+					}
+				}
+				System.out.println("HarmonyMod: Replaced NetHandlerPlayClient");
+			} else {
+				System.out.println("HarmonyMod: DID NOT NetHandlerPlayClient");
+			}
+
+			if (netQueue != null) {
+				System.out.println("HarmonyMod: updated network queue for client player");
+				RiddingMoveUpdate.playerNetworkQueues.put(player, netQueue);
+			}	
+		} catch (Exception e) {
+			System.out.println("HarmonyMod: Failed to update NetHandlerPlayClient: " + e);
 		}
 
 	}
@@ -134,7 +219,7 @@ public class RiddingMoveUpdate {
 							!(manager.getNetHandler() instanceof NetHandlerPlayAndRideServer)) {
 						NetHandlerPlayServer oldHandler = (NetHandlerPlayServer) manager.getNetHandler();
 						manager.setNetHandler(new NetHandlerPlayAndRideServer(server, manager, oldHandler.playerEntity));
-						System.out.println("HarmonyMod: Replaced NetHandlerPlayServer network handler!!");
+						System.out.println("HarmonyMod: Replaced NetHandlerPlayServer");
 						RiddingMoveUpdate.updatedServerPlayers.add(player);
 					}
 				}
