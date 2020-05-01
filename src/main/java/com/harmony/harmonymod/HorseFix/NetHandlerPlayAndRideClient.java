@@ -13,6 +13,9 @@ import net.minecraft.client.network.NetHandlerPlayClient;
 public class NetHandlerPlayAndRideClient extends NetHandlerPlayClient {
     public Minecraft mc;
 
+    //temp
+    public Entity lastRiddenEntity;
+
     public NetHandlerPlayAndRideClient(Minecraft mc, GuiScreen screen, NetworkManager manager) {
         super(mc, screen, manager);
         this.mc = mc;
@@ -34,7 +37,15 @@ public class NetHandlerPlayAndRideClient extends NetHandlerPlayClient {
         if (player.ridingEntity == null ||
                 (updated.getEntityId() != player.getEntityId() &&
                  updated.getEntityId() != player.ridingEntity.getEntityId())) {
+            if (lastRiddenEntity != null && updated.getEntityId() == lastRiddenEntity.getEntityId()) {
+                System.out.println("HarmonyMod: updated entity now that it is off player");
+            }
             super.handleEntityMovement(packetEntity);
+        } else {
+            lastRiddenEntity = player.ridingEntity;
+            if (updated.getEntityId() == player.ridingEntity.getEntityId()) {
+                System.out.println("HarmonyMod: send entity movement to " + player.ridingEntity + " but ignored it.");
+            }
         }
     }
 }
