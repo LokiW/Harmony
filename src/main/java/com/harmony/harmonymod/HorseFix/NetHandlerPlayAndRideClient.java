@@ -3,6 +3,7 @@ package com.harmony.harmonymod.horsefix;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.network.play.server.S14PacketEntity;
 import net.minecraft.network.play.server.S1BPacketEntityAttach;
+import net.minecraft.network.play.server.S18PacketEntityTeleport;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -39,6 +40,18 @@ public class NetHandlerPlayAndRideClient extends NetHandlerPlayClient {
                 (updated.getEntityId() != player.getEntityId() &&
                  updated.getEntityId() != player.ridingEntity.getEntityId())) {
             super.handleEntityMovement(packetEntity);
+        }
+    }
+
+    @Override
+    public void handleEntityTeleport(S18PacketEntityTeleport packet) {
+        EntityClientPlayerMP player = this.mc.thePlayer;
+
+        if (player.ridingEntity == null ||
+                !MoveEntityHelper.entityRequiresMoveHelper(player.ridingEntity) ||
+                (packet.func_149451_c() != player.getEntityId() &&
+                 packet.func_149451_c() != player.ridingEntity.getEntityId())) {
+            super.handleEntityTeleport(packet);
         }
     }
 }

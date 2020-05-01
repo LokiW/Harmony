@@ -38,12 +38,6 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
             super.processPlayer(playerPacket);
             return;
         }
-        // TODO TEMP TEMP
-        //super.processPlayer(playerPacket);
-        //return;
-
-        // END TEMP TEMP
-        System.out.println("HarmonyMod: sending modified playerPacket");
         WorldServer world = this.server.worldServerForDimension(this.playerEntity.dimension);
 
         double packetX = playerPacket.func_149464_c();
