@@ -20,8 +20,6 @@ import java.lang.Math;
 public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
     public MinecraftServer server;
 
-    public RideableEntityWrapper lastRiddenEntity;
-
     public NetHandlerPlayAndRideServer(MinecraftServer server, NetworkManager netManager, EntityPlayerMP player) {
         super(server, netManager, player);
         this.server = server;
@@ -36,13 +34,16 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
     @Override
     public void processPlayer(C03PacketPlayer playerPacket) {
         if (this.playerEntity.ridingEntity == null ||
-                !(this.playerEntity.ridingEntity instanceof RideableEntityWrapper)) {
+                !MoveEntityHelper.entityRequiresMoveHelper(this.playerEntity.ridingEntity)) {
             super.processPlayer(playerPacket);
             return;
         }
+        // TODO TEMP TEMP
+        //super.processPlayer(playerPacket);
+        //return;
 
-        this.lastRiddenEntity = (RideableEntityWrapper) this.playerEntity.ridingEntity;
-
+        // END TEMP TEMP
+        System.out.println("HarmonyMod: sending modified playerPacket");
         WorldServer world = this.server.worldServerForDimension(this.playerEntity.dimension);
 
         double packetX = playerPacket.func_149464_c();
@@ -65,16 +66,16 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
             packetPitch = playerPacket.func_149470_h();
         }
 
-        this.lastRiddenEntity.setPosition(packetX, minBoundingBoxY - this.lastRiddenEntity.getMountedYOffset() - this.playerEntity.getYOffset(), packetZ);
+        this.playerEntity.ridingEntity.setPosition(packetX, minBoundingBoxY - this.playerEntity.ridingEntity.getMountedYOffset() - this.playerEntity.getYOffset(), packetZ);
 
         this.playerEntity.updateRidden();
-
-        world.updateEntity(this.playerEntity);
-        world.updateEntity(this.lastRiddenEntity);
+        //world.updateEntity(this.playerEntity);
+        //world.updateEntity(this.playerEntity.ridingEntity);
 
         super.processPlayer(playerPacket);
     }
 
+    /*
     @Override
     public void sendPacket(final Packet packet) {
         if (packet instanceof S1BPacketEntityAttach) {
@@ -147,6 +148,6 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
             newPacket = new S14PacketEntity.S16PacketEntityLook(this.myEntity.getEntityId(), (byte)var5, (byte)var6);
         } else if (packet instanceof S14PacketEntity.S15PacketEntityRelMove) {
             newPacket = new S14PacketEntity.S15PacketEntityRelMove(this.myEntity.getEntityId(), (byte)var7, (byte)var8, (byte)var9);
-        }*/
-    }
+        }
+    }*/
 }

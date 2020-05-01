@@ -1,7 +1,9 @@
 package com.harmony.harmonymod.horsefix;
 
+import com.harmony.harmonymod.HarmonyMod;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityHorse;
@@ -14,12 +16,25 @@ import java.lang.reflect.Field;
 
 public class RideableEntityWrapper extends EntityLiving {
 
+    public static final String NAME = "RideableEntityWrapper";
+    public static final String FULLNAME = HarmonyMod.MODID +".RideableEntityWrapper";
     public EntityLivingBase mount;
 
-    public RideableEntityWrapper(World world, EntityLivingBase entityToWrap) {
+    public RideableEntityWrapper(World world) {
         super(world);
-        mount = entityToWrap;
-        this.initBasedOnWrappedEntity();
+        System.out.println("HarmonyMod: RideableEntityWrapper entity created");
+    }
+
+    public void wrapEntity(EntityLivingBase mount) {
+        this.mount = mount;
+        if (this.mount.riddenByEntity != null && this.mount.riddenByEntity instanceof EntityLivingBase) {
+            EntityLivingBase rider = (EntityLivingBase) this.mount.riddenByEntity;
+            rider.dismountEntity(this.mount);
+            rider.mountEntity(this);
+            this.mountEntity(this.mount);
+        }
+        initBasedOnWrappedEntity();
+        System.out.println("HarmonyMod: RideableEntityWrapper wrapped entity");
     }
 
     public static boolean entityRequiresWrap(Entity entityToWrap) {
@@ -53,6 +68,23 @@ public class RideableEntityWrapper extends EntityLiving {
         return false;
     }
 
+    public static RideableEntityWrapper createWrapper(World world, EntityLivingBase mount) {
+        RideableEntityWrapper entityToSpawn = null;
+        if (!world.isRemote) { // never spawn entity on client side
+            String name = RideableEntityWrapper.FULLNAME;
+            if (EntityList.stringToClassMapping.containsKey(name)) {
+                entityToSpawn = (RideableEntityWrapper) EntityList.createEntityByName(name, world);
+                world.spawnEntityInWorld(entityToSpawn);
+                entityToSpawn.wrapEntity(mount);
+            } else {
+                //DEBUG
+                System.out.println("HarmonyMod: Entity not found "+ name);
+            }
+        }
+
+        return entityToSpawn;
+    }
+
     public void unwrappEntity() {
         this.worldObj.removeEntity(this);
     }
@@ -64,6 +96,7 @@ public class RideableEntityWrapper extends EntityLiving {
 
     @Override
     public void moveEntityWithHeading(float strafe, float forward) {
+        System.out.println("HarmonyMod: moveEntityWithHeading called in RideableEntityWrapper");
         if (!this.moveableByPlayer()) {
             this.mount.moveEntityWithHeading(strafe, forward);
             return;
@@ -222,27 +255,34 @@ public class RideableEntityWrapper extends EntityLiving {
     }
 
     public void setWrapperStatsToMount() {
-        if (this.riddenByEntity != null) {
-            this.mount.riddenByEntity = this.riddenByEntity;
-        } else {
-            this.riddenByEntity = this.mount.riddenByEntity;
-        }
+        this.posX = this.mount.posX;
+        this.posY = this.mount.posY;
+        this.posZ = this.mount.posZ;
+        this.rotationPitch = this.mount.rotationPitch;
+        this.rotationYaw = this.mount.rotationYaw;
 
+        this.motionX = this.mount.motionX;
+        this.motionY = this.mount.motionY;
+        this.motionZ = this.mount.motionZ;
+
+        /*
         Class cursor = this.getClass().getSuperclass();
         while (cursor != null && cursor != Object.class) {
             // EntityLiving Fields
+            System.out.println("HarmonyMod: syncing for " + cursor);
             Field[] fieldsToUpdate = cursor.getDeclaredFields();
             for (Field field : fieldsToUpdate) {
                 if (field.isAccessible()) {
                     try {
                         field.set(this, field.get(this.mount));
+                        System.out.println("HarmonyMod: sync " + field.getName() + " to rideableEntityWrapper from mount.");
                     } catch (Exception e) {
                         // TODO remove print
-                        System.out.println("HarmonyMod: sync " + field.getName() + " to rideableEntityWrapper from mount.");
+                        System.out.println("HarmonyMod: failed to sync " + field.getName() + " to rideableEntityWrapper from mount.");
                     }
                 }
             }
             cursor = cursor.getSuperclass();
-        }
+        }*/
     }
 }

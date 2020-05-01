@@ -8,6 +8,7 @@ import com.harmony.harmonymod.entities.HarmonyHorse;
 import com.harmony.harmonymod.FeedAnimal;
 import com.harmony.harmonymod.RespawnAnimal;
 import com.harmony.harmonymod.horsefix.RiddingMoveUpdate;
+import com.harmony.harmonymod.horsefix.RideableEntityWrapper;
 import net.minecraft.init.Blocks;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -91,6 +92,7 @@ public class HarmonyMod
 
 		// add Entities
 		EntityRegistry.registerModEntity(HarmonyHorse.class, "HarmonyHorse", mobID++, this, 80, 3, false);
+		EntityRegistry.registerModEntity(RideableEntityWrapper.class, RideableEntityWrapper.NAME, mobID++, this, 80, 3, false);
 
 		Item horseSpawnEgg = new GenericEntitySpawnEgg("HarmonyHorse", 0xE18519, 0x000000)
 			.setUnlocalizedName("spawn_egg_harmony_horse")
