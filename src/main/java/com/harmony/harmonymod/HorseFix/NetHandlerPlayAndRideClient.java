@@ -18,7 +18,6 @@ public class NetHandlerPlayAndRideClient extends NetHandlerPlayClient {
     public NetHandlerPlayAndRideClient(Minecraft mc, GuiScreen screen, NetworkManager manager) {
         super(mc, screen, manager);
         this.mc = mc;
-        System.out.println("HarmonyMod: created NetHandlerPlayAndRideClient to override mc NetHandlerPlayClient for ridding.");
     }
 
     @Override

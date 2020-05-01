@@ -28,7 +28,6 @@ public class MoveEntityHelper {
     }
 
     public static void moveEntityWithHeading(EntityLivingBase myEntity, float strafe, float forward) {
-        System.out.println("HarmonyMod: moveEntityWithHeading called in RideableEntityWrapper");
         if (!MoveEntityHelper.moveableByPlayer(myEntity)) {
             myEntity.moveEntityWithHeading(strafe, forward);
             return;

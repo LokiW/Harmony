@@ -48,12 +48,10 @@ public class RiddingMoveUpdate {
 
         if(event.side == Side.SERVER) {
 			if (!RiddingMoveUpdate.serverHandlers.containsKey(player.getEntityId())) {
-				System.out.println("HarmonyMod: updating server network handler");
 				RiddingMoveUpdate.updateServerNetHandler(player);
 			}
         } else {
 			if (!RiddingMoveUpdate.clientHandlers.containsKey(player.getEntityId())) {
-				System.out.println("HarmonyMod: updating client network handler");
 				//RiddingMoveUpdate.updatePlayerClientNetworkQueue(player);
 				RiddingMoveUpdate.setPlayerClientNetworkQueue(player);
 			}
@@ -76,31 +74,6 @@ public class RiddingMoveUpdate {
 					player.onGround));
 		}
     }
-	
-	public static void updatePlayerClientNetworkQueue(EntityPlayer player) {
-		if (player == null || player.worldObj == null) {
-			return;
-		}
-
-        if (player.worldObj.isRemote && player.worldObj instanceof WorldClient) {
-			try {
-				WorldClient worldClient = (WorldClient) player.worldObj;
-				Field[] fields = worldClient.getClass().getDeclaredFields();
-				for (Field field : fields) {
-					if (field.getType() == NetHandlerPlayClient.class) {
-						field.setAccessible(true);
-						NetHandlerPlayClient netQueue = (NetHandlerPlayClient) field.get(worldClient);
-						if (netQueue != null) {
-							System.out.println("HarmonyMod: updated network queue for client player");
-							RiddingMoveUpdate.clientHandlers.put(player.getEntityId(), netQueue);
-						}
-					}
-				}
-			} catch (Exception e) {
-				System.out.println("HarmonyMod: Failed to update network queue for client player with exception " + e);
-			}
-		}
-	}
 
 	public static void setPlayerClientNetworkQueue(EntityPlayer player) {
 		if (player == null || player.worldObj == null) {
@@ -122,7 +95,6 @@ public class RiddingMoveUpdate {
 				} else if (field.getType() == Minecraft.class) {
 					field.setAccessible(true);
 					mc = (Minecraft) field.get(worldClient);
-					System.out.println("HarmonyMod: found Minecraft object in worldClient");
 				}
 			}
 
@@ -140,9 +112,8 @@ public class RiddingMoveUpdate {
 				try {
 					oldField.setAccessible(true);
 					oldField.set(newNetHandler, oldField.get(netQueue));
-					System.out.println("HarmonyMod: set value " + oldField.getName());
 				} catch (Exception e) {
-					System.out.println("HarmonyMod: DID NOT set value " + oldField.getName());
+					continue;
 				}
 			}
 

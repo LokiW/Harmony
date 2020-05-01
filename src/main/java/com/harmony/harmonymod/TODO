@@ -38,6 +38,8 @@ High Value
 		bark/animal sound
 	Trick indicators
 		attack change wolf texture, don't attack sheep unless instructed
+	HorseFix
+		Horses don't suffocate ever
 
 
 Medium Value
@@ -51,4 +53,4 @@ Medium Value
 		ender portal
 		place
 		laydown/backflip/rollover
-
+	Remove NetHandlerPlayClient override and just don't send updates in NetHandlerPlayServer
