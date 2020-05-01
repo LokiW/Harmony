@@ -25,7 +25,8 @@ public class NetHandlerPlayAndRideClient extends NetHandlerPlayClient {
     public void handlePlayerPosLook(S08PacketPlayerPosLook serverPacket) {
         EntityClientPlayerMP player = this.mc.thePlayer;
 
-        if (player.ridingEntity == null) {
+        if (player.ridingEntity == null ||
+                !(player.ridingEntity instanceof RideableEntityWrapper)) {
             super.handlePlayerPosLook(serverPacket);
         }
     }
@@ -35,6 +36,7 @@ public class NetHandlerPlayAndRideClient extends NetHandlerPlayClient {
         EntityClientPlayerMP player = this.mc.thePlayer;
         Entity updated = packetEntity.func_149065_a(this.mc.theWorld);
         if (player.ridingEntity == null ||
+                !(player.ridingEntity instanceof RideableEntityWrapper) ||
                 (updated.getEntityId() != player.getEntityId() &&
                  updated.getEntityId() != player.ridingEntity.getEntityId())) {
             if (lastRiddenEntity != null && updated.getEntityId() == lastRiddenEntity.getEntityId()) {

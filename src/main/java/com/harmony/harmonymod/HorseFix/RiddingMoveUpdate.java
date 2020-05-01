@@ -2,6 +2,7 @@ package com.harmony.harmonymod.horsefix;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
 import net.minecraft.network.NetworkSystem;
@@ -11,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.network.play.client.C03PacketPlayer;
+import net.minecraft.network.play.server.S1BPacketEntityAttach;
 import net.minecraft.client.multiplayer.WorldClient;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -25,10 +27,10 @@ import java.util.HashMap;
 
 public class RiddingMoveUpdate {
 	//@SideOnly(Side.CLIENT)
-	public static Map<EntityPlayer, NetHandlerPlayClient> playerNetworkQueues = new HashMap<EntityPlayer, NetHandlerPlayClient>();
+	public static Map<Integer, NetHandlerPlayClient> clientHandlers = new HashMap<Integer, NetHandlerPlayClient>();
 
 	//@SideOnly(Side.SERVER)
-	public static List<EntityPlayer> updatedServerPlayers = new ArrayList<EntityPlayer>();
+	public static Map<Integer, NetHandlerPlayServer> serverHandlers = new HashMap<Integer, NetHandlerPlayServer>();
 
     public static void register() {
 		RiddingMoveUpdate handler = new RiddingMoveUpdate();
@@ -43,21 +45,61 @@ public class RiddingMoveUpdate {
 			return;
 		}
 
+		boolean updatedRiddingEntity = false;
+
+		// Check to see if ridingEntity needs to be wrapped for smooth riding
+		if (!(player.ridingEntity instanceof RideableEntityWrapper)) {
+			if (!RideableEntityWrapper.entityRequiresWrap(player.ridingEntity)) {
+				// Don't need to continue processing player tick if riding entity
+				// isn't configured for a riding fix
+				return;
+			}
+			System.out.println("HarmonyMod: ridignEntity should be wrapped");
+	
+			if (event.side == Side.CLIENT) {
+				// Skip client ticks until wrapper entity established on both sides
+				return;			
+			}
+
+			// Wrap entity
+			if (!(player.worldObj instanceof WorldServer)) {
+				// TODO deal with this??
+				return;
+			}
+
+			WorldServer world = (WorldServer) player.worldObj;
+			EntityLivingBase mount = (EntityLivingBase) player.ridingEntity;
+
+			// Need to wrap entity for better ridding
+			RideableEntityWrapper wrapper = new RideableEntityWrapper(world, mount);
+			// This sends packet to client so the wrapper exists on both sides
+			world.spawnEntityInWorld(wrapper);
+
+			player.ridingEntity = wrapper;
+			updatedRiddingEntity = true;
+			System.out.println("HarmonyMod: riddingEntity wrapped");
+		}
+
         if(event.side == Side.SERVER) {
-			if (!RiddingMoveUpdate.updatedServerPlayers.contains(player)) {
+			if (!RiddingMoveUpdate.serverHandlers.containsKey(player.getEntityId())) {
 				RiddingMoveUpdate.updateServerNetHandler(player);
 			}
+			if (updatedRiddingEntity && RiddingMoveUpdate.serverHandlers.containsKey(player.getEntityId())) {
+				// Need to tell client about wrapper existing if it was updated
+				NetHandlerPlayServer netQueue = RiddingMoveUpdate.serverHandlers.get(player.getEntityId());
+				netQueue.sendPacket(new S1BPacketEntityAttach(1, player, player.ridingEntity));
+			}
         } else {
-			if (!RiddingMoveUpdate.playerNetworkQueues.containsKey(player)) {
+			if (!RiddingMoveUpdate.clientHandlers.containsKey(player.getEntityId())) {
 				//RiddingMoveUpdate.updatePlayerClientNetworkQueue(player);
 				RiddingMoveUpdate.setPlayerClientNetworkQueue(player);
 			}
-			if (!RiddingMoveUpdate.playerNetworkQueues.containsKey(player)) {
+			if (!RiddingMoveUpdate.clientHandlers.containsKey(player.getEntityId())) {
 				// Wasn't found in updatePlayerClientNetworkQueue
 				System.out.println("HarmonyMod: didn't find client network queue for player");
 				return;
 			}
-			NetHandlerPlayClient netQueue = RiddingMoveUpdate.playerNetworkQueues.get(player);
+			NetHandlerPlayClient netQueue = RiddingMoveUpdate.clientHandlers.get(player.getEntityId());
 			
 			netQueue.addToSendQueue(new C03PacketPlayer.C06PacketPlayerPosLook(player.posX,
 					player.boundingBox.minY,
@@ -84,7 +126,7 @@ public class RiddingMoveUpdate {
 						NetHandlerPlayClient netQueue = (NetHandlerPlayClient) field.get(worldClient);
 						if (netQueue != null) {
 							System.out.println("HarmonyMod: updated network queue for client player");
-							RiddingMoveUpdate.playerNetworkQueues.put(player, netQueue);
+							RiddingMoveUpdate.clientHandlers.put(player.getEntityId(), netQueue);
 						}
 					}
 				}
@@ -170,7 +212,7 @@ public class RiddingMoveUpdate {
 
 			if (netQueue != null) {
 				System.out.println("HarmonyMod: updated network queue for client player");
-				RiddingMoveUpdate.playerNetworkQueues.put(player, netQueue);
+				RiddingMoveUpdate.clientHandlers.put(player.getEntityId(), netQueue);
 			}	
 		} catch (Exception e) {
 			System.out.println("HarmonyMod: Failed to update NetHandlerPlayClient: " + e);
@@ -218,9 +260,10 @@ public class RiddingMoveUpdate {
 					if (manager.getNetHandler() instanceof NetHandlerPlayServer &&
 							!(manager.getNetHandler() instanceof NetHandlerPlayAndRideServer)) {
 						NetHandlerPlayServer oldHandler = (NetHandlerPlayServer) manager.getNetHandler();
-						manager.setNetHandler(new NetHandlerPlayAndRideServer(server, manager, oldHandler.playerEntity));
+						NetHandlerPlayAndRideServer newHandler = new NetHandlerPlayAndRideServer(server, manager, oldHandler.playerEntity);
+						manager.setNetHandler(newHandler);
 						System.out.println("HarmonyMod: Replaced NetHandlerPlayServer");
-						RiddingMoveUpdate.updatedServerPlayers.add(player);
+						RiddingMoveUpdate.serverHandlers.put(player.getEntityId(), newHandler);
 					}
 				}
 

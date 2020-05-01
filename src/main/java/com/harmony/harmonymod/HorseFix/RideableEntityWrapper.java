@@ -3,11 +3,13 @@ package com.harmony.harmonymod.horsefix;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.util.MathHelper;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.world.World;
+import java.lang.reflect.Field;
 
 
 public class RideableEntityWrapper extends EntityLiving {
@@ -17,19 +19,21 @@ public class RideableEntityWrapper extends EntityLiving {
     public RideableEntityWrapper(World world, EntityLivingBase entityToWrap) {
         super(world);
         mount = entityToWrap;
+        this.initBasedOnWrappedEntity();
     }
 
-    public static boolean validEntityToWrap(EntityLivingBase entityToWrap) {
-        // Update for entities to wrap
+    public static boolean entityRequiresWrap(Entity entityToWrap) {
+        // TODO Update for entities to wrap based off config
         if (entityToWrap instanceof EntityHorse) {
-            return true;
+            return ((EntityHorse) entityToWrap).isHorseSaddled();
         }
         return false;
     }
 
-    protected void entityInit() {
+    protected void initBasedOnWrappedEntity() {
         // Set Entity to Invisible (since it is just a wrapper)
         this.setFlag(5, true);
+        this.setWrapperStatsToMount();
     }
 
     public boolean isTame() {
@@ -55,7 +59,6 @@ public class RideableEntityWrapper extends EntityLiving {
 
     @Override
     public void onEntityUpdate() {
-        mount.riddenByEntity = this.riddenByEntity;
         setWrapperStatsToMount();
     }
 
@@ -219,11 +222,27 @@ public class RideableEntityWrapper extends EntityLiving {
     }
 
     public void setWrapperStatsToMount() {
-        this.posX = this.mount.posX;
-        this.posY = this.mount.posY;
-        this.posZ = this.mount.posZ;
-        this.motionX = this.mount.motionX;
-        this.motionY = this.mount.motionY;
-        this.motionZ = this.mount.motionZ;
+        if (this.riddenByEntity != null) {
+            this.mount.riddenByEntity = this.riddenByEntity;
+        } else {
+            this.riddenByEntity = this.mount.riddenByEntity;
+        }
+
+        Class cursor = this.getClass().getSuperclass();
+        while (cursor != null && cursor != Object.class) {
+            // EntityLiving Fields
+            Field[] fieldsToUpdate = cursor.getDeclaredFields();
+            for (Field field : fieldsToUpdate) {
+                if (field.isAccessible()) {
+                    try {
+                        field.set(this, field.get(this.mount));
+                    } catch (Exception e) {
+                        // TODO remove print
+                        System.out.println("HarmonyMod: sync " + field.getName() + " to rideableEntityWrapper from mount.");
+                    }
+                }
+            }
+            cursor = cursor.getSuperclass();
+        }
     }
 }

@@ -20,7 +20,7 @@ import java.lang.Math;
 public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
     public MinecraftServer server;
 
-    public Entity lastRiddenEntity;
+    public RideableEntityWrapper lastRiddenEntity;
 
     public NetHandlerPlayAndRideServer(MinecraftServer server, NetworkManager netManager, EntityPlayerMP player) {
         super(server, netManager, player);
@@ -35,11 +35,13 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
      */
     @Override
     public void processPlayer(C03PacketPlayer playerPacket) {
-        if (this.playerEntity.ridingEntity == null) {
+        if (this.playerEntity.ridingEntity == null ||
+                !(this.playerEntity.ridingEntity instanceof RideableEntityWrapper)) {
             super.processPlayer(playerPacket);
             return;
         }
-        this.lastRiddenEntity = this.playerEntity.ridingEntity;
+
+        this.lastRiddenEntity = (RideableEntityWrapper) this.playerEntity.ridingEntity;
 
         WorldServer world = this.server.worldServerForDimension(this.playerEntity.dimension);
 
@@ -93,6 +95,7 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
                 int packetPitch = MathHelper.floor_float(this.lastRiddenEntity.rotationPitch * 256.0F / 360.0F);
                 super.sendPacket(new S18PacketEntityTeleport(this.lastRiddenEntity.getEntityId(), packetX, packetY, packetZ, (byte)packetYaw, (byte)packetPitch));
                 System.out.println("HarmonyMod: teleported mount to server location after dismounting");
+                this.lastRiddenEntity.unwrappEntity();
                 this.lastRiddenEntity = null;
                 return;
             } else {
