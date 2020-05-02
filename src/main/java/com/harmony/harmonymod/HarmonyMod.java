@@ -110,7 +110,9 @@ public class HarmonyMod
 		FeedAnimal.register();
 		RespawnAnimal.register();
 		RidingMoveUpdateServer.register();
-		RidingMoveUpdateClient.register();
+		if (event.getSide().isClient()) {
+			RidingMoveUpdateClient.register();
+		}
 		Traits.register();
 	}
 

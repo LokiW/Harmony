@@ -24,25 +24,52 @@ import java.lang.reflect.Field;
 public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
     public MinecraftServer server;
 
-    public Field lastPosXF;
-    public Field lastPosYF;
-    public Field lastPosZF;
+    public Field lastPosXF = null;
+    public Field lastPosYF = null;
+    public Field lastPosZF = null;
+
+    public static String lastPosXFName = "lastPasX";
+    public static String lastPosYFName = "lastPasY";
+    public static String lastPosZFName = "lastPasZ";
+
+    public boolean setupLastPositions = false;
 
     public NetHandlerPlayAndRideServer(MinecraftServer server, NetworkManager netManager, EntityPlayerMP player) {
         super(server, netManager, player);
         this.server = server;
+        boolean failure = false;
         try {
-            this.lastPosXF = this.getClass().getSuperclass().getDeclaredField("lastPosX");
+            this.lastPosXF = this.getClass().getSuperclass().getDeclaredField(NetHandlerPlayAndRideServer.lastPosXFName);
             this.lastPosXF.setAccessible(true);
+        } catch (Exception e) {
+            failure = true;
+            NetHandlerPlayAndRideServer.lastPosXFName = null;
+        }
 
-            this.lastPosYF = this.getClass().getSuperclass().getDeclaredField("lastPosZ");
+        try {
+            this.lastPosYF = this.getClass().getSuperclass().getDeclaredField(NetHandlerPlayAndRideServer.lastPosYFName);
             this.lastPosYF.setAccessible(true);
+        } catch (Exception e) {
+            failure = true;
+            NetHandlerPlayAndRideServer.lastPosYFName = null;
+        }
 
-            this.lastPosZF = this.getClass().getSuperclass().getDeclaredField("lastPosZ");
+        try {
+            this.lastPosZF = this.getClass().getSuperclass().getDeclaredField(NetHandlerPlayAndRideServer.lastPosZFName);
             this.lastPosZF.setAccessible(true);
 
+            setupLastPositions = true;
+
         } catch (Exception e) {
+            failure = true;
+            NetHandlerPlayAndRideServer.lastPosZFName = null;
+        }
+
+        if (failure) {
             System.out.println("HarmonyMod: failed to get lastPosX, lastPosY and lastPosZ");
+        } else {
+            this.setupLastPositions = true;
+            NetHandlerPlayAndRideServer.lastPosZFName = null;
         }
     }
 
@@ -53,6 +80,9 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
      */
     @Override
     public void processPlayer(C03PacketPlayer playerPacket) {
+        if (!this.setupLastPositions) {
+            this.tryToSetupLastPositions();
+        }
         try {
             System.out.println("HarmonyMod: playerx="+this.playerEntity.posX+
                     " lastX="+this.lastPosXF.getDouble(this)+
@@ -60,6 +90,8 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
                     " playerz="+this.playerEntity.posZ+
                     " lastZ="+this.lastPosZF.getDouble(this));
         } catch (Exception e) {
+            // TODO this whole print is for debugging, remove
+            System.out.println("HarmonyMod: " + e);
         }
 
         if (playerPacket.func_149464_c() > 0 && (Math.abs(playerPacket.func_149464_c()-this.playerEntity.posX) > 4 ||
@@ -99,12 +131,16 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
         this.playerEntity.ridingEntity.setPosition(packetX, minBoundingBoxY - this.playerEntity.ridingEntity.getMountedYOffset() - this.playerEntity.getYOffset(), packetZ);
 
         this.playerEntity.updateRidden();
-        try {
-            this.lastPosXF.setDouble(this, this.playerEntity.posX);
-            this.lastPosYF.setDouble(this, this.playerEntity.posY);
-            this.lastPosZF.setDouble(this, this.playerEntity.posZ);
-        } catch (Exception e) { 
-            System.out.println("HarmonyMod: failed to set lastX, lastY, lastZ. May result in teleporting back to place of mounting horse");
+
+        if (this.setupLastPositions) {
+            try {
+                this.lastPosXF.setDouble(this, this.playerEntity.posX);
+                this.lastPosYF.setDouble(this, this.playerEntity.posY);
+                this.lastPosZF.setDouble(this, this.playerEntity.posZ);
+            } catch (Exception e) {
+                // pass
+                System.out.println("HarmonyMod: " + e);
+            }
         }
 
         //world.updateEntity(this.playerEntity);
@@ -113,14 +149,50 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
         super.processPlayer(playerPacket);
     }
 
-
-    @Override
-    public void sendPacket(final Packet packet) {
-        if (packet instanceof S08PacketPlayerPosLook) {
-            System.out.println("HarmonyMod: Teleporting player, playerx="+this.playerEntity.posX+" packetX="+((S08PacketPlayerPosLook)packet).func_148932_c()+" playerz="+this.playerEntity.posZ+" packetZ="+((S08PacketPlayerPosLook)packet).func_148933_e());
+    public void tryToSetupLastPositions() {
+        if (Math.abs(this.playerEntity.posX - this.playerEntity.posY) < 1.0 ||
+            Math.abs(this.playerEntity.posX - this.playerEntity.posZ) < 1.0 ||
+            Math.abs(this.playerEntity.posY - this.playerEntity.posZ) < 1.0) {
+            // Positions too close to be safe to set
+            System.out.println("HarmonyMod: couldn't set last positions because player x, y or z too similar");
+            return;
         }
 
-        super.sendPacket(packet);
+        Field[] fields = this.getClass().getSuperclass().getDeclaredFields();
+        for (Field field : fields) {
+            try {
+                System.out.println("HarmonyMod: " + field.getName() + "   " + field.getType());
+                if (field.getType().toString().equals("double")) {
+                    field.setAccessible(true);
+                    double value = field.getDouble(this);
+                    System.out.println("HarmonyMod: found double");
+                    if (Math.abs(value - this.playerEntity.posX) < 1.0) {
+                        System.out.println("HarmonyMod: set lastPosX");
+                        this.lastPosXF = field;
+                        if (NetHandlerPlayAndRideServer.lastPosXFName == null) {
+                            NetHandlerPlayAndRideServer.lastPosXFName = field.getName();
+                        }
+                    } else if (Math.abs(value - this.playerEntity.posY) < 1.0) {
+                        System.out.println("HarmonyMod: set lastPosY");
+                        this.lastPosYF = field;
+                        if (NetHandlerPlayAndRideServer.lastPosYFName == null) {
+                            NetHandlerPlayAndRideServer.lastPosYFName = field.getName();
+                        }
+                    } else if (Math.abs(value - this.playerEntity.posZ) < 1.0) {
+                        System.out.println("HarmonyMod: set lastPosZ");
+                        this.lastPosZF = field;
+                        if (NetHandlerPlayAndRideServer.lastPosZFName == null) {
+                            NetHandlerPlayAndRideServer.lastPosZFName = field.getName();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("HarmonyMod: failed to set NetHandlerPlayAndRideServer last Positions. May result in teleporting back to place of mounting horse.");
+            }
+        }
+        if (this.lastPosXF != null && this.lastPosYF != null && this.lastPosZF != null) {
+            this.setupLastPositions = true;
+        }
     }
 
     @Override
