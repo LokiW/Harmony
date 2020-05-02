@@ -66,7 +66,7 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
         }
 
         if (failure) {
-            System.out.println("HarmonyMod: failed to get lastPosX, lastPosY and lastPosZ");
+            System.out.println("HarmonyMod: Couldn't initially set parent NetHandlerPlayServer's lastPosX/Y/Z because they are private. Will try again later. Until set, dismounting horses has a small chance to teleport player back to where they mounted.");
         } else {
             this.setupLastPositions = true;
             NetHandlerPlayAndRideServer.lastPosZFName = null;
@@ -83,24 +83,7 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
         if (!this.setupLastPositions) {
             this.tryToSetupLastPositions();
         }
-        try {
-            System.out.println("HarmonyMod: playerx="+this.playerEntity.posX+
-                    " lastX="+this.lastPosXF.getDouble(this)+
-                    " motionX="+this.playerEntity.motionX+
-                    " playerz="+this.playerEntity.posZ+
-                    " lastZ="+this.lastPosZF.getDouble(this));
-        } catch (Exception e) {
-            // TODO this whole print is for debugging, remove
-            System.out.println("HarmonyMod: " + e);
-        }
 
-        if (playerPacket.func_149464_c() > 0 && (Math.abs(playerPacket.func_149464_c()-this.playerEntity.posX) > 4 ||
-                Math.abs(playerPacket.func_149472_e() - this.playerEntity.posZ) > 4)) {
-            System.out.println("HarmonyMod: GOT BAD C03PacketPlayer Packet: playerx=" + this.playerEntity.posX +
-                            " packetX="+ playerPacket.func_149464_c() +
-                            " playerz="+ this.playerEntity.posZ +
-                            " packetz="+ playerPacket.func_149472_e());
-        }
         if (this.playerEntity.ridingEntity == null ||
                 !MoveEntityHelper.entityRequiresMoveHelper(this.playerEntity.ridingEntity)) {
             super.processPlayer(playerPacket);
@@ -138,13 +121,9 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
                 this.lastPosYF.setDouble(this, this.playerEntity.posY);
                 this.lastPosZF.setDouble(this, this.playerEntity.posZ);
             } catch (Exception e) {
-                // pass
-                System.out.println("HarmonyMod: " + e);
+                // pass as sadly too many things in this world are private :(
             }
         }
-
-        //world.updateEntity(this.playerEntity);
-        //System.out.println("HarmonyMod: playerx="+this.playerEntity.posX+ " mountX="+this.playerEntity.ridingEntity.posX+" playerz="+this.playerEntity.posZ+" mountZ="+this.playerEntity.ridingEntity.posZ);
 
         super.processPlayer(playerPacket);
     }
@@ -154,32 +133,26 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
             Math.abs(this.playerEntity.posX - this.playerEntity.posZ) < 1.0 ||
             Math.abs(this.playerEntity.posY - this.playerEntity.posZ) < 1.0) {
             // Positions too close to be safe to set
-            System.out.println("HarmonyMod: couldn't set last positions because player x, y or z too similar");
             return;
         }
 
         Field[] fields = this.getClass().getSuperclass().getDeclaredFields();
         for (Field field : fields) {
             try {
-                System.out.println("HarmonyMod: " + field.getName() + "   " + field.getType());
                 if (field.getType().toString().equals("double")) {
                     field.setAccessible(true);
                     double value = field.getDouble(this);
-                    System.out.println("HarmonyMod: found double");
                     if (Math.abs(value - this.playerEntity.posX) < 1.0) {
-                        System.out.println("HarmonyMod: set lastPosX");
                         this.lastPosXF = field;
                         if (NetHandlerPlayAndRideServer.lastPosXFName == null) {
                             NetHandlerPlayAndRideServer.lastPosXFName = field.getName();
                         }
                     } else if (Math.abs(value - this.playerEntity.posY) < 1.0) {
-                        System.out.println("HarmonyMod: set lastPosY");
                         this.lastPosYF = field;
                         if (NetHandlerPlayAndRideServer.lastPosYFName == null) {
                             NetHandlerPlayAndRideServer.lastPosYFName = field.getName();
                         }
                     } else if (Math.abs(value - this.playerEntity.posZ) < 1.0) {
-                        System.out.println("HarmonyMod: set lastPosZ");
                         this.lastPosZF = field;
                         if (NetHandlerPlayAndRideServer.lastPosZFName == null) {
                             NetHandlerPlayAndRideServer.lastPosZFName = field.getName();
@@ -187,26 +160,12 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
                     }
                 }
             } catch (Exception e) {
-                System.out.println("HarmonyMod: failed to set NetHandlerPlayAndRideServer last Positions. May result in teleporting back to place of mounting horse.");
+                // Pass
             }
         }
         if (this.lastPosXF != null && this.lastPosYF != null && this.lastPosZF != null) {
             this.setupLastPositions = true;
+            System.out.println("HarmonyMod: Set LastPosX/Y/Z of NetHandlerPlayServer. Player will no longer ever teleport when dismounting entities.");
         }
     }
-
-    @Override
-    public void setPlayerLocation(double x, double y, double z, float yaw, float pitch) {
-        if (Math.abs(x - this.playerEntity.posX) > 4 || Math.abs(z - this.playerEntity.posZ) > 4 ) {
-            System.out.println("HarmonyMod: stack trace: ");
-            StackTraceElement[] elements = Thread.currentThread().getStackTrace();
-            for (int i = 1; i < elements.length; i++) {
-                StackTraceElement s = elements[i];
-                System.out.println("\tat " + s.getClassName() + "." + s.getMethodName()
-                + "(" + s.getFileName() + ":" + s.getLineNumber() + ")");
-            }
-        }
-        super.setPlayerLocation(x,y,z,yaw,pitch);
-    }
-
 }
