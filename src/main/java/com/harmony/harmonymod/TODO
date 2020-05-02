@@ -39,7 +39,9 @@ High Value
 	Trick indicators
 		attack change wolf texture, don't attack sheep unless instructed
 	HorseFix
-		Horses don't suffocate ever
+		Horses don't suffocate ever (probably intercept entity hurt event)
+		Horses move through leaves (how?)
+		Horses don't glitch after dismount
 
 
 Medium Value

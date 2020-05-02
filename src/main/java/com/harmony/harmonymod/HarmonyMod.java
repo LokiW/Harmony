@@ -6,15 +6,17 @@ import com.harmony.harmonymod.items.ItemDiagnostic;
 import com.harmony.harmonymod.items.GenericEntitySpawnEgg;
 import com.harmony.harmonymod.FeedAnimal;
 import com.harmony.harmonymod.RespawnAnimal;
-import com.harmony.harmonymod.horsefix.RiddingMoveUpdate;
+import com.harmony.harmonymod.horsefix.RidingMoveUpdateClient;
+import com.harmony.harmonymod.horsefix.RidingMoveUpdateServer;
 import net.minecraft.init.Blocks;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import cpw.mods.fml.common.event.FMLServerStartedEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -56,8 +58,6 @@ public class HarmonyMod
 	//constants related to breeding's interactions with happiness
 	public static int breedingHappiness;
 	public static int breedingCost;
-
-	public static boolean isRiddingUpdated;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -109,7 +109,8 @@ public class HarmonyMod
 		SoundDB.getSoundDB();
 		FeedAnimal.register();
 		RespawnAnimal.register();
-		RiddingMoveUpdate.register();
+		RidingMoveUpdateServer.register();
+		RidingMoveUpdateClient.register();
 		Traits.register();
 	}
 

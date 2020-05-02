@@ -26,6 +26,7 @@ public class NetHandlerPlayAndRideClient extends NetHandlerPlayClient {
 
         if (player.ridingEntity == null ||
                 !MoveEntityHelper.entityRequiresMoveHelper(player.ridingEntity)) {
+            System.out.println("HarmonyMod: Teleporting player, playerx="+player.posX+" packetX="+serverPacket.func_148932_c()+" playerz="+player.posZ+" packetZ="+serverPacket.func_148933_e());
             super.handlePlayerPosLook(serverPacket);
         }
     }
