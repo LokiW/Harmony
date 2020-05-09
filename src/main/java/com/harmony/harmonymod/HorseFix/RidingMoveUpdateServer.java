@@ -14,6 +14,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.PlayerTickEvent;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.server.FMLServerHandler;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.ArrayList;
@@ -86,8 +87,8 @@ public class RidingMoveUpdateServer {
 						NetHandlerPlayServer oldHandler = (NetHandlerPlayServer) manager.getNetHandler();
 						NetHandlerPlayAndRideServer newHandler = new NetHandlerPlayAndRideServer(server, manager, oldHandler.playerEntity);
 						manager.setNetHandler(newHandler);
-						RidingMoveUpdateServer.serverHandlers.put(player.getEntityId(), newHandler);
-						System.out.println("HarmonyMod: Replaced NetHandlerPlayServer");
+						RidingMoveUpdateServer.serverHandlers.put(oldHandler.playerEntity.getEntityId(), newHandler);
+						System.out.println("HarmonyMod: Replaced NetHandlerPlayServer for player "+oldHandler.playerEntity.getEntityId());
 					}
 				}
 

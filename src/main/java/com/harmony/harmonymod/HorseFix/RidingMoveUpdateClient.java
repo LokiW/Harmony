@@ -2,6 +2,7 @@ package com.harmony.harmonymod.horsefix;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.world.WorldServer;
 import net.minecraft.network.NetworkSystem;
@@ -27,6 +28,8 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class RidingMoveUpdateClient {
+	public EntityClientPlayerMP player;
+
     public static void register() {
 		RidingMoveUpdateClient handler = new RidingMoveUpdateClient();
         MinecraftForge.EVENT_BUS.register(handler);
@@ -42,8 +45,14 @@ public class RidingMoveUpdateClient {
         }
 
 		EntityPlayer player = event.player;
+
 		if(player.ridingEntity == null ||
 			!MoveEntityHelper.entityRequiresMoveHelper(player.ridingEntity)) {
+			return;
+		}
+
+		EntityPlayer clientPlayer = FMLClientHandler.instance().getClientPlayerEntity();
+		if (clientPlayer.getEntityId() != player.getEntityId()) {
 			return;
 		}
 
@@ -52,7 +61,6 @@ public class RidingMoveUpdateClient {
 
 		NetworkManager netQueue = FMLClientHandler.instance().getClientToServerNetworkManager();
 		if (netQueue == null) {
-			System.out.println("HarmonyMod: didn't send anything");
 			return;
 		}
 
@@ -63,7 +71,7 @@ public class RidingMoveUpdateClient {
 				player.rotationYaw,
 				player.rotationPitch,
 				player.onGround);
-		
+
 		netQueue.scheduleOutboundPacket(packet, new GenericFutureListener[0]);
     }
 }

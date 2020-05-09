@@ -90,9 +90,6 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
      */
     @Override
     public void processPlayer(C03PacketPlayer playerPacket) {
-        if (playerPacket.func_149466_j()) {
-            System.out.println("HarmonyMod: player "+this.playerEntity.getEntityId() +"  "+(playerPacket.func_149471_f()-playerPacket.func_149467_d()));
-        }
         if (!this.setupLastPositions) {
             this.tryToSetupLastPositions();
         }
@@ -110,16 +107,11 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
         double packetZ = playerPacket.func_149472_e();
         double packetY = playerPacket.func_149471_f();
 
-        if (Math.abs(packetX - this.playerEntity.posX) > 2.0 ||
-            Math.abs(packetY - this.playerEntity.posY) > 2.0 ||
-            Math.abs(packetZ - this.playerEntity.posZ) > 2.0) {
-            System.out.println("HarmonyMod:");
-        }
-
         boolean hasMoved = playerPacket.func_149466_j();
         if (!hasMoved || packetY == -999.0D || minBoundingBoxY == -999.0D) {
             return;
         }
+
 
         minBoundingBoxY = Math.abs(minBoundingBoxY);
         packetY = Math.abs(packetY);
@@ -133,7 +125,6 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
         }
 
         double mountY = minBoundingBoxY - this.playerEntity.ridingEntity.getMountedYOffset() - this.playerEntity.getYOffset();
-        //double mountY = packetY - (this.playerEntity.ridingEntity.getMountedYOffset() + this.playerEntity.getYOffset());
 
         this.playerEntity.motionX = packetX - this.playerEntity.posX;
         this.playerEntity.motionY = 0.0D;
@@ -156,7 +147,11 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
                 // pass as sadly too many things in this world are private :(
             }
         }
-        super.processPlayer(playerPacket);
+        try {
+            this.playerEntity.getServerForPlayer().getPlayerManager().updatePlayerPertinentChunks(this.playerEntity);
+        } catch (Exception e) {
+        }
+        //super.processPlayer(playerPacket);
     }
 
     public void tryToSetupLastPositions() {
