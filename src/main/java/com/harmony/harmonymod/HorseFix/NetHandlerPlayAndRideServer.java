@@ -16,6 +16,7 @@ import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.network.play.server.S14PacketEntity;
 import net.minecraft.network.play.server.S18PacketEntityTeleport;
 import net.minecraft.network.play.server.S1BPacketEntityAttach;
+import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import java.lang.Math;
 import java.lang.Thread;
 import java.lang.StackTraceElement;
@@ -28,9 +29,9 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
     public Field lastPosYF = null;
     public Field lastPosZF = null;
 
-    public static String lastPosXFName = "lastPasX";
-    public static String lastPosYFName = "lastPasY";
-    public static String lastPosZFName = "lastPasZ";
+    public static String lastPosXFName = "lastPosX";
+    public static String lastPosYFName = "lastPosY";
+    public static String lastPosZFName = "lastPosZ";
 
     public boolean setupLastPositions = false;
 
@@ -73,6 +74,15 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
         }
     }
 
+    @Override
+    public void processInput(C0CPacketInput packet) {
+        // func_149617_f() is a boolean for isSneaking which is input for dismounting horse
+        if (packet.func_149617_f() || this.playerEntity.ridingEntity == null ||
+                !MoveEntityHelper.entityRequiresMoveHelper(this.playerEntity.ridingEntity)) {
+            super.processInput(packet);
+        }
+    }
+
     /*
      * Override process player which would normally only get player
      * location from the client when not ridding an entity.
@@ -80,6 +90,9 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
      */
     @Override
     public void processPlayer(C03PacketPlayer playerPacket) {
+        if (playerPacket.func_149466_j()) {
+            System.out.println("HarmonyMod: player "+this.playerEntity.getEntityId() +"  "+(playerPacket.func_149471_f()-playerPacket.func_149467_d()));
+        }
         if (!this.setupLastPositions) {
             this.tryToSetupLastPositions();
         }
@@ -89,6 +102,7 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
             super.processPlayer(playerPacket);
             return;
         }
+
         WorldServer world = this.server.worldServerForDimension(this.playerEntity.dimension);
 
         double packetX = playerPacket.func_149464_c();
@@ -96,10 +110,17 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
         double packetZ = playerPacket.func_149472_e();
         double packetY = playerPacket.func_149471_f();
 
+        if (Math.abs(packetX - this.playerEntity.posX) > 2.0 ||
+            Math.abs(packetY - this.playerEntity.posY) > 2.0 ||
+            Math.abs(packetZ - this.playerEntity.posZ) > 2.0) {
+            System.out.println("HarmonyMod:");
+        }
+
         boolean hasMoved = playerPacket.func_149466_j();
         if (!hasMoved || packetY == -999.0D || minBoundingBoxY == -999.0D) {
             return;
         }
+
         minBoundingBoxY = Math.abs(minBoundingBoxY);
         packetY = Math.abs(packetY);
 
@@ -111,7 +132,18 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
             packetPitch = playerPacket.func_149470_h();
         }
 
-        this.playerEntity.ridingEntity.setPosition(packetX, minBoundingBoxY - this.playerEntity.ridingEntity.getMountedYOffset() - this.playerEntity.getYOffset(), packetZ);
+        double mountY = minBoundingBoxY - this.playerEntity.ridingEntity.getMountedYOffset() - this.playerEntity.getYOffset();
+        //double mountY = packetY - (this.playerEntity.ridingEntity.getMountedYOffset() + this.playerEntity.getYOffset());
+
+        this.playerEntity.motionX = packetX - this.playerEntity.posX;
+        this.playerEntity.motionY = 0.0D;
+        this.playerEntity.motionZ = packetZ - this.playerEntity.posZ;
+
+        this.playerEntity.ridingEntity.motionX = packetX - this.playerEntity.ridingEntity.posX;
+        this.playerEntity.ridingEntity.motionY = 0.0D;
+        this.playerEntity.ridingEntity.motionZ = packetZ - this.playerEntity.ridingEntity.posZ;
+
+        this.playerEntity.ridingEntity.setPosition(packetX, mountY, packetZ);
 
         this.playerEntity.updateRidden();
 
@@ -124,7 +156,6 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
                 // pass as sadly too many things in this world are private :(
             }
         }
-
         super.processPlayer(playerPacket);
     }
 
@@ -167,5 +198,43 @@ public class NetHandlerPlayAndRideServer extends NetHandlerPlayServer {
             this.setupLastPositions = true;
             System.out.println("HarmonyMod: Set LastPosX/Y/Z of NetHandlerPlayServer. Player will no longer ever teleport when dismounting entities.");
         }
+    }
+
+    public void sendPacket(final Packet packet) {
+        if (this.playerEntity.ridingEntity == null ||
+                !MoveEntityHelper.entityRequiresMoveHelper(this.playerEntity.ridingEntity)) {
+            super.sendPacket(packet);
+            return;
+        }
+
+        if (packet instanceof S08PacketPlayerPosLook) {
+            // Client should update server when riding, not visa versa
+            return;
+        }
+
+        if (packet instanceof S14PacketEntity) {
+            Entity updated = ((S14PacketEntity) packet).func_149065_a(this.playerEntity.worldObj);
+            if (updated.getEntityId() == this.playerEntity.getEntityId() ||
+                 updated.getEntityId() == this.playerEntity.ridingEntity.getEntityId()) {
+                return;
+            }
+
+        }
+
+        if (packet instanceof S18PacketEntityTeleport) {
+            if (((S18PacketEntityTeleport) packet).func_149451_c() == this.playerEntity.getEntityId() ||
+                     ((S18PacketEntityTeleport)packet).func_149451_c() == this.playerEntity.ridingEntity.getEntityId()) {
+                 return;
+            }
+        }
+
+        if (packet instanceof S12PacketEntityVelocity) {
+            if (((S12PacketEntityVelocity) packet).func_149412_c() == this.playerEntity.getEntityId() ||
+                    ((S12PacketEntityVelocity) packet).func_149412_c() == this.playerEntity.ridingEntity.getEntityId()) {
+                return;
+            }
+        }
+
+        super.sendPacket(packet);
     }
 }
