@@ -46,7 +46,11 @@ public class ItemDiagnostic extends HarmonyItem {
 				out += t + " ";
 			}
 		}
-		say(player, side + out + "| Happiness: " + hp.happiness + " | Owner: " + (hp.isBonded() ? hp.ownerName : "none"));
+		// Clients only get happiness when the mood changes, so they show the mood
+		String happiness = player.worldObj.isRemote ? "Mood: " + moodName(hp.mood)
+				: "Happiness: " + hp.happiness + "/" + HarmonyProps.MAX_HAPPINESS + " (" + moodName(hp.getMood()) + ")";
+		say(player, side + out + "| " + happiness + " | Kept: " + (hp.kept ? "yes" : "no")
+				+ " | Owner: " + (hp.isBonded() ? hp.ownerName : "none"));
 
 		// Stats only from the server, clients aren't sent every attribute (e.g. attack damage)
 		if (!player.worldObj.isRemote) {
@@ -66,6 +70,10 @@ public class ItemDiagnostic extends HarmonyItem {
 		}
 		say(player, side + out);
 		return true;
+	}
+
+	private static String moodName(int mood) {
+		return mood > 0 ? "happy" : (mood < 0 ? "unhappy" : "content");
 	}
 
 	private static double attributeValue(EntityLivingBase entity, IAttribute attribute) {

@@ -18,15 +18,13 @@ import net.minecraft.world.World;
 public class HarmonyWanderAI extends EntityAIBase
 {
 	private EntityAnimal entity;
-	private int delayCounter;
 
-	private static final int maxDelay = 16;
+	// More animals than this in the 5x5 area around where it's going makes an animal unhappier
+	private static final int CROWDED = 8;
 
 	public HarmonyWanderAI(EntityAnimal entity) {
 		this.entity = entity;
-		this.delayCounter = maxDelay;
 		this.setMutexBits(1);
-		this.delayCounter = this.entity.getRNG().nextInt(maxDelay);
 	}
 
 	/**
@@ -45,47 +43,42 @@ public class HarmonyWanderAI extends EntityAIBase
 
 			// If animal is missing health, loose happiness
 			if (this.entity.getHealth() < this.entity.getMaxHealth()) {
-				hp.happiness--;
+				hp.changeHappiness(-1);
 				canHappinessIncrease = false;
 			}
 
 			if (var1 == null) {
 				// Couldn't move to location, reduce happiness for being confined
-				hp.happiness--;
+				hp.changeHappiness(-1);
 				return false;
 			} else if (!this.entity.getNavigator().tryMoveToXYZ(var1.xCoord, var1.yCoord, var1.zCoord, 1.0)) {
-				hp.happiness--;
+				hp.changeHappiness(-1);
 				return false;
 			}
 			World world = this.entity.worldObj;
-			Block target = world.getBlock((int)var1.xCoord, (int)var1.yCoord - 1, (int)var1.zCoord);
 
-			if (target != null && target instanceof IGrowable && canHappinessIncrease)
-				hp.happiness++;
-
-			if (this.delayCounter > 0) {
-				this.delayCounter--;
-				return true;
-			}
-	
 			AxisAlignedBB boxToCheck = AxisAlignedBB.getBoundingBox(var1.xCoord-2, var1.yCoord-2,
 				 													var1.zCoord-2,
 																	var1.xCoord+2, var1.yCoord+2,
 																	var1.zCoord+2);
 
+			// Only overcrowding is bad, small groups and pairs are fine
 			List<Object> entities = world.getEntitiesWithinAABB(EntityAnimal.class, boxToCheck);
-			if (entities.size() > 10) {
-				hp.happiness = 0;
+			if (entities.size() > CROWDED) {
+				hp.changeHappiness(-1);
 				canHappinessIncrease = false;
-			} else if (entities.size() < 3 || entities.size() > 5) {
-				hp.happiness--;
 			}
 
 			entities = world.getEntitiesWithinAABB(EntityMob.class, boxToCheck);
-			if (entities.size() > 0)
-				hp.happiness--;
+			if (entities.size() > 0) {
+				hp.changeHappiness(-1);
+				canHappinessIncrease = false;
+			}
 
-			this.delayCounter = maxDelay;
+			Block target = world.getBlock((int)var1.xCoord, (int)var1.yCoord - 1, (int)var1.zCoord);
+			if (target != null && target instanceof IGrowable && canHappinessIncrease)
+				hp.changeHappiness(1);
+
 			return true;
 		}
 	}

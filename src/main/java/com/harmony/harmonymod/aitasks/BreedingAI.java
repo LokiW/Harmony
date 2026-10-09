@@ -9,17 +9,29 @@ import net.minecraft.entity.ai.EntityAIMate;
 import net.minecraft.entity.ai.EntityAITasks.EntityAITaskEntry;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.world.WorldServer;
+import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.EntityTameable;
 
+/*
+ * Replaces vanilla breeding. Happy animals breed: kept animals (see HarmonyProps.kept) on their own,
+ * any animal right away when a player feeds it its breeding food. Unhappy animals fed their food get
+ * happier instead.
+ */
 public class BreedingAI extends EntityAIBase
 {
+	// How often kept animals check whether they can breed on their own
+	private static final int NATURAL_INTERVAL = 200;
+	// Happiness from being fed while too unhappy to breed
+	private static final int FED_HAPPINESS = 3;
+
 	private EntityAnimal pet;
 	private Breed breedTrick;
-	private int delayCounter;
+	private long nextNaturalCheck;
 
 
 	public BreedingAI(EntityAnimal pet) {
 		this.pet = pet;
-		this.delayCounter = 0;
 		this.setMutexBits(3);
 	}
 
@@ -27,25 +39,52 @@ public class BreedingAI extends EntityAIBase
 	 * Returns whether the EntityAIBase should begin execution.
 	 */
 	public boolean shouldExecute() {
-		HarmonyProps hp;
-		if(pet.isInLove()) {
-			pet.resetInLove();
-			pet.worldObj.setEntityState(pet, (byte)0);
-			hp = HarmonyProps.get(pet);
-			hp.happiness += 5; //TODO this shouldn't be hardcoded
+		HarmonyProps hp = HarmonyProps.get(pet);
+		if (hp == null || !hp.isInitialized()) {
+			return false;
 		}
 
-		delayCounter++;
-		if(!(delayCounter % 256 == 0))
+		if(pet.isInLove()) {
+			// Fed its breeding food. Vanilla put it in love mode, Harmony decides what happens instead.
+			pet.resetInLove();
+			hp.kept = true;
+			if (hp.canBreed()) {
+				return startBreeding();
+			}
+			hp.changeHappiness(FED_HAPPINESS);
+			pet.worldObj.setEntityState(pet, (byte)0);
+			((WorldServer) pet.worldObj).func_147487_a("angryVillager", pet.posX, pet.posY + pet.height + 0.3D,
+					pet.posZ, 2, 0.3D, 0.2D, 0.3D, 0.0D);
 			return false;
+		}
 
-		hp = HarmonyProps.get(pet);
-		if(hp != null && hp.happiness >= HarmonyMod.breedingHappiness) {
-			breedTrick = new Breed(HarmonyMod.breedingHappiness);
-			breedTrick.setupTrick(pet, null);
-			return true;
+		long now = pet.worldObj.getTotalWorldTime();
+		if (now < nextNaturalCheck) {
+			return false;
+		}
+		nextNaturalCheck = now + NATURAL_INTERVAL;
+
+		if (isKept(hp) && hp.canBreed()) {
+			return startBreeding();
 		}
 		return false;
+	}
+
+	/*
+	 * Kept by a player, or tamed the vanilla way
+	 */
+	private boolean isKept(HarmonyProps hp) {
+		return hp.kept || (pet instanceof EntityTameable && ((EntityTameable) pet).isTamed())
+				|| (pet instanceof EntityHorse && ((EntityHorse) pet).isTame());
+	}
+
+	/*
+	 * Look for a mate, Breed ends straight away if there's none or there are too many animals around
+	 */
+	private boolean startBreeding() {
+		breedTrick = new Breed(HarmonyMod.breedingHappiness);
+		breedTrick.setupTrick(pet, null);
+		return true;
 	}
 
 	/**

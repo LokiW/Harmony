@@ -67,6 +67,7 @@ public class FeedAnimal {
 			if (!Ownership.mayUse(player, target, hp)) {
 				return;
 			}
+			hp.kept = true;
 			if (hp.tricks.learnTrick()) {
 				// Learned from the reward
 				((WorldServer) target.worldObj).func_147487_a("heart", target.posX, target.posY + target.height + 0.3,
@@ -81,6 +82,7 @@ public class FeedAnimal {
 			if (!Ownership.mayUse(player, target, hp)) {
 				return;
 			}
+			hp.kept = true;
 			hp.tricks.xRespawn = target.posX;
 			hp.tricks.yRespawn = target.posY;
 			hp.tricks.zRespawn = target.posZ;

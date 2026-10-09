@@ -29,9 +29,23 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	// Version of the saved data. Bump it when the format changes, and convert older data in loadNBTData.
 	private static final int DATA_VERSION = 1;
 
+	// Happiness runs from 0 to MAX_HAPPINESS. Animals breed from HarmonyMod.breedingHappiness up,
+	// and are unhappy below UNHAPPY_BELOW.
+	public static final int MAX_HAPPINESS = 20;
+	public static final int UNHAPPY_BELOW = 5;
+	// New animals start neutral
+	public static final int STARTING_HAPPINESS = 5;
+
 	public TrickHandler tricks;
 	public Traits traits;
 	public int happiness;
+
+	// Whether a player has looked after this animal (fed, bonded, or born to kept parents). Only kept
+	// animals breed on their own, so wild herds don't multiply.
+	public boolean kept;
+
+	// Client copy of the animal's mood (-1 unhappy, 0 content, 1 happy), sent by the server
+	public int mood;
 
 	// Player bonded with this animal (see Ownership), null while unbonded
 	public UUID ownerId;
@@ -47,7 +61,25 @@ public class HarmonyProps implements IExtendedEntityProperties {
 
 	public HarmonyProps(Entity e) {
 		this.pet = (EntityLiving) e;
-		happiness = 0;
+		happiness = STARTING_HAPPINESS;
+	}
+
+	/*
+	 * Change happiness, keeping it in range
+	 */
+	public void changeHappiness(int delta) {
+		happiness = Math.max(0, Math.min(MAX_HAPPINESS, happiness + delta));
+	}
+
+	public boolean canBreed() {
+		return happiness >= HarmonyMod.breedingHappiness;
+	}
+
+	/*
+	 * -1 unhappy, 0 content, 1 happy enough to breed
+	 */
+	public int getMood() {
+		return canBreed() ? 1 : (happiness < UNHAPPY_BELOW ? -1 : 0);
 	}
 
 	/*
@@ -104,6 +136,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		NBTTagCompound data = new NBTTagCompound();
 		data.setInteger("Version", DATA_VERSION);
 		data.setInteger("Happiness", happiness);
+		data.setBoolean("Kept", kept);
 		if (ownerId != null) {
 			data.setString("OwnerId", ownerId.toString());
 			data.setString("OwnerName", ownerName);
@@ -118,6 +151,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 
 	private void readData(NBTTagCompound data) {
 		happiness = data.getInteger("Happiness");
+		kept = data.getBoolean("Kept");
 		ownerId = data.hasKey("OwnerId") ? UUID.fromString(data.getString("OwnerId")) : null;
 		ownerName = data.getString("OwnerName");
 		traits = Traits.readFromNBT(data);
@@ -149,6 +183,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	public void readSyncedData(NBTTagCompound data) {
 		readData(data);
 		learning = data.getBoolean("Learning");
+		mood = data.getInteger("Mood");
 	}
 
 	/*
@@ -157,6 +192,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	public NBTTagCompound writeSyncData() {
 		NBTTagCompound data = writeData();
 		data.setBoolean("Learning", tricks.isLearningTrick());
+		data.setInteger("Mood", getMood());
 		return data;
 	}
 

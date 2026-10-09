@@ -44,8 +44,16 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 ### Happiness
 
 - Gives a mechanical reason to build nice looking pens.
-- Unhappy animals don't breed. Happiness never affects tricks, so pets still work on rough adventures.
-- Today: grass, crowding, monsters nearby, being hurt.
+- Happiness runs 0-20, new animals start at 5. Animals breed at 10+ (configurable) and are unhappy
+  below 5. Happiness never affects tricks, so pets still work on rough adventures.
+- Factors today: wandering to grass (+1), being hurt, confined, overcrowded (more than 8 animals in a
+  5x5 area) or near monsters (-1 each).
+- Feeding an animal its breeding food: if it's happy it looks for a mate right away, otherwise it gets
+  happier (+3) and shows grey clouds.
+- Only kept animals (fed, trained, bonded, tamed, or born to kept parents) breed on their own, so wild
+  herds stay vanilla. Nothing breeds with 16+ of its species within 16 blocks (configurable).
+- Kept animals show green sparkles when happy and grey clouds when unhappy.
+- Happiness alone isn't synced to clients, only mood changes, to keep network traffic down.
 - Later: water, flowers, light, and preferences that differ by species (set in config).
   No block variety scoring, it's too easy to cheese.
 
@@ -130,7 +138,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - [ ] Pets follow through dimensions and owner teleports, path to owner aggressively instead of
       teleporting to catch up
 - [x] Traits: exponential stacking, first bad traits, polish breeding, Jump trait takes less fall damage
-- [ ] Happiness gates breeding, tune existing factors
+- [x] Happiness gates breeding, tune existing factors
 - [ ] Overlay showing an animal's traits, happiness, tricks and owner (replaces the Harmony Diagnostics
       debug item)
 - [ ] Config cleanup (incl. option to quiet animal sounds), achievements or other in game hints so

@@ -51,10 +51,20 @@ public class AnimalSync {
 		}
 
 		NBTTagCompound data = hp.writeSyncData();
-		if (data.equals(hp.lastSynced)) {
+		if (hp.lastSynced != null && withoutHappiness(data).equals(withoutHappiness(hp.lastSynced))) {
 			return;
 		}
 		send(animal, hp, data);
+	}
+
+	/*
+	 * Happiness changes every few seconds, so it alone isn't worth sending: clients get it with other
+	 * changes, and when the animal's mood (which is compared) changes.
+	 */
+	private static NBTTagCompound withoutHappiness(NBTTagCompound data) {
+		NBTTagCompound copy = (NBTTagCompound) data.copy();
+		copy.removeTag("Happiness");
+		return copy;
 	}
 
 	/*
