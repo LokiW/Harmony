@@ -116,6 +116,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 ### Phase 1: MVP
 
 - [ ] Reliable core tricks: follow, stay/sit, go to, guard, attack, come back
+- [x] Learning mode indicator: question marks while an animal is learning, hearts when it learns
 - [ ] Phrase based listening (single notes still instant)
 - [ ] First handheld instrument
 - [x] Bonding and transfer (done with Phase 0 ownership)

@@ -151,7 +151,17 @@ public class TrickHandler extends EntityAIBase {
 	 * Animal rewarded for current trick, make it more likely
 	 *   to happen from last sound.
 	 */
-	public void learnTrick() {
+	/*
+	 * Whether the pet is waiting to be rewarded for a trick
+	 */
+	public boolean isLearningTrick() {
+		return this.isLearning != null;
+	}
+
+	/*
+	 * Fed the training item. Returns true if that rewarded an attempt and the pet learned from it.
+	 */
+	public boolean learnTrick() {
 		if (this.isLearning != null && this.isLearning.currentAttempt()) {
 			ActionSet newActionSet = tricks.get(this.isLearning.noteID);
 			if (newActionSet == null) {
@@ -163,9 +173,11 @@ public class TrickHandler extends EntityAIBase {
 			this.tricks.put(this.isLearning.noteID, newActionSet);
 
 			this.isLearning = null;
+			return true;
 		} else {
 			this.isLearning = new TrickLearner();
-		}	
+			return false;
+		}
 	}
 
 	public void writeToNBT(NBTTagCompound tag) {

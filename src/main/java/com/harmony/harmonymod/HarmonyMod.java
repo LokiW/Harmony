@@ -10,6 +10,7 @@ import com.harmony.harmonymod.horsefix.HorseControl;
 import com.harmony.harmonymod.sync.AnimalSync;
 import com.harmony.harmonymod.ownership.Ownership;
 import com.harmony.harmonymod.horsefix.HorseControlClient;
+import com.harmony.harmonymod.client.LearningIndicator;
 import net.minecraft.init.Blocks;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -66,6 +67,11 @@ public class HarmonyMod
 		//Read in configuration values
 		config = new Configuration(event.getSuggestedConfigurationFile());
 		syncConfig();
+
+		// Before textures are first stitched, so its particle icon gets registered
+		if (event.getSide().isClient()) {
+			LearningIndicator.register();
+		}
 
 		int mobID = 0;
 

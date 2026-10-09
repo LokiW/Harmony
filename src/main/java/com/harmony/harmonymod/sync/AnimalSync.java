@@ -32,7 +32,7 @@ public class AnimalSync {
 		if (hp == null || !hp.isInitialized() || !(event.entityPlayer instanceof EntityPlayerMP)) {
 			return;
 		}
-		HarmonyNetwork.channel.sendTo(new AnimalSyncMessage(event.target, hp.writeData()), (EntityPlayerMP) event.entityPlayer);
+		HarmonyNetwork.channel.sendTo(new AnimalSyncMessage(event.target, hp.writeSyncData()), (EntityPlayerMP) event.entityPlayer);
 	}
 
 	/*
@@ -50,12 +50,25 @@ public class AnimalSync {
 			return;
 		}
 
-		NBTTagCompound data = hp.writeData();
+		NBTTagCompound data = hp.writeSyncData();
 		if (data.equals(hp.lastSynced)) {
 			return;
 		}
-		hp.lastSynced = data;
+		send(animal, hp, data);
+	}
 
+	/*
+	 * Send the animal's data now rather than at its next check, for changes players should see right away
+	 */
+	public static void syncNow(EntityLivingBase animal) {
+		HarmonyProps hp = HarmonyProps.get(animal);
+		if (hp != null && hp.isInitialized() && !animal.worldObj.isRemote) {
+			send(animal, hp, hp.writeSyncData());
+		}
+	}
+
+	private static void send(EntityLivingBase animal, HarmonyProps hp, NBTTagCompound data) {
+		hp.lastSynced = data;
 		((WorldServer) animal.worldObj).getEntityTracker().func_151247_a(animal,
 				HarmonyNetwork.channel.getPacketFrom(new AnimalSyncMessage(animal, data)));
 	}
