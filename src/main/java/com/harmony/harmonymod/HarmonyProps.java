@@ -45,6 +45,9 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	// Data last sent to clients, so only changes are sent. Server only, see AnimalSync.
 	public NBTTagCompound lastSynced;
 
+	// Client copy of whether the animal is learning a trick (the server's is in tricks)
+	public boolean learning;
+
 	public HarmonyProps(Entity e) {
 		this.pet = (EntityLiving) e;
 		happiness = 0;
@@ -139,6 +142,16 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	 */
 	public void readSyncedData(NBTTagCompound data) {
 		readData(data);
+		learning = data.getBoolean("Learning");
+	}
+
+	/*
+	 * Saved data plus state clients need that isn't saved
+	 */
+	public NBTTagCompound writeSyncData() {
+		NBTTagCompound data = writeData();
+		data.setBoolean("Learning", tricks.isLearningTrick());
+		return data;
 	}
 
 	private void registerAI() {

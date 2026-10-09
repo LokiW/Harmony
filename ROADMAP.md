@@ -109,13 +109,14 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - [x] Sync animal state (traits, happiness, tricks) to clients, needed for the overlay
 - [x] Ownership data and rules (bonding, transfer, reuse vanilla owners)
 - [x] Way to test the release jar in a normal Forge install
-- [ ] Fix known bugs: Sit doesn't sit, wander AI's crowding check uses x instead of y for its box,
+- [x] Fix known bugs: Sit doesn't sit, wander AI's crowding check uses x instead of y for its box,
       animals scared of water, GO without a target teleports the animal south every half second
 - [ ] Remove leftovers: example lang entries, HarmonyHorse spawn egg, unused imports and debug prints
 
 ### Phase 1: MVP
 
 - [ ] Reliable core tricks: follow, stay/sit, go to, guard, attack, come back
+- [x] Learning mode indicator: question marks while an animal is learning, hearts when it learns
 - [ ] Phrase based listening (single notes still instant)
 - [ ] First handheld instrument
 - [x] Bonding and transfer (done with Phase 0 ownership)
@@ -141,6 +142,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - [ ] Happiness: water, flowers, light, eating grass, per species preferences
 - [ ] Trick indicators, e.g. wolves look different while attacking, and don't attack sheep unless told to
 - [ ] Animals holding items
+- [ ] Sitting poses for animals without a vanilla one (cows, pigs, sheep, chickens, horses)
 - [ ] Pet armor (enchantable) and potions
 - [ ] Rituals and magical traits
 - [ ] Integrations: Thaumcraft, Botania, Witchery
