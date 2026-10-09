@@ -44,11 +44,14 @@ public class HarmonyCommand extends CommandBase {
 		}
 		World world = sender.getEntityWorld();
 
-		Entity entity = EntityList.createEntityByName(args[1], world);
+		Entity entity = EntityList.createEntityByName(entityName(args[1]), world);
 		if (!(entity instanceof EntityLiving) || HarmonyProps.get(entity) == null) {
 			throw new CommandException("harmony.command.not_harmony", args[1]);
 		}
 
+		if (args.length - 2 > 3) {
+			throw new CommandException("harmony.command.too_many_traits");
+		}
 		TRAIT[] chosen = new TRAIT[args.length - 2];
 		for (int i = 2; i < args.length; i++) {
 			try {
@@ -97,7 +100,8 @@ public class HarmonyCommand extends CommandBase {
 	}
 
 	/*
-	 * Entity names of the animals Harmony adds data to
+	 * Names of the animals Harmony adds data to, as typed in the command: the entity name without
+	 * vanilla's "Entity" prefix (horses are "EntityHorse", other animals just "Cow" etc.)
 	 */
 	private static String[] harmonyAnimalNames() {
 		List<String> names = new ArrayList<String>();
@@ -105,9 +109,22 @@ public class HarmonyCommand extends CommandBase {
 			Map.Entry entry = (Map.Entry) o;
 			String className = ((Class) entry.getValue()).getSimpleName().toLowerCase();
 			if (HarmonyMod.harmonyMobs.contains(className)) {
-				names.add((String) entry.getKey());
+				names.add(((String) entry.getKey()).replaceFirst("^Entity", ""));
 			}
 		}
 		return names.toArray(new String[names.size()]);
+	}
+
+	/*
+	 * Entity name for a typed animal name, ignoring case and the "Entity" prefix
+	 */
+	private static String entityName(String typed) {
+		for (Object o : EntityList.stringToClassMapping.keySet()) {
+			String name = (String) o;
+			if (name.equalsIgnoreCase(typed) || name.equalsIgnoreCase("Entity" + typed)) {
+				return name;
+			}
+		}
+		return typed;
 	}
 }

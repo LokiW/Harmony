@@ -21,3 +21,4 @@ harmony.command.usage=/harmony spawn <animal> [trait] [trait] [trait]
 harmony.command.not_harmony=%s isn't an animal Harmony knows about
 harmony.command.unknown_trait=Unknown trait %s
 harmony.command.spawned=Spawned %s with traits %s
+harmony.command.too_many_traits=An animal has at most 3 traits

@@ -5,6 +5,9 @@ import com.harmony.harmonymod.Traits.*;
 import com.harmony.harmonymod.HarmonyProps;
 import com.harmony.harmonymod.tricks.ActionSet;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.IAttribute;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagList;
@@ -45,12 +48,41 @@ public class ItemDiagnostic extends HarmonyItem {
 		}
 		say(player, side + out + "| Happiness: " + hp.happiness + " | Owner: " + (hp.isBonded() ? hp.ownerName : "none"));
 
+		// Stats only from the server, clients aren't sent every attribute (e.g. attack damage)
+		if (!player.worldObj.isRemote) {
+			out = String.format("Health: %.1f/%.1f%s | Speed: %.3f%s",
+					entity.getHealth(), entity.getMaxHealth(), multiplier(entity, SharedMonsterAttributes.maxHealth),
+					attributeValue(entity, SharedMonsterAttributes.movementSpeed), multiplier(entity, SharedMonsterAttributes.movementSpeed));
+			if (entity.getEntityAttribute(SharedMonsterAttributes.attackDamage) != null) {
+				out += String.format(" | Attack: %.2f%s", attributeValue(entity, SharedMonsterAttributes.attackDamage),
+						multiplier(entity, SharedMonsterAttributes.attackDamage));
+			}
+			say(player, side + out);
+		}
+
 		out = "Current trick: " + (hp.tricks.currentTrick == null ? "none" : hp.tricks.currentTrick.getClass().getSimpleName());
 		for (Map.Entry<Integer, ActionSet> phrase : hp.tricks.tricks.entrySet()) {
 			out += " | note " + phrase.getKey() + ": " + trickNames(phrase.getValue());
 		}
 		say(player, side + out);
 		return true;
+	}
+
+	private static double attributeValue(EntityLivingBase entity, IAttribute attribute) {
+		IAttributeInstance instance = entity.getEntityAttribute(attribute);
+		return instance == null ? 0.0 : instance.getAttributeValue();
+	}
+
+	/*
+	 * " (x2.00)" compared to the attribute's base value, or nothing if unchanged
+	 */
+	private static String multiplier(EntityLivingBase entity, IAttribute attribute) {
+		IAttributeInstance instance = entity.getEntityAttribute(attribute);
+		if (instance == null || instance.getBaseValue() == 0.0) {
+			return "";
+		}
+		double m = instance.getAttributeValue() / instance.getBaseValue();
+		return Math.abs(m - 1.0) < 0.005 ? "" : String.format(" (x%.2f)", m);
 	}
 
 	private static String trickNames(ActionSet actions) {
