@@ -9,10 +9,12 @@ import net.minecraft.util.Vec3;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIControlledByPlayer;
 import net.minecraft.entity.ai.EntityAITasks.EntityAITaskEntry;
 import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.block.Block;
 import net.minecraft.block.IGrowable;
@@ -23,7 +25,6 @@ public class HarmonyWanderAI extends EntityAIBase
 	private EntityAnimal entity;
 	private int delayCounter;
 
-	private static final String __OBFID = "CL_00001578";
 	private static final int maxDelay = 16;
 
 	public HarmonyWanderAI(EntityAnimal entity) {

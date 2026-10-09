@@ -1,65 +1,66 @@
-buildscript {
-    repositories {
-        maven {
-            url = "https://repo1.maven.org/maven2/"
-        }
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+plugins {
+    id("java")
+    id("com.gtnewhorizons.retrofuturagradle") version "1.4.9"
+}
+
+version = "1.0"
+group = "com.harmony.harmonymod"
+base { archivesName = "harmony" }
+
+java {
+    toolchain {
+        // Minecraft 1.7.10 must be compiled and run with Java 8
+        languageVersion = JavaLanguageVersion.of(8)
+        vendor = JvmVendorSpec.AZUL
     }
 }
 
-apply plugin: 'forge'
-
-version = "1.0"
-group= "com.xaphiinia.harmony" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "harmony"
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+}
 
 minecraft {
-    version = "1.7.10-10.13.4.1614-1.7.10"
-    runDir = "eclipse"
+    mcVersion = "1.7.10"
+    // Forge version defaults to 10.13.4.1614 for 1.7.10
+    username = "Developer"
+}
+
+repositories {
+    mavenCentral()
 }
 
 dependencies {
-    // you may put jars on which you depend on in ./libs
-    // or you may define them like so..
-    //compile "some.group:artifact:version:classifier"
-    //compile "some.group:artifact:version"
-
-    // real examples
-    //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
-    //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
-
-    // for more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
-
+    // Put mod dependencies here, e.g.
+    // implementation rfg.deobf("curse.maven:some-mod-12345:67890")
 }
 
-processResources
-{
-    // this will ensure that this task is redone when the versions change.
+processResources {
     inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
+    inputs.property "mcversion", minecraft.mcVersion
 
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-
-        // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version
+    filesMatching("mcmod.info") {
+        expand("version": project.version, "mcversion": minecraft.mcVersion.get())
     }
+}
 
-    // copy everything else, thats not the mcmod.info
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
+// Local test setup, see test.ps1
+//   -Pplayer=Name      play as Name, with its own folder in run/players/ (default: Developer in run/)
+//   -Pconnect=host:port  join that server on startup (port defaults to 25565)
+tasks.named("runServer") {
+    workingDir = file("run/server")
+    doFirst { workingDir.mkdirs() }
+}
+
+tasks.named("runClient") {
+    def player = findProperty("player")
+    if (player) {
+        username = player
+        workingDir = file("run/players/${player}")
     }
+    def connect = findProperty("connect")
+    if (connect) {
+        def (host, port) = (connect.contains(":") ? connect.split(":") : [connect, "25565"]) as List
+        extraArgs.addAll("--server", host, "--port", port)
+    }
+    doFirst { workingDir.mkdirs() }
 }

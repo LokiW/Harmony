@@ -13,7 +13,7 @@ import net.minecraft.util.*;
 import cpw.mods.fml.relauncher.*;
 
 public class ItemDiagnostic extends HarmonyItem {
-    
+
     public ItemDiagnostic(String name) {
         super(name);
     }
@@ -44,7 +44,7 @@ public class ItemDiagnostic extends HarmonyItem {
 		}
 		return true; //TODO what does this do?
 	}
-   
+
 }
 
 

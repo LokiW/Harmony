@@ -1,8 +1,8 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
+  "modid": "harmony",
+  "name": "Harmony",
+  "description": "Minecraft mod focused around better pets",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",

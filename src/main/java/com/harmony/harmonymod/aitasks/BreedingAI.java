@@ -19,7 +19,6 @@ public class BreedingAI extends EntityAIBase
 	private Breed breedTrick;
 	private int delayCounter;
 
-	private static final String __OBFID = "CL_00001578";
 
 	public BreedingAI(EntityAnimal pet) {
 		this.pet = pet;

@@ -3,15 +3,20 @@ package com.harmony.harmonymod;
 import com.harmony.harmonymod.sounds.SoundDB;
 import com.harmony.harmonymod.Traits.TRAIT;
 import com.harmony.harmonymod.items.ItemDiagnostic;
+import com.harmony.harmonymod.items.GenericEntitySpawnEgg;
 import com.harmony.harmonymod.FeedAnimal;
 import com.harmony.harmonymod.RespawnAnimal;
+import com.harmony.harmonymod.horsefix.HorseControl;
+import com.harmony.harmonymod.horsefix.HorseControlClient;
 import net.minecraft.init.Blocks;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import cpw.mods.fml.common.event.FMLServerStartedEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.common.registry.EntityRegistry;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -60,6 +65,8 @@ public class HarmonyMod
 		config = new Configuration(event.getSuggestedConfigurationFile());
 		syncConfig();
 
+		int mobID = 0;
+
 		//add blocks and items
 		/*
 		 * Example Item
@@ -79,7 +86,16 @@ public class HarmonyMod
 		GameRegistry.registerItem(armor_bundle, "armor_bundle");
 		 */
 
-		Item itemDiag = new ItemDiagnostic("Diagnostics");
+		// Item itemDiag = new ItemDiagnostic("Diagnostics");
+
+		// add Entities
+		/*
+		EntityRegistry.registerModEntity(HarmonyHorse.class, "HarmonyHorse", mobID++, this, 80, 3, false);
+
+		Item horseSpawnEgg = new GenericEntitySpawnEgg("HarmonyHorse", 0xE18519, 0x000000)
+			.setUnlocalizedName("spawn_egg_harmony_horse")
+			.setTextureName(HarmonyMod.MODID+":spawn_egg");
+		GameRegistry.registerItem(horseSpawnEgg, "spawnEggHarmonyHorse");*/
 	}
 
 	/*
@@ -93,9 +109,12 @@ public class HarmonyMod
 		SoundDB.getSoundDB();
 		FeedAnimal.register();
 		RespawnAnimal.register();
+		HorseControl.register();
+		if (event.getSide().isClient()) {
+			HorseControlClient.register();
+		}
 		Traits.register();
 	}
-
 
 	/*
 	 * Load configuration data from file
@@ -121,6 +140,7 @@ public class HarmonyMod
 					p = config.get(MODID, "breedingCost", 5);
 					breedingCost = p.getInt();
 				} else {
+					System.out.println("HarmonyMod: config setup for " + s);
 					//for each mob
 					Property p;
 					p = config.get(s, "slot1", "");
@@ -180,6 +200,11 @@ public class HarmonyMod
 		config.get("EntityWolf", "slot2", "JUMP,HARDY,FAST,VICIOUS");
 		config.get("EntityWolf", "slot3", "JUMP,HARDY,FAST,VICIOUS");
 		config.get("EntityWolf", "needsAttackAttr", true);
+
+		config.get("EntityHorse", "slot1", "HARDY");
+		config.get("EntityHorse", "slot2", "HARDY");
+		config.get("EntityHorse", "slot3", "HARDY");
+		config.get("EntityHorse", "needsAttackAttr", true);
 
 		config.save();
 
