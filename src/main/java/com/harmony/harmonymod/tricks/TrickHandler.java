@@ -85,7 +85,7 @@ public class TrickHandler extends EntityAIBase {
 	 */
 	public void updateCurrentTrick(Trick newTrick) {
 		if (newTrick != null) {
-			System.out.println("HarmonyMod: " + pet + " doing trick " + newTrick);
+
 			if (newTrick instanceof Stop) {
 				endCurrentTrick();
 				pet.getNavigator().clearPathEntity();

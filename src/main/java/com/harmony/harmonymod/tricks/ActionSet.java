@@ -2,8 +2,6 @@ package com.harmony.harmonymod.tricks;
 
 import net.minecraft.entity.ai.*;
 import net.minecraft.entity.EntityLiving;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import com.harmony.harmonymod.HarmonyProps;
 import com.harmony.harmonymod.tricks.*;

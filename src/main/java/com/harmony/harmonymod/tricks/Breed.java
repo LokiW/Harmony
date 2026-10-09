@@ -2,14 +2,10 @@ package com.harmony.harmonymod.tricks;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.World;
-import java.lang.Math;
 import java.util.List;
 import java.util.Random;
 import com.harmony.harmonymod.HarmonyProps;
 import com.harmony.harmonymod.HarmonyMod;
-import com.harmony.harmonymod.Traits.TRAIT;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.player.EntityPlayer;
@@ -71,20 +67,14 @@ public class Breed extends Trick {
 				this.spawnBaby();
 
 				HarmonyProps hp1 = HarmonyProps.get(e1);
-				for(int i = 0; i < 3; i++) {
-					if(hp1.traits.traits[i] == TRAIT.FERTILE) {
-						this.spawnBaby();
-					}
+				HarmonyProps hp2 = HarmonyProps.get(e2);
+				int extra = hp1.traits.extraBabies() + hp2.traits.extraBabies();
+				for (int i = 0; i < extra; i++) {
+					this.spawnBaby();
 				}
+
 				hp1.happiness -= HarmonyMod.breedingCost;
 				e1.setGrowingAge(6000);
-
-				HarmonyProps hp2 = HarmonyProps.get(e2);
-				for(int i = 0; i < 3; i++) {
-					if(hp2.traits.traits[i] == TRAIT.FERTILE) {
-						this.spawnBaby();
-					}
-				}
 				hp2.happiness -= HarmonyMod.breedingCost;
 				e2.setGrowingAge(6000);
 

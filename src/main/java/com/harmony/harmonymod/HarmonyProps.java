@@ -11,11 +11,8 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import net.minecraft.server.MinecraftServer;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.entity.ai.attributes.BaseAttributeMap;
-import net.minecraft.entity.ai.attributes.IAttribute;
 import com.harmony.harmonymod.tricks.TrickHandler;
 import com.harmony.harmonymod.aitasks.BreedingAI;
 import com.harmony.harmonymod.aitasks.HarmonyWanderAI;
@@ -58,6 +55,15 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	 */
 	public void constructProperties() {
 		traits = new Traits(pet);
+		tricks = new TrickHandler(pet);
+		registerAI();
+	}
+
+	/*
+	 * Specific traits, for the /harmony spawn test command
+	 */
+	public void constructProperties(Traits.TRAIT[] chosen) {
+		traits = new Traits(pet, chosen);
 		tricks = new TrickHandler(pet);
 		registerAI();
 	}

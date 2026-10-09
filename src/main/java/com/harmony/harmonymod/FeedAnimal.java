@@ -5,9 +5,7 @@ import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.common.MinecraftForge;
 import com.harmony.harmonymod.ownership.Ownership;
@@ -59,7 +57,7 @@ public class FeedAnimal {
 		HarmonyProps hp = HarmonyProps.get(target);
 
 		if (hp == null) {
-			System.out.println("HarmonyMod: HarmonyProps are null for " + target);
+			// Not an animal Harmony tracks
 			return;
 		}
 
@@ -87,7 +85,6 @@ public class FeedAnimal {
 			hp.tricks.yRespawn = target.posY;
 			hp.tricks.zRespawn = target.posZ;
 			removeItem = true;
-			System.out.println("HarmonyMod: Set respawn location.");
 		}
 
 		if (removeItem) {

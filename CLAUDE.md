@@ -37,9 +37,12 @@ migration or compatibility code for old saves.
   `TrickEnum` (trick bits and saved names), `Trick` subclasses.
 - `sounds/SoundDB` - noteblock events -> animals within 16 blocks.
 - `aitasks/` - happiness-aware wander and breeding AI replacing vanilla's.
+- `HarmonyNetwork` - the mod's network channel ("harmony"); each message type has its own id.
+- `HarmonyCommand` - `/harmony spawn <animal> [traits]`, spawns animals with chosen traits for testing
+  (works from the server console too, spawning at world spawn).
+- `sync/` - sends animals' data to clients. `ownership/` - bonding and adoption papers.
 - `horsefix/` - client-driven horse riding (`HorseControl` server side, `HorseControlClient`).
-  Owns the mod's network channel `HorseControl.network` ("harmony"), message ids 0 and 1 are taken.
-- `items/`, `ArmoredPig`, `TextureHelper` - unused leftovers, slated for cleanup in Phase 0.
+- `client/` - client-only rendering (learning particles). `items/` - the diagnostics debug item.
 
 ## Rules that bite in 1.7.10
 

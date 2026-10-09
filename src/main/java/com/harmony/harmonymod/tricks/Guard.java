@@ -1,19 +1,12 @@
 package com.harmony.harmonymod.tricks;
 
 import net.minecraft.entity.*;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.*;
 import net.minecraft.pathfinding.*;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.World;
-import net.minecraft.util.DamageSource;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import java.lang.Math;
 import java.util.*;
-import com.harmony.harmonymod.HarmonyProps;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class Guard extends Trick {
