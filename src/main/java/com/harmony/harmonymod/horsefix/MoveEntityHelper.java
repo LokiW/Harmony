@@ -29,8 +29,9 @@ public class MoveEntityHelper {
         }
 
         // Float like vanilla: the server's swim AI keeps an unridden horse up, but it doesn't move
-        // this one, so without this a ridden horse sinks and drowns in deep water.
-        if (horse.isInWater() || horse.handleLavaMovement()) {
+        // this one, so without this a ridden horse sinks and drowns in deep water. Only while it's
+        // more than half under, so it swims low in the water rather than bobbing out of it.
+        if (isLiquidAt(horse, horse.posY + horse.height * 0.5D)) {
             horse.motionY += 0.03999999910593033D;
         }
 

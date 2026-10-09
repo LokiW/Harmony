@@ -101,6 +101,13 @@ public class TrickHandler extends EntityAIBase {
 		}
 	}
 
+	/*
+	 * End whatever the pet is doing
+	 */
+	public void stopCurrentTrick() {
+		endCurrentTrick();
+	}
+
 	private void endCurrentTrick() {
 		if (currentTrick != null) {
 			currentTrick.stopTrick();

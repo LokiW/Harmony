@@ -9,6 +9,7 @@ import com.harmony.harmonymod.RespawnAnimal;
 import com.harmony.harmonymod.horsefix.HorseControl;
 import com.harmony.harmonymod.sync.AnimalSync;
 import com.harmony.harmonymod.ownership.Ownership;
+import com.harmony.harmonymod.tricks.Sit;
 import com.harmony.harmonymod.horsefix.HorseControlClient;
 import com.harmony.harmonymod.client.LearningIndicator;
 import net.minecraft.init.Blocks;
@@ -118,6 +119,7 @@ public class HarmonyMod
 		HarmonyProps.register();
 		AnimalSync.register();
 		Ownership.register();
+		Sit.register();
 		SoundDB.getSoundDB();
 		FeedAnimal.register();
 		RespawnAnimal.register();
