@@ -25,7 +25,6 @@ public class HarmonyWanderAI extends EntityAIBase
 	private EntityAnimal entity;
 	private int delayCounter;
 
-	private static final String __OBFID = "CL_00001578";
 	private static final int maxDelay = 16;
 
 	public HarmonyWanderAI(EntityAnimal entity) {
