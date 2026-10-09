@@ -1,52 +1,33 @@
 package com.harmony.harmonymod.horsefix;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityHorse;
-import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.util.MathHelper;
 import net.minecraft.entity.SharedMonsterAttributes;
 
 public class MoveEntityHelper {
 
-     public static boolean entityRequiresMoveHelper(Entity myEntit) {
-        // TODO Update for entities to wrap based off config
-        if (myEntit instanceof EntityHorse) {
-            return ((EntityHorse) myEntit).isHorseSaddled();
-        }
-        return false;
-    }
-
-    public static boolean moveableByPlayer(EntityLivingBase myEntity) {
-        // update to include other Entities controllabe by player
-        if (myEntity instanceof EntityHorse) {
-            EntityHorse horse = (EntityHorse) myEntity;
-            return horse.isHorseSaddled() && horse.isTame();
-        }
-        return false;
-    }
-
-    public static void moveEntityWithHeading(EntityLivingBase myEntity, float strafe, float forward) {
-        if (!MoveEntityHelper.moveableByPlayer(myEntity)) {
-            myEntity.moveEntityWithHeading(strafe, forward);
-            return;
+    /*
+     * Moves a horse that the local player is riding, on the client.
+     * Vanilla EntityHorse.moveEntityWithHeading only applies physics on the server, which is
+     * why ridden horses jitter. It has already run this tick (rotation, jump motion, limb swing),
+     * so this applies the physics it skipped using the rider's input.
+     */
+    public static void moveRiddenHorse(EntityHorse horse, EntityLivingBase rider) {
+        // Same input scaling EntityHorse uses: half speed strafing, quarter speed backwards
+        float strafe = rider.moveStrafing * 0.5F;
+        float forward = rider.moveForward;
+        if (forward <= 0.0F) {
+            forward *= 0.25F;
         }
 
-        if (myEntity.worldObj.isRemote) {
-            // This is where the "magic" (hacks) happens
-            // Horses jitter because they are only updated form the server normally,
-            // to reduce jitter we can update them from the client but the client often runs
-            // faster than the server meaning we can't update them as fast as the server.
-            // So we reduce the movement speed based on server ping to smooth horses.
-            myEntity.setAIMoveSpeed((float)myEntity.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue());
-            MoveEntityHelper.moveEntityWithHeadingBasic(myEntity, strafe, forward);
-        }
+        horse.setAIMoveSpeed((float)horse.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue());
+        MoveEntityHelper.moveEntityWithHeadingBasic(horse, strafe, forward);
     }
 
     /*
      * Basic move entity with heading from EntityLivingBase.
-     * Called from EntityHorse, but unable to be referenced in HarmonyHorse.
+     * EntityHorse overrides it, so it can't be called directly on a horse.
      */
     public static void moveEntityWithHeadingBasic(EntityLivingBase myEntity, float strafe, float forward) {
         double var8;
@@ -170,7 +151,10 @@ public class MoveEntityHelper {
             myEntity.motionZ *= (double)var3;
         }
 
-        myEntity.prevLimbSwingAmount = myEntity.limbSwingAmount;
+        // EntityHorse already updated the limb swing this tick while the horse was standing still,
+        // so undo that update and redo it with the distance actually moved.
+        float startSwingAmount = myEntity.prevLimbSwingAmount;
+        myEntity.limbSwing -= myEntity.limbSwingAmount;
         var8 = myEntity.posX - myEntity.prevPosX;
         double var9 = myEntity.posZ - myEntity.prevPosZ;
         float var10 = MathHelper.sqrt_double(var8 * var8 + var9 * var9) * 4.0F;
@@ -180,12 +164,7 @@ public class MoveEntityHelper {
             var10 = 1.0F;
         }
 
-        myEntity.limbSwingAmount += (var10 - myEntity.limbSwingAmount) * 0.4F;
+        myEntity.limbSwingAmount = startSwingAmount + (var10 - startSwingAmount) * 0.4F;
         myEntity.limbSwing += myEntity.limbSwingAmount;
-
-        myEntity.serverPosX = myEntity.myEntitySize.multiplyBy32AndRound(myEntity.posX);
-        myEntity.serverPosY = MathHelper.floor_double(myEntity.posY * 32.0D);
-        myEntity.serverPosZ = myEntity.myEntitySize.multiplyBy32AndRound(myEntity.posZ);
-
     }
 }

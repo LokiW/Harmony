@@ -19,7 +19,6 @@ import net.minecraft.entity.ai.attributes.IAttribute;
 import com.harmony.harmonymod.tricks.TrickHandler;
 import com.harmony.harmonymod.aitasks.BreedingAI;
 import com.harmony.harmonymod.aitasks.HarmonyWanderAI;
-import com.harmony.harmonymod.horsefix.NetHandlerPlayAndRideServer;
 import java.io.*;
 
 
