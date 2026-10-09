@@ -2,6 +2,7 @@ package com.harmony.harmonymod;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemArmor;
@@ -41,6 +42,13 @@ public class FeedAnimal {
 		}
 
 		EntityAnimal target = (EntityAnimal) e_target;
+		String heldName = held_items.getUnlocalizedName();
+		if (target instanceof EntityTameable && HarmonyProps.get(target) != null
+				&& ("item.speckledMelon".equals(heldName) || "item.appleGold".equals(heldName))) {
+			// Vanilla makes a tamed wolf or ocelot sit (or stand) when its owner right clicks it with
+			// anything that isn't food, which gets in the way of training. Cancelled on both sides.
+			e.setCanceled(true);
+		}
 		if (target.worldObj.isRemote) {
 			// Only register tricks on server side
 			return;

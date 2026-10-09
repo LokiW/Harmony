@@ -21,6 +21,13 @@ public class MoveEntityHelper {
             forward *= 0.25F;
         }
 
+        // Swimming is slowed the same way: the horse bobs in and out of the water, and the ticks it
+        // spends just above the surface would otherwise move it at nearly land speed
+        if (isLiquidAt(horse, horse.posY) || isLiquidAt(horse, horse.posY - 1.0D)) {
+            strafe *= SWIM_SPEED;
+            forward *= SWIM_SPEED;
+        }
+
         // Float like vanilla: the server's swim AI keeps an unridden horse up, but it doesn't move
         // this one, so without this a ridden horse sinks and drowns in deep water.
         if (horse.isInWater() || horse.handleLavaMovement()) {
@@ -29,6 +36,14 @@ public class MoveEntityHelper {
 
         horse.setAIMoveSpeed((float)horse.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue());
         MoveEntityHelper.moveEntityWithHeadingBasic(horse, strafe, forward);
+    }
+
+    // Input scale while a ridden horse swims, so swimming is slower than a boat
+    private static final float SWIM_SPEED = 0.35F;
+
+    private static boolean isLiquidAt(EntityLivingBase entity, double y) {
+        return entity.worldObj.getBlock(MathHelper.floor_double(entity.posX), MathHelper.floor_double(y),
+                MathHelper.floor_double(entity.posZ)).getMaterial().isLiquid();
     }
 
     /*
