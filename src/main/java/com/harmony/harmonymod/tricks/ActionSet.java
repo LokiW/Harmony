@@ -76,6 +76,14 @@ public class ActionSet {
 		return convertRawAction(getAction(pet), pet);
 	}
 
+	/*
+	 * Random action, avoiding one (e.g. the trick a learning pet was just told no to) if there are others
+	 */
+	public long getActionExcept(EntityLiving pet, long except) {
+		long others = this.actions & ~except;
+		return others != 0 ? new ActionSet(others).getAction(pet) : getAction(pet);
+	}
+
 	public long getAction(EntityLiving pet) {
 		int max = Long.bitCount(actions);
 		long gotAction = 3;
