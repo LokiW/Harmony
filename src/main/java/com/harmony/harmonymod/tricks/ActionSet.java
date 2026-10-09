@@ -5,11 +5,12 @@ import net.minecraft.entity.EntityLiving;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.io.Serializable;
 import com.harmony.harmonymod.HarmonyProps;
 import com.harmony.harmonymod.tricks.*;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 
-public class ActionSet implements Serializable {
+public class ActionSet {
 	// "actions" uses bit manipulation to store actions to
 	// reducememory load when many pets are loaded.
 	// This is premature optimization but exists anyways.
@@ -36,6 +37,37 @@ public class ActionSet implements Serializable {
 		this.actions &= ~action;
 	}
 
+	public boolean isEmpty() {
+		return this.actions == 0;
+	}
+
+	/*
+	 * Save as a list of trick names, so saves don't depend on trick bit order
+	 */
+	public NBTTagList writeToNBT() {
+		NBTTagList list = new NBTTagList();
+		for (int i = 0; i < 64; i++) {
+			String name = TrickEnum.getName(this.actions & (1L << i));
+			if (name != null) {
+				list.appendTag(new NBTTagString(name));
+			}
+		}
+		return list;
+	}
+
+	public static ActionSet readFromNBT(NBTTagList list) {
+		long actions = 0;
+		for (int i = 0; i < list.tagCount(); i++) {
+			String name = list.getStringTagAt(i);
+			long action = TrickEnum.fromName(name);
+			if (action == 0) {
+				System.out.println("HarmonyMod: Ignoring unknown saved trick " + name);
+			}
+			actions |= action;
+		}
+		return new ActionSet(actions);
+	}
+
 	/*
 	 * Get Trick in actionSet
 	 * Not all actions are a trick, in this case null is returned.
@@ -54,7 +86,7 @@ public class ActionSet implements Serializable {
 			for (int i = 0; i < 64; i++) {
 				dist -= (actions >> i) & 1;
 				if ( dist < 0) {
-					gotAction = 1 << i;
+					gotAction = 1L << i;
 					break;
 				}
 			}
@@ -78,7 +110,7 @@ public class ActionSet implements Serializable {
 		for (int i = 0; i < 64; i++) {
 			dist -= (otherActions >> i) & 1;
 			if ( dist < 0) {
-				this.removeAction(1 << i);
+				this.removeAction(1L << i);
 				break;
 			}
 		}
@@ -117,32 +149,7 @@ public class ActionSet implements Serializable {
 	}
 
 	public String getTrickNameForAction(long action) {
-		int a = (int) action;
-		int b = (int) (action >> 32);	
-		switch (a) {
-			case TrickEnum.STOP:
-				return "STOP";
-			case TrickEnum.GO:
-				return "GO";
-			case TrickEnum.LEARNED_LOCATION_1:
-				return "LEARNED_LOCATION_1";
-			case TrickEnum.LEARNED_LOCATION_2:
-				return "LEARNED_LOCATION_2";
-			case TrickEnum.LEARNED_LOCATION_3:
-				return "LEARNED_LOCATION_3";
-			case TrickEnum.ATTACK:
-				return "ATTACK";
-			case TrickEnum.GUARD:
-				return "GUARD";
-			case TrickEnum.JUMP:
-				return "JUMP";
-			case TrickEnum.SIT:
-				return "SIT";
-			case TrickEnum.RESPAWN_LOCATION:
-				return "RESPAWN_LOCATION";
-			default:
-				break;
-		}
-		return "UNKNOWN " + a;
+		String name = TrickEnum.getName(action);
+		return name != null ? name : "UNKNOWN " + action;
 	}
 }

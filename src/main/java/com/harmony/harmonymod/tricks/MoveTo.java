@@ -7,6 +7,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import java.lang.Math;
 import com.harmony.harmonymod.HarmonyProps;
+import net.minecraft.nbt.NBTTagCompound;
 
 public class MoveTo extends Trick {
     private int delayCounter;
@@ -22,8 +23,11 @@ public class MoveTo extends Trick {
 			this.delayCounter = 10;
 			
 			if (this.targetTrick instanceof EntityTrick) {
-				EntityTrick targetE = (EntityTrick) this.targetTrick;
-				return moveToEntity(targetE.target, false);
+				EntityLiving target = ((EntityTrick) this.targetTrick).getTarget();
+				if (target == null) {
+					return false;
+				}
+				return moveToEntity(target, false);
 			} else if (this.targetTrick instanceof LocationTrick) {
 				LocationTrick targetL = (LocationTrick) this.targetTrick;
 				return moveToPoint(targetL.targetX, targetL.targetY, targetL.targetZ, false);
@@ -46,6 +50,26 @@ public class MoveTo extends Trick {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	protected String getSaveType() {
+		return "move_to";
+	}
+
+	@Override
+	protected void writeToNBT(NBTTagCompound tag) {
+		NBTTagCompound target = Trick.saveTrick(this.targetTrick);
+		if (target != null) {
+			tag.setTag("Target", target);
+		}
+	}
+
+	@Override
+	protected void readFromNBT(NBTTagCompound tag) {
+		if (tag.hasKey("Target")) {
+			this.targetTrick = Trick.loadTrick(tag.getCompoundTag("Target"), this.pet);
+		}
 	}
 
 	private boolean randomTeleport() {

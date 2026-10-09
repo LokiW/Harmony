@@ -33,7 +33,7 @@ public class Breed extends Trick {
 		this.pet = pet;
 
 		if(currentTrick instanceof EntityTrick) {
-			targetMate = ((EntityTrick)currentTrick).target;
+			targetMate = ((EntityTrick)currentTrick).getTarget();
 		} else if(pet instanceof EntityAnimal) {
 			targetMate = getNearbyMate();
 		}

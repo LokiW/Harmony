@@ -19,7 +19,6 @@ import net.minecraft.entity.ai.attributes.IAttribute;
 import com.harmony.harmonymod.tricks.TrickHandler;
 import com.harmony.harmonymod.aitasks.BreedingAI;
 import com.harmony.harmonymod.aitasks.HarmonyWanderAI;
-import java.io.*;
 
 
 /*
@@ -28,6 +27,9 @@ import java.io.*;
 public class HarmonyProps implements IExtendedEntityProperties {
 
 	public static final String PROP_NAME = HarmonyMod.MODID + "_HarmonyProps";
+
+	// Version of the saved data. Bump it when the format changes, and convert older data in loadNBTData.
+	private static final int DATA_VERSION = 1;
 
 	public TrickHandler tricks;
 	public Traits traits;
@@ -68,22 +70,21 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	}
 
 	/*
-	 * Serialize Traits and Tricks to disk
+	 * Save traits, happiness and tricks with the entity
 	 */
 	@Override
 	public void saveNBTData(NBTTagCompound tag) {
 		if (this.isInitialized()) {
-			//container tag
 			NBTTagCompound data = new NBTTagCompound();
+			data.setInteger("Version", DATA_VERSION);
+			data.setInteger("Happiness", happiness);
+			traits.writeToNBT(data);
+
+			NBTTagCompound trickData = new NBTTagCompound();
+			tricks.writeToNBT(trickData);
+			data.setTag("Tricks", trickData);
+
 			tag.setTag(PROP_NAME, data);
-
-			//save traits
-			byte[] byteTraits = toBytes(traits);
-			data.setByteArray("traits", byteTraits);
-
-			//save tricks
-			byte[] byteTricks = toBytes(tricks);
-			data.setByteArray("tricks", byteTricks);
 		}
 	}
 
@@ -94,19 +95,11 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	public void loadNBTData(NBTTagCompound tag) {
 		if(tag.hasKey(PROP_NAME, Constants.NBT.TAG_COMPOUND)) {
 			NBTTagCompound data = tag.getCompoundTag(PROP_NAME);
-			
-			byte[] nbtTraits = data.getByteArray("traits");
-			traits = (Traits)fromBytes(nbtTraits);
 
-			byte[] nbtTricks = data.getByteArray("tricks");
-			tricks = (TrickHandler)fromBytes(nbtTricks);
-			tricks.pet = this.pet;
-			tricks.registerTask();
-
-			if(tricks.currentTrick != null) {
-				tricks.currentTrick.updatePet(this.pet);
-				System.out.println("HarmonyMod: loaded active trick " + tricks.currentTrick);
-			}
+			happiness = data.getInteger("Happiness");
+			traits = Traits.readFromNBT(data);
+			tricks = new TrickHandler(pet);
+			tricks.readFromNBT(data.getCompoundTag("Tricks"));
 
 			registerAI();
 		}
@@ -117,47 +110,6 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		HarmonyWanderAI.registerTask(this.pet);
 	}
 
-	private byte[] toBytes(Object o) {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ObjectOutput out = null;
-		try {
-			out = new ObjectOutputStream(bos);   
-			out.writeObject(o);
-			out.flush();
-			byte[] bytes = bos.toByteArray();
-			return bytes;
-		} catch(Exception e) {
-			System.out.println("HarmonyMod: Failed to save to NBT\n" + e);
-		}finally {
-			try {
-				bos.close();
-			} catch (IOException e) {
-				System.out.println("HarmonyMod: Failed to save to NBT\n" + e);
-			}
-		}
-		return null;
-	}
-
-	private Object fromBytes(byte[] bytes) {
-		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-		ObjectInput in = null;
-		try {
-			in = new ObjectInputStream(bis);
-			Object o = in.readObject();
-			return o;
-		} catch(Exception e) {
-			System.out.println("HarmonyMod: Failed to load from NBT\n" + e);
-		}finally {
-			try {
-				if (in != null) {
-					in.close();
-				}
-			} catch (IOException e) {
-				System.out.println("HarmonyMod: Failed to load from NBT\n" + e);
-			}
-		}
-		return null;
-	}
 
 	/*
 	 * Hooks to Minecraft engine to add HarmonyProps to entities

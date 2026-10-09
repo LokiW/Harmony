@@ -2,19 +2,20 @@ package com.harmony.harmonymod.tricks;
 
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraftforge.common.util.Constants;
 import java.util.Map;
 import java.util.HashMap;
-import java.io.Serializable;
 
 
-public class TrickHandler extends EntityAIBase implements Serializable {
-	private static final long serialVersionUID = 1L;
-	public transient EntityLiving pet;
+public class TrickHandler extends EntityAIBase {
+	public EntityLiving pet;
 
 	public Trick currentTrick;
 	public ActionSet actions;
 	public Map<Integer, ActionSet> tricks;
-	public transient TrickLearner isLearning;
+	public TrickLearner isLearning;
 
 	// These are for setting pet known locations at non-preset locations
 	// the actual values are set by feeding a pet specific items
@@ -133,6 +134,81 @@ public class TrickHandler extends EntityAIBase implements Serializable {
 		} else {
 			this.isLearning = new TrickLearner();
 		}	
+	}
+
+	public void writeToNBT(NBTTagCompound tag) {
+		tag.setTag("Actions", this.actions.writeToNBT());
+
+		NBTTagList phrases = new NBTTagList();
+		for (Map.Entry<Integer, ActionSet> entry : this.tricks.entrySet()) {
+			NBTTagCompound phrase = new NBTTagCompound();
+			phrase.setInteger("Note", entry.getKey());
+			phrase.setTag("Actions", entry.getValue().writeToNBT());
+			phrases.appendTag(phrase);
+		}
+		tag.setTag("Phrases", phrases);
+
+		writeLocation(tag, "Location1", this.xLearned1, this.yLearned1, this.zLearned1);
+		writeLocation(tag, "Location2", this.xLearned2, this.yLearned2, this.zLearned2);
+		writeLocation(tag, "Location3", this.xLearned3, this.yLearned3, this.zLearned3);
+		writeLocation(tag, "Respawn", this.xRespawn, this.yRespawn, this.zRespawn);
+
+		NBTTagCompound current = Trick.saveTrick(this.currentTrick);
+		if (current != null) {
+			tag.setTag("Current", current);
+		}
+	}
+
+	public void readFromNBT(NBTTagCompound tag) {
+		this.actions = ActionSet.readFromNBT(tag.getTagList("Actions", Constants.NBT.TAG_STRING));
+		if (this.actions.isEmpty()) {
+			this.actions = new ActionSet();
+		}
+
+		this.tricks.clear();
+		NBTTagList phrases = tag.getTagList("Phrases", Constants.NBT.TAG_COMPOUND);
+		for (int i = 0; i < phrases.tagCount(); i++) {
+			NBTTagCompound phrase = phrases.getCompoundTagAt(i);
+			ActionSet as = ActionSet.readFromNBT(phrase.getTagList("Actions", Constants.NBT.TAG_STRING));
+			if (!as.isEmpty()) {
+				this.tricks.put(phrase.getInteger("Note"), as);
+			}
+		}
+
+		if (tag.hasKey("Location1")) {
+			NBTTagCompound l = tag.getCompoundTag("Location1");
+			this.xLearned1 = l.getDouble("X"); this.yLearned1 = l.getDouble("Y"); this.zLearned1 = l.getDouble("Z");
+		}
+		if (tag.hasKey("Location2")) {
+			NBTTagCompound l = tag.getCompoundTag("Location2");
+			this.xLearned2 = l.getDouble("X"); this.yLearned2 = l.getDouble("Y"); this.zLearned2 = l.getDouble("Z");
+		}
+		if (tag.hasKey("Location3")) {
+			NBTTagCompound l = tag.getCompoundTag("Location3");
+			this.xLearned3 = l.getDouble("X"); this.yLearned3 = l.getDouble("Y"); this.zLearned3 = l.getDouble("Z");
+		}
+		if (tag.hasKey("Respawn")) {
+			NBTTagCompound l = tag.getCompoundTag("Respawn");
+			this.xRespawn = l.getDouble("X"); this.yRespawn = l.getDouble("Y"); this.zRespawn = l.getDouble("Z");
+		}
+
+		if (tag.hasKey("Current")) {
+			this.currentTrick = Trick.loadTrick(tag.getCompoundTag("Current"), this.pet);
+		}
+	}
+
+	/*
+	 * Locations are unset while their y is negative
+	 */
+	private static void writeLocation(NBTTagCompound tag, String key, double x, double y, double z) {
+		if (y < 0.0) {
+			return;
+		}
+		NBTTagCompound l = new NBTTagCompound();
+		l.setDouble("X", x);
+		l.setDouble("Y", y);
+		l.setDouble("Z", z);
+		tag.setTag(key, l);
 	}
 
 	/*
