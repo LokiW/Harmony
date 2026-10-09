@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.common.MinecraftForge;
+import com.harmony.harmonymod.ownership.Ownership;
 
 /*
  * Event handler for a player feeding an animal
@@ -55,11 +56,17 @@ public class FeedAnimal {
 		// TODO make our own items for learning tricks, differentiate based on animal
 		// If interacting with a speckled melon, indicate animal should begin to learn trick
 		if ("item.speckledMelon".equals(itemName)) {
+			if (!Ownership.mayUse(player, target, hp)) {
+				return;
+			}
 			hp.tricks.learnTrick();
 			removeItem = true;
 		// If interacting with a golden apple, animal should save current location and
 		//  teleport back to current location instead of dying.
 		} else if ("item.appleGold".equals(itemName)) {
+			if (!Ownership.mayUse(player, target, hp)) {
+				return;
+			}
 			hp.tricks.xRespawn = target.posX;
 			hp.tricks.yRespawn = target.posY;
 			hp.tricks.zRespawn = target.posZ;

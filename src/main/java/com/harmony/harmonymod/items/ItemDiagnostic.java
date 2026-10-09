@@ -43,7 +43,7 @@ public class ItemDiagnostic extends HarmonyItem {
 				out += t + " ";
 			}
 		}
-		say(player, side + out + "| Happiness: " + hp.happiness);
+		say(player, side + out + "| Happiness: " + hp.happiness + " | Owner: " + (hp.isBonded() ? hp.ownerName : "none"));
 
 		out = "Current trick: " + (hp.tricks.currentTrick == null ? "none" : hp.tricks.currentTrick.getClass().getSimpleName());
 		for (Map.Entry<Integer, ActionSet> phrase : hp.tricks.tricks.entrySet()) {

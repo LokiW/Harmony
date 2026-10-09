@@ -60,6 +60,9 @@ migration or compatibility code for old saves.
   drive it with console commands on stdin (`summon`, `setblock` a noteblock + `redstone_block` to
   play a note, `save-all`, `stop`), and inspect or edit entity NBT in the region files. Harmony data is
   under the `harmony_HarmonyProps` key on each entity.
+- Never run a test server in the owner's folders (`run/server`, `run/obfuscated/server`) or on port
+  25565: they may have a server running there. Point the run task's `workingDir` at your own folder
+  under `run/` and set a different `server-port` in its `server.properties`.
 - Run the release jar (`runObfServer` / `test.cmd -Release`) for anything that could behave
   differently outside the dev environment.
 - You can't see the game. For anything visual (UI, rendering, animation, feel), give the owner short
