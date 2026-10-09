@@ -99,7 +99,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 ### Phase 0: Foundation
 
 - [x] Save animal data as versioned NBT instead of Java serialization, so updates don't break saves
-- [ ] Remove code that only works in the dev environment (Jump trick reflects on `jump` by name)
+- [x] Remove code that only works in the dev environment (Jump trick reflects on `jump` by name)
 - [ ] Sync animal state (traits, happiness, tricks) to clients, needed for the overlay
 - [ ] Ownership data and rules (bonding, transfer, reuse vanilla owners)
 - [ ] Way to test the release jar in a normal Forge install

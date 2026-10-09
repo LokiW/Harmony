@@ -12,16 +12,15 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.util.DamageSource;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.potion.Potion;
+import net.minecraftforge.common.ForgeHooks;
 import java.lang.Math;
-import java.lang.Class;
-import java.lang.reflect.Method;
 import java.util.*;
 import com.harmony.harmonymod.HarmonyProps;
 import com.harmony.harmonymod.Traits;
 import com.harmony.harmonymod.Traits.MAGICAL_TRAIT;
 
 public class Jump extends Trick {
-	private static Method jumper;
 	private int delayCounter;
 
 	public Jump () {
@@ -35,16 +34,7 @@ public class Jump extends Trick {
 	public boolean act() {
 		if (this.delayCounter == 0) {
 			if (this.pet.onGround || canFly()) {
-				try {
-					if (jumper == null) {
-						// Reflections
-						jumper = Class.forName("net.minecraft.entity.EntityLivingBase").getDeclaredMethod("jump");
-						jumper.setAccessible(true);
-					}
-					jumper.invoke(this.pet);
-				} catch (Exception e) {
-					System.out.println("HarmonyMod: ERROR threw Exception " + e + " when trying to do Jump Trick");
-				}
+				jump();
 			}
 		} else if (this.delayCounter == LEARNING_DELAY) {
 			return false;
@@ -60,6 +50,21 @@ public class Jump extends Trick {
 
 	public boolean consume(Trick newTrick) {
 		return false;
+	}
+
+	/*
+	 * Same as EntityLivingBase.jump(), which is protected. Animals don't sprint, so its sprint boost is left out.
+	 * The Forge jump event is what lets the JUMP trait boost the jump.
+	 */
+	private void jump() {
+		this.pet.motionY = 0.41999998688697815D;
+
+		if (this.pet.isPotionActive(Potion.jump)) {
+			this.pet.motionY += (double)((float)(this.pet.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F);
+		}
+
+		this.pet.isAirBorne = true;
+		ForgeHooks.onLivingJump(this.pet);
 	}
 
 	private boolean canFly() {
