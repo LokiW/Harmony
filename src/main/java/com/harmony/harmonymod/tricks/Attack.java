@@ -21,8 +21,10 @@ public class Attack extends Trick {
 	public void setupTrick(EntityLiving pet, Trick currentTrick) {
 		this.pet = pet;
 		if (currentTrick instanceof EntityTrick) {
-			EntityTrick eTrick = (EntityTrick) currentTrick;
-			this.pet.setAttackTarget((EntityLivingBase) eTrick.target);
+			EntityLiving target = ((EntityTrick) currentTrick).getTarget();
+			if (target != null) {
+				this.pet.setAttackTarget(target);
+			}
 		}
 	}
 
@@ -53,11 +55,19 @@ public class Attack extends Trick {
 		if (newTrick instanceof Attack) {
 			return true;
 		} else if (newTrick instanceof EntityTrick) {
-			EntityTrick eTrick = (EntityTrick) newTrick;
-			this.pet.setAttackTarget((EntityLivingBase) eTrick.target);
+			EntityLiving target = ((EntityTrick) newTrick).getTarget();
+			if (target != null) {
+				this.pet.setAttackTarget(target);
+			}
 			return true;
 		}
 		return false;
+	}
+
+	// Saved so the pet keeps fighting after a reload, it picks a new nearby target
+	@Override
+	protected String getSaveType() {
+		return "attack";
 	}
 
 	private void setNewAttackTarget() {

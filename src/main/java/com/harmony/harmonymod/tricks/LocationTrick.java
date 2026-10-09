@@ -7,12 +7,15 @@ import net.minecraft.world.*;
 import net.minecraft.pathfinding.*;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.nbt.NBTTagCompound;
 import java.lang.Math;
 
 public class LocationTrick extends Trick {
     public double targetX;
 	public double targetY;
 	public double targetZ;
+
+	LocationTrick() {}
 
     public LocationTrick(double x, double y, double z) {
 		this.targetX = x;
@@ -36,4 +39,23 @@ public class LocationTrick extends Trick {
 		this.pet.getLookHelper().setLookPosition(this.targetX, this.targetY, this.targetZ, 20.0F, (float)this.pet.getVerticalFaceSpeed());
 		return true;
     }
+
+	@Override
+	protected String getSaveType() {
+		return "location";
+	}
+
+	@Override
+	protected void writeToNBT(NBTTagCompound tag) {
+		tag.setDouble("X", this.targetX);
+		tag.setDouble("Y", this.targetY);
+		tag.setDouble("Z", this.targetZ);
+	}
+
+	@Override
+	protected void readFromNBT(NBTTagCompound tag) {
+		this.targetX = tag.getDouble("X");
+		this.targetY = tag.getDouble("Y");
+		this.targetZ = tag.getDouble("Z");
+	}
 }

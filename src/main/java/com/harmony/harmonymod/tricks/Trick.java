@@ -9,12 +9,10 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.util.DamageSource;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import java.io.Serializable;
-import java.lang.reflect.Field;
+import net.minecraft.nbt.NBTTagCompound;
 
-public abstract class Trick implements Serializable {
-	private static final long serialVersionUID = 1L;
-	public transient EntityLiving pet;
+public abstract class Trick {
+	public EntityLiving pet;
 	protected static final int LEARNING_DELAY = 100;
 
 	/*
@@ -42,6 +40,59 @@ public abstract class Trick implements Serializable {
 	 * Returns true if the trick's act only needs to be called once.
 	 */
 	public abstract boolean isInstant();
+
+
+	/*
+	 * Name this trick is saved under while it's the pet's current trick, or null if it isn't
+	 * worth keeping across a reload. Also add new types to loadTrick. Never rename a saved type.
+	 */
+	protected String getSaveType() {
+		return null;
+	}
+
+	/*
+	 * Save and load any state the trick needs to carry on after a reload
+	 */
+	protected void writeToNBT(NBTTagCompound tag) {}
+	protected void readFromNBT(NBTTagCompound tag) {}
+
+	/*
+	 * Save a trick, or null if it isn't saved
+	 */
+	public static NBTTagCompound saveTrick(Trick trick) {
+		if (trick == null || trick.getSaveType() == null) {
+			return null;
+		}
+		NBTTagCompound tag = new NBTTagCompound();
+		tag.setString("Type", trick.getSaveType());
+		trick.writeToNBT(tag);
+		return tag;
+	}
+
+	/*
+	 * Load a trick saved with saveTrick, or null if it can't be
+	 */
+	public static Trick loadTrick(NBTTagCompound tag, EntityLiving pet) {
+		String type = tag.getString("Type");
+		Trick trick;
+		if ("guard".equals(type)) {
+			trick = new Guard();
+		} else if ("move_to".equals(type)) {
+			trick = new MoveTo();
+		} else if ("attack".equals(type)) {
+			trick = new Attack();
+		} else if ("location".equals(type)) {
+			trick = new LocationTrick();
+		} else if ("entity".equals(type)) {
+			trick = new EntityTrick();
+		} else {
+			System.out.println("HarmonyMod: Ignoring unknown saved trick type " + type);
+			return null;
+		}
+		trick.pet = pet;
+		trick.readFromNBT(tag);
+		return trick;
+	}
 
 
 	/*
@@ -164,22 +215,5 @@ public abstract class Trick implements Serializable {
 			}
 		}
 		return true;
-	}
-
-	public void updatePet(EntityLiving pet) {
-		this.pet = pet;
-
-		try {
-			Field[] fs = this.getClass().getDeclaredFields();
-
-			for(Field f : fs) {
-				if(this.getClass().isAssignableFrom(f.getType())) {
-					Trick childTrick = (Trick) f.get(this);
-					childTrick.updatePet(pet);
-				}
-			}
-		} catch(Exception ex) {
-			System.out.println("HarmonyMod: Couldn't reinitialize current trick state, hopefully transient");
-		}
 	}
 }

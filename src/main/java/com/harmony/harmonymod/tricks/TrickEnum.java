@@ -19,4 +19,41 @@ public class TrickEnum {
 	// This is used for action initialization and should be updated
 	// for each new trick added to this enum
 	public static final int ALL_TRICKS = (1 << 10) - 1;
+
+	// Names tricks are saved under, indexed by bit. Never rename an existing one, saved animals use them.
+	private static final String[] NAMES = {
+		"STOP",
+		"GO",
+		"LEARNED_LOCATION_1",
+		"LEARNED_LOCATION_2",
+		"LEARNED_LOCATION_3",
+		"ATTACK",
+		"GUARD",
+		"JUMP",
+		"SIT",
+		"RESPAWN_LOCATION",
+	};
+
+	/*
+	 * Name of a single trick bit, or null if it isn't one
+	 */
+	public static String getName(long action) {
+		int bit = Long.numberOfTrailingZeros(action);
+		if (bit >= NAMES.length || action != 1L << bit) {
+			return null;
+		}
+		return NAMES[bit];
+	}
+
+	/*
+	 * Trick bit for a saved name, or 0 if there's no such trick
+	 */
+	public static long fromName(String name) {
+		for (int i = 0; i < NAMES.length; i++) {
+			if (NAMES[i].equals(name)) {
+				return 1L << i;
+			}
+		}
+		return 0;
+	}
 }

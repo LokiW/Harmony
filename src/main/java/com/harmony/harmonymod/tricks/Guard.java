@@ -14,6 +14,7 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import java.lang.Math;
 import java.util.*;
 import com.harmony.harmonymod.HarmonyProps;
+import net.minecraft.nbt.NBTTagCompound;
 
 public class Guard extends Trick {
     private int delayCounter;
@@ -32,6 +33,11 @@ public class Guard extends Trick {
 		if (--this.delayCounter <= 0) {
 			this.delayCounter = 10;
 
+			if (this.guardTarget instanceof EntityTrick && ((EntityTrick) this.guardTarget).getTarget() == null) {
+				// Whoever we were guarding is gone, guard this spot instead
+				this.guardTarget = new LocationTrick(this.pet.posX, this.pet.posY, this.pet.posZ);
+			}
+
 			if (this.pet.getAttackTarget() == null || this.pet.getAttackTarget().isDead) {
 				boolean getNewTarget = false;
 				// If to far away from guard location/entity move back
@@ -41,9 +47,9 @@ public class Guard extends Trick {
 					if (this.pet.getDistanceSq(trickL.targetX, trickL.targetY, trickL.targetZ) <= 10.0D)
 						getNewTarget = true;
 				} else {
-					EntityTrick trickE = (EntityTrick) guardTarget;
-					moveToEntity(trickE.target, true);
-					if (this.pet.getDistanceSqToEntity(trickE.target) <= 10.0D)
+					EntityLiving guarded = ((EntityTrick) guardTarget).getTarget();
+					moveToEntity(guarded, true);
+					if (this.pet.getDistanceSqToEntity(guarded) <= 10.0D)
 						getNewTarget = true;
 				}
 
@@ -76,10 +82,10 @@ public class Guard extends Trick {
 		double targetY;
 		double targetZ;
 		if (guardTarget instanceof EntityTrick) {
-			EntityTrick trickE = (EntityTrick) guardTarget;
-			targetX = trickE.target.posX;
-			targetY = trickE.target.posY;
-			targetZ = trickE.target.posZ;
+			EntityLiving guarded = ((EntityTrick) guardTarget).getTarget();
+			targetX = guarded.posX;
+			targetY = guarded.posY;
+			targetZ = guarded.posZ;
 		} else {
 			LocationTrick trickL = (LocationTrick) guardTarget;
 			targetX = trickL.targetX;
@@ -98,7 +104,7 @@ public class Guard extends Trick {
 					continue;
 
 				if (guardTarget instanceof EntityTrick) {
-					if (mob.getAttackTarget() == ((EntityTrick) guardTarget).target) {
+					if (mob.getAttackTarget() == ((EntityTrick) guardTarget).getTarget()) {
 						this.pet.setAttackTarget(mob);
 						return;
 					}
@@ -114,5 +120,28 @@ public class Guard extends Trick {
 		if (closest instanceof EntityMob)
 			this.pet.setAttackTarget((EntityMob) closest);
 
+	}
+
+	@Override
+	protected String getSaveType() {
+		return "guard";
+	}
+
+	@Override
+	protected void writeToNBT(NBTTagCompound tag) {
+		NBTTagCompound target = Trick.saveTrick(this.guardTarget);
+		if (target != null) {
+			tag.setTag("Target", target);
+		}
+	}
+
+	@Override
+	protected void readFromNBT(NBTTagCompound tag) {
+		if (tag.hasKey("Target")) {
+			this.guardTarget = Trick.loadTrick(tag.getCompoundTag("Target"), this.pet);
+		}
+		if (this.guardTarget == null) {
+			this.guardTarget = new LocationTrick(this.pet.posX, this.pet.posY, this.pet.posZ);
+		}
 	}
 }

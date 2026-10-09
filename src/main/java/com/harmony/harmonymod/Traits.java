@@ -10,20 +10,24 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import java.util.UUID;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.*;
-import java.io.Serializable;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
+import net.minecraftforge.common.util.Constants;
 import java.util.Random;
 import java.util.List;
 
-public class Traits implements Serializable {
-	private static final long serialVersionUID = 1L;
+public class Traits {
 	private static Random r = new Random();
 
-	//Always add traits to end of existing traits for backward compatibility
+	// Saved by name, so never rename one that's in use
 	public static enum TRAIT {JUMP, FAST, HARDY, VICIOUS, FERTILE, NONE};
 	public static enum MAGICAL_TRAIT {FLY, NONE};
 
 	public TRAIT[] traits;
 	public MAGICAL_TRAIT[] m_traits;
+
+	private Traits() {}
 
 	public Traits(EntityLiving pet, EntityLiving parent1, EntityLiving parent2) {
 		m_traits = new MAGICAL_TRAIT[] {MAGICAL_TRAIT.NONE, MAGICAL_TRAIT.NONE, MAGICAL_TRAIT.NONE};
@@ -63,6 +67,49 @@ public class Traits implements Serializable {
 		applyTraits(pet);
 	}
 
+	public void writeToNBT(NBTTagCompound tag) {
+		NBTTagList list = new NBTTagList();
+		for (TRAIT t : this.traits) {
+			list.appendTag(new NBTTagString(t.name()));
+		}
+		tag.setTag("Traits", list);
+
+		list = new NBTTagList();
+		for (MAGICAL_TRAIT t : this.m_traits) {
+			list.appendTag(new NBTTagString(t.name()));
+		}
+		tag.setTag("MagicalTraits", list);
+	}
+
+	/*
+	 * Load saved traits. Their attribute modifiers are saved with the entity, so aren't applied again.
+	 */
+	public static Traits readFromNBT(NBTTagCompound tag) {
+		Traits t = new Traits();
+
+		t.traits = new TRAIT[] {TRAIT.NONE, TRAIT.NONE, TRAIT.NONE};
+		NBTTagList list = tag.getTagList("Traits", Constants.NBT.TAG_STRING);
+		for (int i = 0; i < list.tagCount() && i < t.traits.length; i++) {
+			try {
+				t.traits[i] = TRAIT.valueOf(list.getStringTagAt(i));
+			} catch (IllegalArgumentException e) {
+				System.out.println("HarmonyMod: Ignoring unknown saved trait " + list.getStringTagAt(i));
+			}
+		}
+
+		t.m_traits = new MAGICAL_TRAIT[] {MAGICAL_TRAIT.NONE, MAGICAL_TRAIT.NONE, MAGICAL_TRAIT.NONE};
+		list = tag.getTagList("MagicalTraits", Constants.NBT.TAG_STRING);
+		for (int i = 0; i < list.tagCount() && i < t.m_traits.length; i++) {
+			try {
+				t.m_traits[i] = MAGICAL_TRAIT.valueOf(list.getStringTagAt(i));
+			} catch (IllegalArgumentException e) {
+				System.out.println("HarmonyMod: Ignoring unknown saved magical trait " + list.getStringTagAt(i));
+			}
+		}
+
+		return t;
+	}
+
 	/*
 	 * Call after trait array has been initialized
 	 */
@@ -99,7 +146,7 @@ public class Traits implements Serializable {
 	 */
 	private void applyAttr(EntityLiving pet, double modifierValue, int modifierType, IAttribute attr, int key) {
 		AttributeModifier modifier = new AttributeModifier(
-				new UUID(853L + key, 9274L + attr.hashCode()),
+				new UUID(853L + key, 9274L + attr.getAttributeUnlocalizedName().hashCode()),
 				"Trait Modifier " + key,
 				modifierValue, modifierType);
 
@@ -110,6 +157,7 @@ public class Traits implements Serializable {
 			attrInst.applyModifier(modifier);
 		}
 	}
+
 
 
 	public static void register() {
