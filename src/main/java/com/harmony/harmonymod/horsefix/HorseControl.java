@@ -1,12 +1,10 @@
 package com.harmony.harmonymod.horsefix;
 
-import com.harmony.harmonymod.HarmonyMod;
+import com.harmony.harmonymod.HarmonyNetwork;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.WorldTickEvent;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityHorse;
@@ -23,8 +21,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
  * still work, and corrects the client if they disagree.
  */
 public class HorseControl {
-    public static SimpleNetworkWrapper network;
-
     // Furthest a horse may move in a single update (squared), same limit vanilla uses for players
     private static final double MAX_MOVE_SQ = 100.0D;
     // How far the server's result may be from the client's (squared) before the client is corrected
@@ -33,9 +29,6 @@ public class HorseControl {
     private static final double GROUND_PROBE = 0.0625D;
 
     public static void register() {
-        network = NetworkRegistry.INSTANCE.newSimpleChannel(HarmonyMod.MODID);
-        network.registerMessage(MountMoveMessage.Handler.class, MountMoveMessage.class, 0, Side.SERVER);
-        network.registerMessage(MountCorrectionMessage.Handler.class, MountCorrectionMessage.class, 1, Side.CLIENT);
         FMLCommonHandler.instance().bus().register(new HorseControl());
     }
 
@@ -121,6 +114,6 @@ public class HorseControl {
     }
 
     private static void sendCorrection(EntityPlayerMP player, Entity mount) {
-        network.sendTo(new MountCorrectionMessage(mount), player);
+        HarmonyNetwork.channel.sendTo(new MountCorrectionMessage(mount), player);
     }
 }

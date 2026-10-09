@@ -7,6 +7,7 @@ import com.harmony.harmonymod.items.GenericEntitySpawnEgg;
 import com.harmony.harmonymod.FeedAnimal;
 import com.harmony.harmonymod.RespawnAnimal;
 import com.harmony.harmonymod.horsefix.HorseControl;
+import com.harmony.harmonymod.sync.AnimalSync;
 import com.harmony.harmonymod.horsefix.HorseControlClient;
 import net.minecraft.init.Blocks;
 import cpw.mods.fml.common.Mod;
@@ -86,7 +87,7 @@ public class HarmonyMod
 		GameRegistry.registerItem(armor_bundle, "armor_bundle");
 		 */
 
-		// Item itemDiag = new ItemDiagnostic("Diagnostics");
+		new ItemDiagnostic("diagnostics");
 
 		// add Entities
 		/*
@@ -105,7 +106,9 @@ public class HarmonyMod
 	public void init(FMLInitializationEvent event)
 	{
 		//add crafting recipes and event handlers
+		HarmonyNetwork.register();
 		HarmonyProps.register();
+		AnimalSync.register();
 		SoundDB.getSoundDB();
 		FeedAnimal.register();
 		RespawnAnimal.register();

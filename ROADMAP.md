@@ -100,7 +100,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 
 - [x] Save animal data as versioned NBT instead of Java serialization, so updates don't break saves
 - [x] Remove code that only works in the dev environment (Jump trick reflects on `jump` by name)
-- [ ] Sync animal state (traits, happiness, tricks) to clients, needed for the overlay
+- [x] Sync animal state (traits, happiness, tricks) to clients, needed for the overlay
 - [ ] Ownership data and rules (bonding, transfer, reuse vanilla owners)
 - [x] Way to test the release jar in a normal Forge install
 - [ ] Fix known bugs: Sit doesn't sit, wander AI's crowding check uses x instead of y for its box,
@@ -118,7 +118,8 @@ Thaumcraft 4, Witchery and Botania when they're installed.
       teleporting to catch up
 - [ ] Traits: exponential stacking, first bad traits, polish breeding, Jump trait takes less fall damage
 - [ ] Happiness gates breeding, tune existing factors
-- [ ] Overlay showing an animal's traits, happiness, tricks and owner
+- [ ] Overlay showing an animal's traits, happiness, tricks and owner (replaces the Harmony Diagnostics
+      debug item)
 - [ ] Config cleanup (incl. option to quiet animal sounds), achievements or other in game hints so
       players can discover the systems
 

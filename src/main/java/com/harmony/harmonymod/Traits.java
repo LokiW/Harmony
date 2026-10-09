@@ -174,7 +174,8 @@ public class Traits {
 			EntityLivingBase e = jumpEvent.entityLiving;
 			HarmonyProps hp = HarmonyProps.get(e);
 
-			if(hp != null) {
+			// Clients may not have the animal's traits yet
+			if(hp != null && hp.isInitialized()) {
 				double multiplier = 1.0;
 				Traits traits = hp.traits;
 				for (TRAIT t : traits.traits) {

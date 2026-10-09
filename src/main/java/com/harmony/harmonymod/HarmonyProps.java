@@ -37,6 +37,9 @@ public class HarmonyProps implements IExtendedEntityProperties {
 
 	public transient EntityLiving pet;
 
+	// Data last sent to clients, so only changes are sent. Server only, see AnimalSync.
+	public NBTTagCompound lastSynced;
+
 	public HarmonyProps(Entity e) {
 		this.pet = (EntityLiving) e;
 		happiness = 0;
@@ -57,6 +60,9 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		registerAI();
 	}
 
+	/*
+	 * On clients this stays false until the server sends the animal's data
+	 */
 	public Boolean isInitialized() {
 		return traits != null;
 	}
@@ -70,21 +76,31 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	}
 
 	/*
-	 * Save traits, happiness and tricks with the entity
+	 * Traits, happiness and tricks, as saved with the entity and sent to clients
 	 */
+	public NBTTagCompound writeData() {
+		NBTTagCompound data = new NBTTagCompound();
+		data.setInteger("Version", DATA_VERSION);
+		data.setInteger("Happiness", happiness);
+		traits.writeToNBT(data);
+
+		NBTTagCompound trickData = new NBTTagCompound();
+		tricks.writeToNBT(trickData);
+		data.setTag("Tricks", trickData);
+		return data;
+	}
+
+	private void readData(NBTTagCompound data) {
+		happiness = data.getInteger("Happiness");
+		traits = Traits.readFromNBT(data);
+		tricks = new TrickHandler(pet);
+		tricks.readFromNBT(data.getCompoundTag("Tricks"));
+	}
+
 	@Override
 	public void saveNBTData(NBTTagCompound tag) {
 		if (this.isInitialized()) {
-			NBTTagCompound data = new NBTTagCompound();
-			data.setInteger("Version", DATA_VERSION);
-			data.setInteger("Happiness", happiness);
-			traits.writeToNBT(data);
-
-			NBTTagCompound trickData = new NBTTagCompound();
-			tricks.writeToNBT(trickData);
-			data.setTag("Tricks", trickData);
-
-			tag.setTag(PROP_NAME, data);
+			tag.setTag(PROP_NAME, writeData());
 		}
 	}
 
@@ -94,18 +110,20 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	@Override
 	public void loadNBTData(NBTTagCompound tag) {
 		if(tag.hasKey(PROP_NAME, Constants.NBT.TAG_COMPOUND)) {
-			NBTTagCompound data = tag.getCompoundTag(PROP_NAME);
-
-			happiness = data.getInteger("Happiness");
-			traits = Traits.readFromNBT(data);
-			tricks = new TrickHandler(pet);
-			tricks.readFromNBT(data.getCompoundTag("Tricks"));
-
+			readData(tag.getCompoundTag(PROP_NAME));
 			registerAI();
 		}
 	}
 
+	/*
+	 * Client copy of the server's data, see AnimalSync. No AI is registered, the server runs that.
+	 */
+	public void readSyncedData(NBTTagCompound data) {
+		readData(data);
+	}
+
 	private void registerAI() {
+		tricks.registerTask();
 		BreedingAI.registerTask(this.pet);
 		HarmonyWanderAI.registerTask(this.pet);
 	}
@@ -131,6 +149,10 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		 */
 		@SubscribeEvent
 		public void entityJoin(EntityJoinWorldEvent e) {
+			// Clients get their data from the server instead
+			if (e.world.isRemote) {
+				return;
+			}
 			HarmonyProps props = HarmonyProps.get(e.entity);
 			if(props != null && !props.isInitialized()) {
 				props.constructProperties();

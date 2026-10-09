@@ -35,11 +35,12 @@ public class TrickHandler extends EntityAIBase {
 		this.actions = new ActionSet(); //TODO initialize better
 		this.tricks = new HashMap<Integer, ActionSet>();
 
-		registerTask();
-
 		this.setMutexBits(3);
 	}
 
+	/*
+	 * Start running tricks as part of the pet's AI, server only
+	 */
 	public void registerTask() {
 		//add tricks
 		this.pet.tasks.addTask(0, this);
