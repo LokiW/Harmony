@@ -1,5 +1,6 @@
 package com.harmony.harmonymod.horsefix;
 
+import com.harmony.harmonymod.HarmonyNetwork;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
@@ -78,7 +79,7 @@ public class HorseControlClient {
         this.jumpHeld = jumpNowHeld;
 
         MoveEntityHelper.moveRiddenHorse(horse, player);
-        HorseControl.network.sendToServer(new MountMoveMessage(horse));
+        HarmonyNetwork.channel.sendToServer(new MountMoveMessage(horse));
     }
 
     public static void applyCorrection(MountCorrectionMessage message) {
