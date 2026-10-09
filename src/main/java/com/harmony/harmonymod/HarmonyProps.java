@@ -19,6 +19,7 @@ import net.minecraft.entity.ai.attributes.IAttribute;
 import com.harmony.harmonymod.tricks.TrickHandler;
 import com.harmony.harmonymod.aitasks.BreedingAI;
 import com.harmony.harmonymod.aitasks.HarmonyWanderAI;
+import java.util.UUID;
 
 
 /*
@@ -34,6 +35,10 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	public TrickHandler tricks;
 	public Traits traits;
 	public int happiness;
+
+	// Player bonded with this animal (see Ownership), null while unbonded
+	public UUID ownerId;
+	public String ownerName;
 
 	public transient EntityLiving pet;
 
@@ -75,6 +80,14 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		return (HarmonyProps) e.getExtendedProperties(PROP_NAME);
 	}
 
+	public boolean isBonded() {
+		return ownerId != null;
+	}
+
+	public boolean isOwner(EntityPlayer player) {
+		return ownerId != null && ownerId.equals(player.getUniqueID());
+	}
+
 	/*
 	 * Traits, happiness and tricks, as saved with the entity and sent to clients
 	 */
@@ -82,6 +95,10 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		NBTTagCompound data = new NBTTagCompound();
 		data.setInteger("Version", DATA_VERSION);
 		data.setInteger("Happiness", happiness);
+		if (ownerId != null) {
+			data.setString("OwnerId", ownerId.toString());
+			data.setString("OwnerName", ownerName);
+		}
 		traits.writeToNBT(data);
 
 		NBTTagCompound trickData = new NBTTagCompound();
@@ -92,6 +109,8 @@ public class HarmonyProps implements IExtendedEntityProperties {
 
 	private void readData(NBTTagCompound data) {
 		happiness = data.getInteger("Happiness");
+		ownerId = data.hasKey("OwnerId") ? UUID.fromString(data.getString("OwnerId")) : null;
+		ownerName = data.getString("OwnerName");
 		traits = Traits.readFromNBT(data);
 		tricks = new TrickHandler(pet);
 		tricks.readFromNBT(data.getCompoundTag("Tricks"));

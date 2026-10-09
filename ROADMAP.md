@@ -63,10 +63,16 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 ### Ownership (bonding)
 
 - Optional. Unbonded animals obey anyone and any noteblock.
-- Bonded animals ignore other players' instruments and can't be leashed or bonded by anyone else.
-  They still obey all noteblocks (noteblocks don't know who built them), so automation keeps working.
-- Reuses vanilla ownership for wolves, ocelots and horses so every animal behaves the same way.
-- Deliberate transfer action, for giving bred animals to friends.
+- Bond by naming the animal with a name tag. Name tags get a crafting recipe (string, lead, paper,
+  black dye). Wolves, ocelots and horses can only be bonded by their tamer.
+- Only the owner can leash, rename, train (melon), set the respawn point of, or use instruments on a
+  bonded animal. Bonded animals still obey all noteblocks (noteblocks don't know who built them), so
+  automation keeps working.
+- Transfer with adoption papers (paper, black dye, name tag). Right clicking signs them: the first
+  signature is the giver (the owner), the second the receiver. Right clicking an animal attaches it,
+  in any order, so a breeder can sign and let a friend pick from the litter. When complete the animal
+  changes owner (and tamer, for tameable animals) and the papers are used up.
+- No way to release a bond back to nobody for now.
 
 ### Protecting pets
 
@@ -101,7 +107,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - [x] Save animal data as versioned NBT instead of Java serialization, so updates don't break saves
 - [x] Remove code that only works in the dev environment (Jump trick reflects on `jump` by name)
 - [x] Sync animal state (traits, happiness, tricks) to clients, needed for the overlay
-- [ ] Ownership data and rules (bonding, transfer, reuse vanilla owners)
+- [x] Ownership data and rules (bonding, transfer, reuse vanilla owners)
 - [x] Way to test the release jar in a normal Forge install
 - [ ] Fix known bugs: Sit doesn't sit, wander AI's crowding check uses x instead of y for its box,
       animals scared of water, GO without a target teleports the animal south every half second
@@ -112,7 +118,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - [ ] Reliable core tricks: follow, stay/sit, go to, guard, attack, come back
 - [ ] Phrase based listening (single notes still instant)
 - [ ] First handheld instrument
-- [ ] Bonding and transfer
+- [x] Bonding and transfer (done with Phase 0 ownership)
 - [ ] Golden / enchanted golden apple respawn tiers, spirit form waiting
 - [ ] Pets follow through dimensions and owner teleports, path to owner aggressively instead of
       teleporting to catch up
