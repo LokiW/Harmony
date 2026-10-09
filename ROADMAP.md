@@ -31,8 +31,14 @@ Thaumcraft 4, Witchery and Botania when they're installed.
   babies inherit each slot from a random parent.
 - Stacked traits scale exponentially, so three Hardy is far stronger than one. This is what makes a
   well bred pet strong enough for modded play.
-- Bad traits balance the strong scaling and have to be bred out (ideas: Slow, Frail, Timid, Clumsy).
-- Current traits (Jump, Fast, Hardy, Vicious, Fertile) are a starting set, more to come.
+- Three copies of a trait is the max, and strong: speed x3.25 (Fast), health x8 (Hardy), attack x7
+  (Vicious), jump x2.74 and fall damage x0.22 (Jump), 4 extra babies per parent (Fertile). Each copy
+  multiplies, so one copy is the cube root of that.
+- Bad traits undo one copy of their counterpart and have to be bred out: Slow, Frail, Weak, Clumsy.
+  Behavioral ones (e.g. Timid) later.
+- Wild animals usually have zero or one trait. Babies have a 5% chance per slot of a new trait from
+  the species' wild list instead of inheriting one.
+- `/harmony spawn <animal> [traits]` spawns an animal with chosen traits for testing.
 - Magical traits add extra strength and are imparted by rituals (see Magic).
 
 ### Happiness
@@ -111,7 +117,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - [x] Way to test the release jar in a normal Forge install
 - [x] Fix known bugs: Sit doesn't sit, wander AI's crowding check uses x instead of y for its box,
       animals scared of water, GO without a target teleports the animal south every half second
-- [ ] Remove leftovers: example lang entries, HarmonyHorse spawn egg, unused imports and debug prints
+- [x] Remove leftovers: example lang entries, HarmonyHorse spawn egg, unused imports and debug prints
 
 ### Phase 1: MVP
 
@@ -123,7 +129,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - [ ] Golden / enchanted golden apple respawn tiers, spirit form waiting
 - [ ] Pets follow through dimensions and owner teleports, path to owner aggressively instead of
       teleporting to catch up
-- [ ] Traits: exponential stacking, first bad traits, polish breeding, Jump trait takes less fall damage
+- [x] Traits: exponential stacking, first bad traits, polish breeding, Jump trait takes less fall damage
 - [ ] Happiness gates breeding, tune existing factors
 - [ ] Overlay showing an animal's traits, happiness, tricks and owner (replaces the Harmony Diagnostics
       debug item)

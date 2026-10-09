@@ -5,10 +5,7 @@ import net.minecraft.entity.ai.attributes.*;
 import net.minecraft.entity.*;
 import net.minecraft.world.*;
 import net.minecraft.pathfinding.*;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.World;
 import net.minecraft.nbt.NBTTagCompound;
-import java.lang.Math;
 
 public class LocationTrick extends Trick {
     public double targetX;

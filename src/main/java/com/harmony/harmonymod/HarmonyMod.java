@@ -3,29 +3,19 @@ package com.harmony.harmonymod;
 import com.harmony.harmonymod.sounds.SoundDB;
 import com.harmony.harmonymod.Traits.TRAIT;
 import com.harmony.harmonymod.items.ItemDiagnostic;
-import com.harmony.harmonymod.items.GenericEntitySpawnEgg;
-import com.harmony.harmonymod.FeedAnimal;
-import com.harmony.harmonymod.RespawnAnimal;
 import com.harmony.harmonymod.horsefix.HorseControl;
 import com.harmony.harmonymod.sync.AnimalSync;
 import com.harmony.harmonymod.ownership.Ownership;
 import com.harmony.harmonymod.tricks.Sit;
 import com.harmony.harmonymod.horsefix.HorseControlClient;
 import com.harmony.harmonymod.client.LearningIndicator;
-import net.minecraft.init.Blocks;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerStartedEvent;
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.EntityRegistry;
-import cpw.mods.fml.relauncher.Side;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraftforge.common.MinecraftForge;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
-import net.minecraft.item.Item;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,38 +64,8 @@ public class HarmonyMod
 			LearningIndicator.register();
 		}
 
-		int mobID = 0;
-
-		//add blocks and items
-		/*
-		 * Example Item
-		Item skillpoint = new Item() {
-		public ItemStack onItemRightClick(ItemStack is, World w, EntityPlayer p) {
-			return is;
-		}
-		}.setUnlocalizedName("skill_point").setCreativeTab(CreativeTabs.tabMisc);
-		GameRegistry.registerItem(skillpoint, "skill_point");
-		 */
-
-		/*
-		 * Armor bundle WIP
-		Item armor_bundle = new ItemArmorBundle().setUnlocalizedName("armor_bundle").setCreativeTab(CreativeTabs.tabMisc);
-		armor_bundle.setTextureName(ExampleMod.MODID + ":" + "ArmorBag");
-
-		GameRegistry.registerItem(armor_bundle, "armor_bundle");
-		 */
-
 		new ItemDiagnostic("diagnostics");
 		Ownership.registerItems();
-
-		// add Entities
-		/*
-		EntityRegistry.registerModEntity(HarmonyHorse.class, "HarmonyHorse", mobID++, this, 80, 3, false);
-
-		Item horseSpawnEgg = new GenericEntitySpawnEgg("HarmonyHorse", 0xE18519, 0x000000)
-			.setUnlocalizedName("spawn_egg_harmony_horse")
-			.setTextureName(HarmonyMod.MODID+":spawn_egg");
-		GameRegistry.registerItem(horseSpawnEgg, "spawnEggHarmonyHorse");*/
 	}
 
 	/*
@@ -130,17 +90,18 @@ public class HarmonyMod
 		Traits.register();
 	}
 
+	@EventHandler
+	public void serverStarting(FMLServerStartingEvent event) {
+		event.registerServerCommand(new HarmonyCommand());
+	}
+
 	/*
 	 * Load configuration data from file
 	 */
 	public static void syncConfig() {
 		try {
 			config.load();
-			//useful methods
-			//config.get("category name","key","default value","comment");
-			//config.getCategoryNames();
-			//config.hasKey(c,Integer.toString(i)))
-			
+
 			if(config.getCategoryNames().size() < 2) {
 				generateConfig();
 			}
@@ -154,7 +115,6 @@ public class HarmonyMod
 					p = config.get(MODID, "breedingCost", 5);
 					breedingCost = p.getInt();
 				} else {
-					System.out.println("HarmonyMod: config setup for " + s);
 					//for each mob
 					Property p;
 					p = config.get(s, "slot1", "");
@@ -187,41 +147,34 @@ public class HarmonyMod
 		config.get(MODID, "breedingHappiness", 10, "required happiness to breed naturally");
 		config.get(MODID, "breedingCost", 5, "penalty for successfully breeding");
 
-		config.get("EntityCow", "slot1", "VICIOUS");
-		config.get("EntityCow", "slot2", "VICIOUS");
-		config.get("EntityCow", "slot3", "VICIOUS");
-		config.get("EntityCow", "needsAttackAttr", true);
-
-		config.get("EntitySheep", "slot1", "HARDY");
-		config.get("EntitySheep", "slot2", "HARDY");
-		config.get("EntitySheep", "slot3", "HARDY");
-		config.get("EntitySheep", "needsAttackAttr", true);
-
-
-		config.get("EntityPig", "slot1", "FAST");
-		config.get("EntityPig", "slot2", "FAST");
-		config.get("EntityPig", "slot3", "FAST");
-		config.get("EntityPig", "needsAttackAttr", true);
-
-
-		config.get("EntityChicken", "slot1", "FERTILE");
-		config.get("EntityChicken", "slot2", "FERTILE");
-		config.get("EntityChicken", "slot3", "FERTILE");
-		config.get("EntityChicken", "needsAttackAttr", true);
-
-
-		config.get("EntityWolf", "slot1", "JUMP,HARDY,FAST,VICIOUS");
-		config.get("EntityWolf", "slot2", "JUMP,HARDY,FAST,VICIOUS");
-		config.get("EntityWolf", "slot3", "JUMP,HARDY,FAST,VICIOUS");
-		config.get("EntityWolf", "needsAttackAttr", true);
-
-		config.get("EntityHorse", "slot1", "HARDY");
-		config.get("EntityHorse", "slot2", "HARDY");
-		config.get("EntityHorse", "slot3", "HARDY");
-		config.get("EntityHorse", "needsAttackAttr", true);
+		// Which traits wild animals can get, per species: good ones that fit the species, and bad ones
+		addSpecies("EntityCow", "VICIOUS,HARDY", "SLOW,WEAK");
+		addSpecies("EntitySheep", "HARDY,FERTILE", "FRAIL,SLOW");
+		addSpecies("EntityPig", "FAST,HARDY", "SLOW,CLUMSY");
+		addSpecies("EntityChicken", "FERTILE,JUMP", "FRAIL,CLUMSY");
+		addSpecies("EntityWolf", "JUMP,HARDY,FAST,VICIOUS", "SLOW,FRAIL,WEAK,CLUMSY");
+		addSpecies("EntityHorse", "FAST,HARDY,JUMP", "SLOW,FRAIL,CLUMSY");
 
 		config.save();
 
+	}
+
+	/*
+	 * Each slot picks one entry at random from its list, so repeating an entry makes it more likely.
+	 * NONE fills two thirds of each list, so a wild animal usually has no more than one trait.
+	 */
+	private static void addSpecies(String species, String good, String bad) {
+		String traits = good + "," + bad;
+		int traitCount = traits.split(",").length;
+		String slot = traits;
+		for (int i = 0; i < traitCount * 2; i++) {
+			slot = "NONE," + slot;
+		}
+		String comment = "Traits wild animals can get in this slot, one picked at random. Repeat an entry to make it more likely.";
+		config.get(species, "slot1", slot, comment);
+		config.get(species, "slot2", slot, comment);
+		config.get(species, "slot3", slot, comment);
+		config.get(species, "needsAttackAttr", true);
 	}
 
 	private static List<TRAIT> parse(String in) {
@@ -230,13 +183,9 @@ public class HarmonyMod
 		String[] traits = in.split(",");
 		for(String s : traits) {
 			TRAIT toAdd = TRAIT.NONE;
-			for(TRAIT t : TRAIT.values()) {
-				if(t.toString().equals(s)) {
-					toAdd = t;
-				}
-			}
-
-			if(toAdd == TRAIT.NONE) {
+			try {
+				toAdd = TRAIT.valueOf(s.trim());
+			} catch (IllegalArgumentException e) {
 				System.out.println("HarmonyMod: Could not parse config value " + s);
 			}
 

@@ -1,20 +1,15 @@
 package com.harmony.harmonymod.aitasks;
 
-import com.harmony.harmonymod.HarmonyMod;
 import com.harmony.harmonymod.HarmonyProps;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import net.minecraft.util.Vec3;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAIWander;
-import net.minecraft.entity.ai.EntityAIControlledByPlayer;
 import net.minecraft.entity.ai.EntityAITasks.EntityAITaskEntry;
 import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.block.Block;
 import net.minecraft.block.IGrowable;

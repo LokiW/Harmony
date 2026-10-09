@@ -123,7 +123,7 @@ public abstract class Trick {
 			if (damageAttr != null) {
 				damage = (float) damageAttr.getAttributeValue();
 			} else {
-				System.out.println("HarmonyMod: Couldn't find attackAttribute for animal D: ");
+				System.out.println("HarmonyMod: " + this.pet + " has no attack damage attribute, can't attack");
 			}
 
 			target.attackEntityFrom(DamageSource.causeMobDamage(this.pet), damage);
