@@ -10,8 +10,10 @@
     .\test.cmd -Lag 300 -Jitter 50   # clients join through a proxy adding 300 ms ping (+/-50 ms)
     .\test.cmd -Lag 200 -LagSpike 1500 -Players Alex,Steve -LagPlayers Alex
                                      # only Alex lags, and freezes for 1.5 s every 10 s
+    .\test.cmd -Release              # the release jar in the real (obfuscated) game instead of the dev game
 
-Server files live in run/server, extra players in run/players/<name>.
+Server files live in run/server, extra players in run/players/<name>. With -Release everything lives
+under run/obfuscated instead, so release testing never touches your dev worlds.
 Players listed here are made server operators so they can use /give, /gamemode etc.
 The lag options need Python (scripts/lagproxy.py), the proxy listens on Port + 1.
 #>
@@ -20,6 +22,8 @@ param(
     [int]$Port = 25565,
     [switch]$ServerOnly,
     [switch]$NoServer,
+    # Test the release jar in the real game, to catch problems that only show up outside the dev environment
+    [switch]$Release,
     # Round trip delay in ms added to clients' connections
     [int]$Lag = 0,
     # Random +/- ms added to the delay in each direction
@@ -36,7 +40,17 @@ $ErrorActionPreference = "Stop"
 $Players = @($Players | ForEach-Object { $_ -split "," } | Where-Object { $_ })
 $LagPlayers = @($LagPlayers | ForEach-Object { $_ -split "," } | Where-Object { $_ })
 $root = $PSScriptRoot
-$serverDir = Join-Path $root "run\server"
+if ($Release) {
+    $serverDir = Join-Path $root "run\obfuscated\server"
+    $serverTask = "runObfServer"
+    $clientTask = "runObfClient"
+    $buildTask = "reobfJar"
+} else {
+    $serverDir = Join-Path $root "run\server"
+    $serverTask = "runServer"
+    $clientTask = "runClient"
+    $buildTask = "classes"
+}
 
 # The UUID an offline mode server gives a player name (Java's UUID.nameUUIDFromBytes)
 function Get-OfflineUuid([string]$name) {
@@ -119,7 +133,7 @@ if (-not $NoServer) {
 
 # Compile once up front so the windows below don't all try to build at the same time
 Write-Host "Building..."
-& .\gradlew.bat classes -q
+& .\gradlew.bat $buildTask -q
 if ($LASTEXITCODE -ne 0) {
     throw "Build failed."
 }
@@ -129,7 +143,7 @@ if (-not $NoServer) {
         throw "Something is already using port $Port. Is a server already running? Use -NoServer to just start clients."
     }
 
-    $server = Start-GradleWindow "Harmony server" "runServer"
+    $server = Start-GradleWindow "Harmony server" $serverTask
     Write-Host "Waiting for the server to start on port $Port..."
     $deadline = (Get-Date).AddMinutes(5)
     while (-not (Test-Port $Port)) {
@@ -168,8 +182,8 @@ if (-not $ServerOnly) {
         if ($useLag -and ($LagPlayers.Count -eq 0 -or $LagPlayers -contains $player)) {
             $connectPort = $proxyPort
         }
-        $gradleArgs = "runClient -Pconnect=localhost:$connectPort"
-        # Developer keeps using run/ as before, anyone else gets their own folder
+        $gradleArgs = "$clientTask -Pconnect=localhost:$connectPort"
+        # Developer uses the base folder, anyone else gets their own folder in players/
         if ($player -ne "Developer") {
             $gradleArgs += " -Pplayer=$player"
         }
