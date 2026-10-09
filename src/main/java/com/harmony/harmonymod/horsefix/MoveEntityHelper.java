@@ -21,6 +21,12 @@ public class MoveEntityHelper {
             forward *= 0.25F;
         }
 
+        // Float like vanilla: the server's swim AI keeps an unridden horse up, but it doesn't move
+        // this one, so without this a ridden horse sinks and drowns in deep water.
+        if (horse.isInWater() || horse.handleLavaMovement()) {
+            horse.motionY += 0.03999999910593033D;
+        }
+
         horse.setAIMoveSpeed((float)horse.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue());
         MoveEntityHelper.moveEntityWithHeadingBasic(horse, strafe, forward);
     }

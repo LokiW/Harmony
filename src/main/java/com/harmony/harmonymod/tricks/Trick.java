@@ -43,6 +43,12 @@ public abstract class Trick {
 
 
 	/*
+	 * Called when the trick ends or another trick replaces it, to undo anything it set up
+	 */
+	public void stopTrick() {}
+
+
+	/*
 	 * Name this trick is saved under while it's the pet's current trick, or null if it isn't
 	 * worth keeping across a reload. Also add new types to loadTrick. Never rename a saved type.
 	 */
@@ -85,6 +91,8 @@ public abstract class Trick {
 			trick = new LocationTrick();
 		} else if ("entity".equals(type)) {
 			trick = new EntityTrick();
+		} else if ("sit".equals(type)) {
+			trick = new Sit();
 		} else {
 			System.out.println("HarmonyMod: Ignoring unknown saved trick type " + type);
 			return null;

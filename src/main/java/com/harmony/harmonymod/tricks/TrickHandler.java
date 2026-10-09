@@ -79,12 +79,25 @@ public class TrickHandler extends EntityAIBase {
 	public void updateCurrentTrick(Trick newTrick) {
 		if (newTrick != null) {
 			System.out.println("HarmonyMod: " + pet + " doing trick " + newTrick);
+			if (newTrick instanceof Stop) {
+				endCurrentTrick();
+				pet.getNavigator().clearPathEntity();
+				return;
+			}
 			newTrick.setupTrick(pet, currentTrick);
 			if (newTrick.isInstant()) {
 				newTrick.act();
 			} else if (currentTrick == null || !currentTrick.consume(newTrick)) {
+				endCurrentTrick();
 				currentTrick = newTrick;
 			}
+		}
+	}
+
+	private void endCurrentTrick() {
+		if (currentTrick != null) {
+			currentTrick.stopTrick();
+			currentTrick = null;
 		}
 	}
 
@@ -112,8 +125,26 @@ public class TrickHandler extends EntityAIBase {
 	public void updateTask() {
 		boolean continueTrick = currentTrick.act();
 		if (!continueTrick) {
-			currentTrick = null;
+			endCurrentTrick();
 		}
+	}
+
+	// Whether the pet avoided water before a trick started, see startExecuting
+	private boolean avoidedWater;
+
+	/*
+	 * Animals normally path around water. While doing tricks they go through it (swimming), so
+	 * water doesn't stop them reaching where they were told to go.
+	 */
+	@Override
+	public void startExecuting() {
+		avoidedWater = pet.getNavigator().getAvoidsWater();
+		pet.getNavigator().setAvoidsWater(false);
+	}
+
+	@Override
+	public void resetTask() {
+		pet.getNavigator().setAvoidsWater(avoidedWater);
 	}
 
 	/*
@@ -212,13 +243,7 @@ public class TrickHandler extends EntityAIBase {
 		tag.setTag(key, l);
 	}
 
-	/*
-	 * Unused required overrides
-	 */
-	@Override
-	public void resetTask() {}
-	@Override
-	public void startExecuting() {}
+
 
 	/*
 	 * Learning struct, which stores last heard sound and action tried

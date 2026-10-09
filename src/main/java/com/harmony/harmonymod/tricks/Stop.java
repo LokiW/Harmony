@@ -20,20 +20,17 @@ import com.harmony.harmonymod.HarmonyProps;
 import com.harmony.harmonymod.Traits;
 import com.harmony.harmonymod.Traits.MAGICAL_TRAIT;
 
+/*
+ * Ends whatever the pet is doing, handled by TrickHandler
+ */
 public class Stop extends Trick {
-	private int delayCounter;
 
 	public void setupTrick(EntityLiving pet, Trick currentTrick) {
 		this.pet = pet;
 	}
 
 	public boolean act() {
-		if (this.delayCounter >= LEARNING_DELAY) {
-			return false;
-		}
-
-		delayCounter++;
-		return true;
+		return false;
 	}
 
 	public boolean isInstant() {

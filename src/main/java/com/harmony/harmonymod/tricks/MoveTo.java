@@ -8,10 +8,19 @@ import net.minecraft.world.World;
 import java.lang.Math;
 import com.harmony.harmonymod.HarmonyProps;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.ai.RandomPositionGenerator;
+import net.minecraft.util.Vec3;
 
 public class MoveTo extends Trick {
+	// Without a target the pet walks off this far, giving up if it hasn't arrived in time
+	private static final int MIN_WANDER = 6;
+	private static final int MAX_WANDER = 10;
+	private static final int WANDER_TICKS = 200;
+
     private int delayCounter;
 	public Trick targetTrick;
+	private LocationTrick wanderTarget;
+	private int wanderTicks;
 
 	public void setupTrick(EntityLiving pet, Trick currentTrick) {
 		this.pet = pet;
@@ -32,10 +41,41 @@ public class MoveTo extends Trick {
 				LocationTrick targetL = (LocationTrick) this.targetTrick;
 				return moveToPoint(targetL.targetX, targetL.targetY, targetL.targetZ, false);
 			} else {
-				return randomTeleport();
+				return wander();
 			}
 		}
 		return true;
+	}
+
+	/*
+	 * Walk to a random reachable spot a few blocks away, then stop
+	 */
+	private boolean wander() {
+		if (this.wanderTarget == null) {
+			this.wanderTarget = pickWanderTarget();
+			if (this.wanderTarget == null) {
+				return false;
+			}
+		}
+		this.wanderTicks += 10;
+		if (this.wanderTicks > WANDER_TICKS) {
+			this.pet.getNavigator().clearPathEntity();
+			return false;
+		}
+		return moveToPoint(this.wanderTarget.targetX, this.wanderTarget.targetY, this.wanderTarget.targetZ, false);
+	}
+
+	private LocationTrick pickWanderTarget() {
+		if (!(this.pet instanceof EntityCreature)) {
+			return null;
+		}
+		for (int attempt = 0; attempt < 10; attempt++) {
+			Vec3 spot = RandomPositionGenerator.findRandomTarget((EntityCreature) this.pet, MAX_WANDER, 7);
+			if (spot != null && this.pet.getDistance(spot.xCoord, this.pet.posY, spot.zCoord) >= MIN_WANDER) {
+				return new LocationTrick(spot.xCoord, spot.yCoord, spot.zCoord);
+			}
+		}
+		return null;
 	}
 
 	public boolean isInstant() {
@@ -72,9 +112,5 @@ public class MoveTo extends Trick {
 		}
 	}
 
-	private boolean randomTeleport() {
-		// TODO don't always teleport south
-		teleportHelper(this.pet.posX - 6, this.pet.posY, this.pet.posZ);
-		return true;
-	}
+
 }

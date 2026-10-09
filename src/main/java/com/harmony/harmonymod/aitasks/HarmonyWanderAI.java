@@ -73,7 +73,7 @@ public class HarmonyWanderAI extends EntityAIBase
 				return true;
 			}
 	
-			AxisAlignedBB boxToCheck = AxisAlignedBB.getBoundingBox(var1.xCoord-2, var1.xCoord-2,
+			AxisAlignedBB boxToCheck = AxisAlignedBB.getBoundingBox(var1.xCoord-2, var1.yCoord-2,
 				 													var1.zCoord-2,
 																	var1.xCoord+2, var1.yCoord+2,
 																	var1.zCoord+2);
