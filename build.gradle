@@ -43,3 +43,24 @@ processResources {
     }
 }
 
+// Local test setup, see test.ps1
+//   -Pplayer=Name      play as Name, with its own folder in run/players/ (default: Developer in run/)
+//   -Pconnect=host:port  join that server on startup (port defaults to 25565)
+tasks.named("runServer") {
+    workingDir = file("run/server")
+    doFirst { workingDir.mkdirs() }
+}
+
+tasks.named("runClient") {
+    def player = findProperty("player")
+    if (player) {
+        username = player
+        workingDir = file("run/players/${player}")
+    }
+    def connect = findProperty("connect")
+    if (connect) {
+        def (host, port) = (connect.contains(":") ? connect.split(":") : [connect, "25565"]) as List
+        extraArgs.addAll("--server", host, "--port", port)
+    }
+    doFirst { workingDir.mkdirs() }
+}
