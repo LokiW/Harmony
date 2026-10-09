@@ -20,8 +20,11 @@ The mod jar ends up in `build/libs/`.
     .\test.cmd -Lag 300 -Jitter 50   # clients join through a proxy adding 300 ms ping (+/-50 ms)
     .\test.cmd -Lag 200 -LagSpike 1500 -Players Alex,Steve -LagPlayers Alex
                                      # only Alex lags, and freezes for 1.5 s every 10 s
+    .\test.cmd -Release              # the release jar in the real (obfuscated) game
 
 The first run asks you to accept the Minecraft EULA for the server. Server files live in `run/server`,
 extra players in `run/players/<name>`, and the listed players are made server operators.
+`-Release` runs the jar players will actually install, in the real game rather than the dev
+environment, to catch problems that only show up there. It uses its own folders under `run/obfuscated`.
 The lag options need Python, see `scripts/lagproxy.py`.
 Single player still works with `./gradlew runClient`.

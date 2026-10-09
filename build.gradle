@@ -44,23 +44,58 @@ processResources {
 }
 
 // Local test setup, see test.ps1
-//   -Pplayer=Name      play as Name, with its own folder in run/players/ (default: Developer in run/)
+//   -Pplayer=Name      play as Name, with its own folder in players/ (default: Developer)
 //   -Pconnect=host:port  join that server on startup (port defaults to 25565)
+//
+// runClient / runServer run the dev game from run/ and run/server.
+// runObfClient / runObfServer run the release jar in the real (obfuscated) game, from run/obfuscated
+// and run/obfuscated/server, to catch problems that only show up outside the dev environment.
+
+def configureClient = { task, File baseDir ->
+    task.configure {
+        def player = findProperty("player")
+        if (player) {
+            username = player
+            workingDir = new File(baseDir, "players/${player}")
+        } else {
+            workingDir = baseDir
+        }
+        def connect = findProperty("connect")
+        if (connect) {
+            def (host, port) = (connect.contains(":") ? connect.split(":") : [connect, "25565"]) as List
+            extraArgs.addAll("--server", host, "--port", port)
+        }
+        doFirst { workingDir.mkdirs() }
+    }
+}
+
+// Put the release jar in a game folder's mods, replacing any older build so two versions never load
+def installReleaseJar = { task ->
+    task.configure {
+        doFirst {
+            def mods = new File(workingDir, "mods")
+            mods.mkdirs()
+            project.delete(project.fileTree(mods) { include "${base.archivesName.get()}-*.jar" })
+            project.copy {
+                from tasks.reobfJar.archiveFile
+                into mods
+            }
+        }
+    }
+}
+
 tasks.named("runServer") {
     workingDir = file("run/server")
     doFirst { workingDir.mkdirs() }
 }
 
-tasks.named("runClient") {
-    def player = findProperty("player")
-    if (player) {
-        username = player
-        workingDir = file("run/players/${player}")
-    }
-    def connect = findProperty("connect")
-    if (connect) {
-        def (host, port) = (connect.contains(":") ? connect.split(":") : [connect, "25565"]) as List
-        extraArgs.addAll("--server", host, "--port", port)
-    }
+configureClient(tasks.named("runClient"), file("run"))
+
+tasks.named("runObfServer") {
+    workingDir = file("run/obfuscated/server")
     doFirst { workingDir.mkdirs() }
 }
+installReleaseJar(tasks.named("runObfServer"))
+
+configureClient(tasks.named("runObfClient"), file("run/obfuscated"))
+installReleaseJar(tasks.named("runObfClient"))
