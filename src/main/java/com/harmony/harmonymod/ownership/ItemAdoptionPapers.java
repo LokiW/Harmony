@@ -44,7 +44,7 @@ public class ItemAdoptionPapers extends HarmonyItem {
 			return stack;
 		}
 		Long usedAt = usedOnAnimalAt.remove(player.getUniqueID());
-		if (usedAt != null && usedAt == world.getTotalWorldTime()) {
+		if ((usedAt != null && usedAt == world.getTotalWorldTime()) || isUsed(stack)) {
 			return stack;
 		}
 
@@ -66,6 +66,9 @@ public class ItemAdoptionPapers extends HarmonyItem {
 	 */
 	public void useOnAnimal(ItemStack stack, EntityPlayer player, EntityLiving animal) {
 		usedOnAnimalAt.put(player.getUniqueID(), player.worldObj.getTotalWorldTime());
+		if (isUsed(stack)) {
+			return;
+		}
 		HarmonyProps hp = HarmonyProps.get(animal);
 		if (!hp.isBonded()) {
 			Ownership.tell(player, "harmony.adoption.not_bonded", animal.getCommandSenderName());
@@ -132,6 +135,10 @@ public class ItemAdoptionPapers extends HarmonyItem {
 		UUID receiverId = getId(stack, "Receiver");
 		String receiverName = getName(stack, "Receiver");
 		Ownership.setOwner(animal, hp, receiverId, receiverName);
+
+		// Removed right away, and again on the next inventory tick in case vanilla puts it back:
+		// in creative, right clicking in the air restores the held stack after the item is used.
+		getTag(stack).setBoolean("Used", true);
 		stack.stackSize = 0;
 		player.inventory.setInventorySlotContents(player.inventory.currentItem, null);
 
@@ -140,6 +147,17 @@ public class ItemAdoptionPapers extends HarmonyItem {
 		if (other != null) {
 			Ownership.tell(other, "harmony.adoption.done", animal.getCommandSenderName(), receiverName);
 		}
+	}
+
+	@Override
+	public void onUpdate(ItemStack stack, World world, Entity holder, int slot, boolean held) {
+		if (!world.isRemote && isUsed(stack) && holder instanceof EntityPlayer) {
+			((EntityPlayer) holder).inventory.setInventorySlotContents(slot, null);
+		}
+	}
+
+	private static boolean isUsed(ItemStack stack) {
+		return stack.hasTagCompound() && stack.getTagCompound().getBoolean("Used");
 	}
 
 	private static boolean isComplete(ItemStack stack) {
