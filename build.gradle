@@ -89,6 +89,13 @@ def installReleaseJar = { task ->
     }
 }
 
+// Test worlds are disposable: when an item or block the world contains has been removed from the mod,
+// remove it from the world instead of waiting for someone to type /fml confirm in the server window
+// (connecting clients get dropped while the server waits)
+["runServer", "runObfServer"].each { name ->
+    tasks.named(name) { extraJvmArgs.add("-Dfml.queryResult=confirm") }
+}
+
 tasks.named("runServer") {
     workingDir = file("run/server")
     doFirst { workingDir.mkdirs() }
