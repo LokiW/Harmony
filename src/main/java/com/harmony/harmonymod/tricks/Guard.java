@@ -2,6 +2,7 @@ package com.harmony.harmonymod.tricks;
 
 import net.minecraft.entity.*;
 import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.*;
@@ -12,10 +13,14 @@ import net.minecraft.nbt.NBTTagCompound;
 public class Guard extends Trick {
     private int delayCounter;
 	private Trick guardTarget;
+	private EntityLivingBase fighting;
 
 	public void setupTrick(EntityLiving pet, Trick currentTrick) {
 		this.pet = pet;
-		if (currentTrick instanceof LocationTrick || currentTrick instanceof EntityTrick) {
+		if (currentTrick instanceof MoveTo && ((MoveTo) currentTrick).targetTrick instanceof LocationTrick) {
+			// Told to guard after going to a place: guard that place
+			this.guardTarget = ((MoveTo) currentTrick).targetTrick;
+		} else if (currentTrick instanceof LocationTrick || currentTrick instanceof EntityTrick) {
 			this.guardTarget = currentTrick;	
 		} else {
 			this.guardTarget = new LocationTrick(this.pet.posX, this.pet.posY, this.pet.posZ);
@@ -31,27 +36,31 @@ public class Guard extends Trick {
 				this.guardTarget = new LocationTrick(this.pet.posX, this.pet.posY, this.pet.posZ);
 			}
 
-			if (this.pet.getAttackTarget() == null || this.pet.getAttackTarget().isDead) {
-				boolean getNewTarget = false;
-				// If to far away from guard location/entity move back
-				if (this.guardTarget instanceof LocationTrick) {
-					LocationTrick trickL = (LocationTrick) guardTarget;
-					moveToPoint(trickL.targetX, trickL.targetY, trickL.targetZ, false);
-					if (this.pet.getDistanceSq(trickL.targetX, trickL.targetY, trickL.targetZ) <= 10.0D)
-						getNewTarget = true;
-				} else {
-					EntityLiving guarded = ((EntityTrick) guardTarget).getTarget();
-					moveToEntity(guarded, true);
-					if (this.pet.getDistanceSqToEntity(guarded) <= 10.0D)
-						getNewTarget = true;
-				}
+			// What it's fighting is kept here and reapplied, since vanilla's targeting AI clears or replaces
+			// the pet's attack target (e.g. a wolf hunting sheep). Monsters only, within LEASH of its post.
+			if (this.fighting != null && (this.fighting.isDead || distanceFromPost(this.fighting) > LEASH)) {
+				this.fighting = null;
+			}
 
-				if (getNewTarget) {
-					// Find target to attack
-					setNewAttackTarget();
+			if (this.fighting == null) {
+				this.pet.setAttackTarget(null);
+				// Back to its post, then look for monsters around it
+				boolean atPost;
+				double[] post = postPosition();
+				if (this.guardTarget instanceof LocationTrick) {
+					moveToPoint(post[0], post[1], post[2], false);
+				} else {
+					moveToEntity(((EntityTrick) this.guardTarget).getTarget(), true);
+				}
+				atPost = this.pet.getDistanceSq(post[0], post[1], post[2]) <= 10.0D;
+				if (atPost) {
+					this.fighting = Attack.findMonster(this.pet, post[0], post[1], post[2], SEARCH);
 				}
 			}
-			attackTarget();
+			if (this.fighting != null) {
+				this.pet.setAttackTarget(this.fighting);
+				attackTarget();
+			}
 		}
 		return true;
 	}
@@ -70,49 +79,31 @@ public class Guard extends Trick {
 		return false;
 	}
 
-	private void setNewAttackTarget() {
-		double targetX;
-		double targetY;
-		double targetZ;
-		if (guardTarget instanceof EntityTrick) {
-			EntityLiving guarded = ((EntityTrick) guardTarget).getTarget();
-			targetX = guarded.posX;
-			targetY = guarded.posY;
-			targetZ = guarded.posZ;
-		} else {
-			LocationTrick trickL = (LocationTrick) guardTarget;
-			targetX = trickL.targetX;
-			targetY = trickL.targetY;
-			targetZ = trickL.targetZ;
+	// How far from its post a guard chases a monster, and looks for them
+	private static final double LEASH = 12.0D;
+	private static final double SEARCH = 8.0D;
+
+	private double distanceFromPost(Entity entity) {
+		if (this.guardTarget instanceof EntityTrick) {
+			EntityLiving guarded = ((EntityTrick) this.guardTarget).getTarget();
+			return guarded == null ? 0.0D : entity.getDistanceToEntity(guarded);
 		}
-		
-		AxisAlignedBB boxToCheck = AxisAlignedBB.getBoundingBox(targetX - 5, targetY - 2, targetZ - 5, 
-																targetX + 5, targetY + 2, targetZ + 5);
-		List e = this.pet.worldObj.getEntitiesWithinAABB(EntityMob.class, boxToCheck);
+		LocationTrick post = (LocationTrick) this.guardTarget;
+		return entity.getDistance(post.targetX, post.targetY, post.targetZ);
+	}
 
-		for (Object entity : e) {
-			if (entity instanceof EntityMob) {
-				EntityMob mob = (EntityMob) entity;
-				if (mob instanceof EntityCreeper)
-					continue;
-
-				if (guardTarget instanceof EntityTrick) {
-					if (mob.getAttackTarget() == ((EntityTrick) guardTarget).getTarget()) {
-						this.pet.setAttackTarget(mob);
-						return;
-					}
-				}
-				if (mob.getAttackTarget() == this.pet) {
-					this.pet.setAttackTarget(mob);
-					return;
-				}
-			}
+	private double[] postPosition() {
+		if (this.guardTarget instanceof EntityTrick) {
+			EntityLiving guarded = ((EntityTrick) this.guardTarget).getTarget();
+			return new double[] {guarded.posX, guarded.posY, guarded.posZ};
 		}
-		// Even if they aren't attacking this, just attack the first one
-		Entity closest = this.pet.worldObj.findNearestEntityWithinAABB(EntityMob.class, boxToCheck, this.pet);
-		if (closest instanceof EntityMob)
-			this.pet.setAttackTarget((EntityMob) closest);
+		LocationTrick post = (LocationTrick) this.guardTarget;
+		return new double[] {post.targetX, post.targetY, post.targetZ};
+	}
 
+	@Override
+	public void stopTrick() {
+		this.pet.setAttackTarget(null);
 	}
 
 	@Override

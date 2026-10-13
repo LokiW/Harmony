@@ -49,6 +49,10 @@ public class FeedAnimal {
 			// anything that isn't food, which gets in the way of training. Cancelled on both sides.
 			e.setCanceled(true);
 		}
+		if ("item.compass".equals(heldName) && HarmonyProps.get(target) != null) {
+			// Setting a place, not vanilla's interaction (e.g. mounting a horse). Cancelled on both sides.
+			e.setCanceled(true);
+		}
 		if (target instanceof EntityHorse && HarmonyProps.get(target) != null && "item.speckledMelon".equals(heldName)) {
 			// Same for horses, which the player would mount. Golden apples are horse food, so vanilla keeps those.
 			e.setCanceled(true);
@@ -84,6 +88,15 @@ public class FeedAnimal {
 			removeItem = true;
 		// If interacting with a golden apple, animal should save current location and
 		//  teleport back to current location instead of dying.
+		} else if ("item.compass".equals(itemName)) {
+			// Right click with a compass: the spot the animal is on becomes its next place (1, 2, 3, then 1 again)
+			if (!Ownership.mayUse(player, target, hp) || !hp.isInitialized()) {
+				return;
+			}
+			hp.kept = true;
+			int place = hp.tricks.setNextPlace(target.posX, target.posY, target.posZ);
+			player.addChatComponentMessage(new ChatComponentTranslation("harmony.place.set", place, target.getCommandSenderName()));
+			AnimalSync.syncNow(target);
 		} else if ("item.appleGold".equals(itemName)) {
 			if (!Ownership.mayUse(player, target, hp)) {
 				return;

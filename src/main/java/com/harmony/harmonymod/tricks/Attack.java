@@ -3,42 +3,53 @@ package com.harmony.harmonymod.tricks;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.*;
 import net.minecraft.pathfinding.*;
 import java.util.*;
 
+/*
+ * Attack a nearby monster (or the entity it was told to), until there are none left close by.
+ */
 public class Attack extends Trick {
+	// How far it looks for monsters, and how far it chases one before giving up
+	private static final double SEARCH = 8.0D;
+	private static final double CHASE = 16.0D;
+
     private int delayCounter;
+	// What it's fighting. Kept here and reapplied, since vanilla's targeting AI clears or replaces the
+	// pet's attack target (e.g. a wolf hunting sheep).
+	private EntityLivingBase fighting;
 
 	public void setupTrick(EntityLiving pet, Trick currentTrick) {
 		this.pet = pet;
 		if (currentTrick instanceof EntityTrick) {
-			EntityLiving target = ((EntityTrick) currentTrick).getTarget();
-			if (target != null) {
-				this.pet.setAttackTarget(target);
-			}
+			this.fighting = ((EntityTrick) currentTrick).getTarget();
 		}
 	}
 
 	public boolean act() {
 		if (--this.delayCounter <= 0) {
 			this.delayCounter = 10;
-			if (this.pet.getAttackTarget() == null) {
-				// Find target to attack
-				setNewAttackTarget();
+			if (this.fighting == null || this.fighting.isDead || this.pet.getDistanceToEntity(this.fighting) > CHASE) {
+				this.fighting = findMonster(this.pet, this.pet.posX, this.pet.posY, this.pet.posZ, SEARCH);
+				if (this.fighting == null) {
+					this.pet.setAttackTarget(null);
+					this.pet.getNavigator().clearPathEntity();
+					return false;
+				}
 			}
+			this.pet.setAttackTarget(this.fighting);
 			attackTarget();
-			// check if specified target killed, if so stop trying to attack things
-			if (this.pet.getAttackTarget() == null || this.pet.getAttackTarget().isDead) {
-				PathNavigate petPathfinder = this.pet.getNavigator();
-				if (petPathfinder != null)
-					petPathfinder.clearPathEntity();
-				return false;
-			}
 		}
 		return true;
+	}
+
+	@Override
+	public void stopTrick() {
+		this.pet.setAttackTarget(null);
 	}
 
 	public boolean isInstant() {
@@ -51,7 +62,7 @@ public class Attack extends Trick {
 		} else if (newTrick instanceof EntityTrick) {
 			EntityLiving target = ((EntityTrick) newTrick).getTarget();
 			if (target != null) {
-				this.pet.setAttackTarget(target);
+				this.fighting = target;
 			}
 			return true;
 		}
@@ -64,27 +75,26 @@ public class Attack extends Trick {
 		return "attack";
 	}
 
-	private void setNewAttackTarget() {
-		AxisAlignedBB boxToCheck = AxisAlignedBB.getBoundingBox(this.pet.posX - 5, this.pet.posY - 2, this.pet.posZ - 5, 
-																this.pet.posX + 5, this.pet.posY + 2, this.pet.posZ + 5);
-		List e = this.pet.worldObj.getEntitiesWithinAABB(EntityMob.class, boxToCheck);
-
-		for (Object entity : e) {
-			if (entity instanceof EntityMob) {
-				EntityMob mob = (EntityMob) entity;
-				if (mob instanceof EntityCreeper)
-					continue;
-
-				if (mob.getAttackTarget() instanceof EntityPlayer || mob.getAttackTarget() == this.pet) {
-					this.pet.setAttackTarget(mob);
-					return;
-				}
+	/*
+	 * A monster within range of a point to fight: one attacking a player or the pet first, otherwise
+	 * the closest. Never creepers, which would just blow up.
+	 */
+	static EntityMob findMonster(EntityLiving pet, double x, double y, double z, double range) {
+		AxisAlignedBB box = AxisAlignedBB.getBoundingBox(x - range, y - 3, z - range, x + range, y + 3, z + range);
+		List mobs = pet.worldObj.getEntitiesWithinAABB(EntityMob.class, box);
+		EntityMob closest = null;
+		for (Object o : mobs) {
+			EntityMob mob = (EntityMob) o;
+			if (mob instanceof EntityCreeper || mob.isDead) {
+				continue;
+			}
+			if (mob.getAttackTarget() instanceof EntityPlayer || mob.getAttackTarget() == pet) {
+				return mob;
+			}
+			if (closest == null || pet.getDistanceSqToEntity(mob) < pet.getDistanceSqToEntity(closest)) {
+				closest = mob;
 			}
 		}
-		// Even if they aren't attacking this, just attack the first one
-		Entity closest = this.pet.worldObj.findNearestEntityWithinAABB(EntityMob.class, boxToCheck, this.pet);
-		if (closest instanceof EntityMob)
-			this.pet.setAttackTarget((EntityMob) closest);
-
+		return closest;
 	}
 }

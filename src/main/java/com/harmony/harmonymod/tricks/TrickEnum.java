@@ -15,10 +15,12 @@ public class TrickEnum {
 	public static final int JUMP = 1 << 7;
 	public static final int SIT = 1 << 8;
 	public static final int RESPAWN_LOCATION = 1 << 9;
+	public static final int FOLLOW = 1 << 10;
+	public static final int COME_BACK = 1 << 11;
 
 	// This is used for action initialization and should be updated
 	// for each new trick added to this enum
-	public static final int ALL_TRICKS = (1 << 10) - 1;
+	public static final int ALL_TRICKS = (1 << 12) - 1;
 
 	// Names tricks are saved under, indexed by bit. Never rename an existing one, saved animals use them.
 	private static final String[] NAMES = {
@@ -32,6 +34,8 @@ public class TrickEnum {
 		"JUMP",
 		"SIT",
 		"RESPAWN_LOCATION",
+		"FOLLOW",
+		"COME_BACK",
 	};
 
 	/*
