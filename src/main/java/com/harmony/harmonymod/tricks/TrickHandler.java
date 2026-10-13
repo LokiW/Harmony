@@ -5,8 +5,13 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.common.util.Constants;
+import com.harmony.harmonymod.sounds.Phrases;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 
 public class TrickHandler extends EntityAIBase {
@@ -14,7 +19,8 @@ public class TrickHandler extends EntityAIBase {
 
 	public Trick currentTrick;
 	public ActionSet actions;
-	public Map<Integer, ActionSet> tricks;
+	// Candidate tricks for each phrase the pet has been taught, keyed as in Phrases
+	public Map<String, ActionSet> tricks;
 	public TrickLearner isLearning;
 
 	// These are for setting pet known locations at non-preset locations
@@ -50,7 +56,7 @@ public class TrickHandler extends EntityAIBase {
 		this.currentTrick = null;
 		this.isLearning = null;
 		this.actions = new ActionSet(); //TODO initialize better
-		this.tricks = new HashMap<Integer, ActionSet>();
+		this.tricks = new HashMap<String, ActionSet>();
 
 		this.setMutexBits(3);
 	}
@@ -63,11 +69,76 @@ public class TrickHandler extends EntityAIBase {
 		this.pet.tasks.addTask(0, this);
 	}
 
+	// Notes heard so far in the current phrase, see Phrases. Each step is the notes heard in one tick.
+	private final List<SortedSet<Integer>> heard = new ArrayList<SortedSet<Integer>>();
+	private long lastNoteTime;
+
 	/*
-	 * Interface for updating current trick
+	 * A note was played nearby. SoundDB calls listen() at the end of the tick to act on it.
 	 */
-	public void updateCurrentTrick(int noteID) {
-		ActionSet as = tricks.get(noteID);
+	public void hearNote(int note) {
+		long now = now();
+		if (!heard.isEmpty() && lastNoteTime == now) {
+			// Same tick as the last note: part of the same chord
+			heard.get(heard.size() - 1).add(note);
+			return;
+		}
+		if (heard.size() >= Phrases.MAX_STEPS) {
+			finishPhrase();
+		}
+		SortedSet<Integer> step = new TreeSet<Integer>();
+		step.add(note);
+		heard.add(step);
+		lastNoteTime = now;
+	}
+
+	/*
+	 * Called at the end of every tick while the pet is listening. Acts on a known phrase as soon as it's
+	 * heard, unless a longer phrase the pet knows starts the same way, otherwise when the phrase ends with
+	 * a pause. Learning pets always wait for the pause, so they learn the whole phrase.
+	 * Returns false once the pet has nothing left to listen for.
+	 */
+	public boolean listen() {
+		if (heard.isEmpty()) {
+			return false;
+		}
+		long now = now();
+		if (now == lastNoteTime) {
+			String phrase = Phrases.key(heard);
+			if (!isLearningTrick() && tricks.containsKey(phrase) && !knowsLongerPhrase(phrase)) {
+				heard.clear();
+				updateCurrentTrick(phrase);
+				return false;
+			}
+			return true;
+		}
+		if (now - lastNoteTime >= Phrases.PAUSE) {
+			finishPhrase();
+			return false;
+		}
+		return true;
+	}
+
+	private void finishPhrase() {
+		String phrase = Phrases.key(heard);
+		heard.clear();
+		updateCurrentTrick(phrase);
+	}
+
+	private boolean knowsLongerPhrase(String phrase) {
+		for (String known : tricks.keySet()) {
+			if (Phrases.startsWith(known, phrase)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/*
+	 * Act on a phrase the pet heard
+	 */
+	public void updateCurrentTrick(String phrase) {
+		ActionSet as = tricks.get(phrase);
 		boolean learning = isLearningTrick();
 
 		// See if we know that sound or should learn it
@@ -91,7 +162,7 @@ public class TrickHandler extends EntityAIBase {
 		Trick newTrick = as.convertRawAction(newAction, pet);
 	
 		if (learning) {
-			isLearning.setAttempt(noteID, newAction, now() + REWARD_WINDOW);
+			isLearning.setAttempt(phrase, newAction, now() + REWARD_WINDOW);
 		}
 
 		updateCurrentTrick(newTrick);
@@ -207,14 +278,14 @@ public class TrickHandler extends EntityAIBase {
 	 */
 	public boolean learnTrick() {
 		if (isLearningTrick() && this.isLearning.currentAttempt()) {
-			ActionSet newActionSet = tricks.get(this.isLearning.noteID);
+			ActionSet newActionSet = tricks.get(this.isLearning.phrase);
 			if (newActionSet == null) {
 				newActionSet = new ActionSet(this.actions);
 			}
 
 			newActionSet.learnTrick(this.isLearning.action);
 
-			this.tricks.put(this.isLearning.noteID, newActionSet);
+			this.tricks.put(this.isLearning.phrase, newActionSet);
 
 			this.isLearning = null;
 			return true;
@@ -228,9 +299,9 @@ public class TrickHandler extends EntityAIBase {
 		tag.setTag("Actions", this.actions.writeToNBT());
 
 		NBTTagList phrases = new NBTTagList();
-		for (Map.Entry<Integer, ActionSet> entry : this.tricks.entrySet()) {
+		for (Map.Entry<String, ActionSet> entry : this.tricks.entrySet()) {
 			NBTTagCompound phrase = new NBTTagCompound();
-			phrase.setInteger("Note", entry.getKey());
+			phrase.setString("Phrase", entry.getKey());
 			phrase.setTag("Actions", entry.getValue().writeToNBT());
 			phrases.appendTag(phrase);
 		}
@@ -262,8 +333,8 @@ public class TrickHandler extends EntityAIBase {
 		for (int i = 0; i < phrases.tagCount(); i++) {
 			NBTTagCompound phrase = phrases.getCompoundTagAt(i);
 			ActionSet as = ActionSet.readFromNBT(phrase.getTagList("Actions", Constants.NBT.TAG_STRING));
-			if (!as.isEmpty()) {
-				this.tricks.put(phrase.getInteger("Note"), as);
+			if (!as.isEmpty() && !phrase.getString("Phrase").isEmpty()) {
+				this.tricks.put(phrase.getString("Phrase"), as);
 			}
 		}
 
@@ -313,7 +384,7 @@ public class TrickHandler extends EntityAIBase {
 	 *  null value for their TrickLearner.
 	 */
 	private static class TrickLearner {
-		public int noteID = -1;
+		public String phrase;
 		public long action;
 		// World time learning mode ends at
 		public long deadline;
@@ -322,14 +393,14 @@ public class TrickHandler extends EntityAIBase {
 			this.deadline = deadline;
 		}
 
-		public void setAttempt(int noteID, long action, long deadline) {
-			this.noteID = noteID;
+		public void setAttempt(String phrase, long action, long deadline) {
+			this.phrase = phrase;
 			this.action = action;
 			this.deadline = deadline;
 		}
 
 		public boolean currentAttempt() {
-			return noteID > -1;
+			return phrase != null;
 		}
 	}
 }

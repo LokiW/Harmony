@@ -61,7 +61,8 @@ migration or compatibility code for old saves.
 
 - Verify changes yourself where you can: build, then run the dev server on a throwaway world,
   drive it with console commands on stdin (`summon`, `setblock` a noteblock + `redstone_block` to
-  play a note, `save-all`, `stop`), and inspect or edit entity NBT in the region files. Harmony data is
+  play a note; it only plays with air directly above it, so set that block to air too, `save-all`,
+  `stop`), and inspect or edit entity NBT in the region files. Harmony data is
   under the `harmony_HarmonyProps` key on each entity.
 - Never run a test server in the owner's folders (`run/server`, `run/obfuscated/server`) or on port
   25565: they may have a server running there. Point the run task's `workingDir` at your own folder

@@ -27,7 +27,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	public static final String PROP_NAME = HarmonyMod.MODID + "_HarmonyProps";
 
 	// Version of the saved data. Bump it when the format changes, and convert older data in loadNBTData.
-	private static final int DATA_VERSION = 1;
+	private static final int DATA_VERSION = 2;
 
 	// Happiness runs from 0 to MAX_HAPPINESS. Animals breed from HarmonyMod.breedingHappiness up,
 	// and are unhappy below UNHAPPY_BELOW.
