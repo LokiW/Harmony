@@ -1,6 +1,8 @@
 package com.harmony.harmonymod.tricks;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.World;
 
 /*
  * Heel: stay right by the player until told otherwise (Stop, Sit or another trick).
@@ -24,6 +26,14 @@ public class Follow extends PlayerTrick {
 	private int delayCounter;
 	private double lastPlayerX, lastPlayerY, lastPlayerZ;
 	private boolean seenPlayer;
+	// The player teleported and the pet hasn't caught up yet
+	private boolean catchingUp;
+	// Close enough that a teleporting player has been caught up with
+	private static final double CAUGHT_UP = 8.0D;
+	// Where around the player to look for a spot to teleport to
+	private static final int SPOT_RANGE = 3;
+	private static final int SPOT_ABOVE = 2;
+	private static final int SPOT_BELOW = 8;
 
 	public boolean act() {
 		if (!hasPlayer()) {
@@ -43,7 +53,13 @@ public class Follow extends PlayerTrick {
 		}
 
 		if (this.seenPlayer && player.getDistanceSq(this.lastPlayerX, this.lastPlayerY, this.lastPlayerZ) > TELEPORTED * TELEPORTED) {
-			teleportHelper(player.posX, player.boundingBox.minY, player.posZ);
+			this.catchingUp = true;
+		}
+		if (this.catchingUp) {
+			// Keep trying until it works: the player may have landed in mid air or be flying
+			if (this.pet.getDistanceToEntity(player) <= CAUGHT_UP || teleportNear(player)) {
+				this.catchingUp = false;
+			}
 		}
 		this.lastPlayerX = player.posX;
 		this.lastPlayerY = player.posY;
@@ -62,6 +78,47 @@ public class Follow extends PlayerTrick {
 			// Out of pathfinding range: head toward them a few blocks at a time
 			stepToward(player.posX, player.boundingBox.minY, player.posZ, speed);
 		}
+		return true;
+	}
+
+	/*
+	 * Teleport to the closest spot near the player with solid ground and room for the pet
+	 */
+	private boolean teleportNear(EntityPlayer player) {
+		World world = this.pet.worldObj;
+		int px = MathHelper.floor_double(player.posX);
+		int py = MathHelper.floor_double(player.boundingBox.minY);
+		int pz = MathHelper.floor_double(player.posZ);
+		double bestDistance = Double.MAX_VALUE;
+		int[] best = null;
+		double startX = this.pet.posX, startY = this.pet.posY, startZ = this.pet.posZ;
+		for (int dx = -SPOT_RANGE; dx <= SPOT_RANGE; dx++) {
+			for (int dz = -SPOT_RANGE; dz <= SPOT_RANGE; dz++) {
+				for (int dy = SPOT_ABOVE; dy >= -SPOT_BELOW; dy--) {
+					int x = px + dx, y = py + dy, z = pz + dz;
+					if (!World.doesBlockHaveSolidTopSurface(world, x, y - 1, z)) {
+						continue;
+					}
+					this.pet.setPosition(x + 0.5D, y, z + 0.5D);
+					boolean room = world.getCollidingBoundingBoxes(this.pet, this.pet.boundingBox).isEmpty()
+							&& !world.isAnyLiquid(this.pet.boundingBox);
+					double distance = player.getDistanceSq(x + 0.5D, y, z + 0.5D);
+					if (room && distance < bestDistance) {
+						bestDistance = distance;
+						best = new int[] {x, y, z};
+					}
+					// The first solid ground found going down is this column's floor
+					break;
+				}
+			}
+		}
+		// setPosition above was only for checking, put it back until the teleport
+		this.pet.setPosition(startX, startY, startZ);
+		if (best == null) {
+			return false;
+		}
+		this.pet.setLocationAndAngles(best[0] + 0.5D, best[1], best[2] + 0.5D, this.pet.rotationYaw, this.pet.rotationPitch);
+		this.pet.getNavigator().clearPathEntity();
 		return true;
 	}
 
