@@ -37,9 +37,9 @@ public class ItemHarp extends HarmonyItem {
 	 */
 	public void register() {
 		GameRegistry.addShapedRecipe(new ItemStack(this),
-				" G ",
-				"SNS",
-				" T ",
+				"SG ",
+				"TTS",
+				"SN ",
 				'G', Items.gold_ingot, 'S', Items.stick, 'N', Blocks.noteblock, 'T', Items.string);
 		MinecraftForge.EVENT_BUS.register(this);
 	}

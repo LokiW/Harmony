@@ -232,9 +232,12 @@ public class GuiHarp extends GuiScreen {
 		}
 	}
 
+	/*
+	 * Full volume at the player, as loud as really playing it (vanilla's GUI sounds are quiet)
+	 */
 	private void playNote(int pitch) {
-		mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("note.harp"),
-				Phrases.soundPitch(pitch)));
+		mc.getSoundHandler().playSound(new PositionedSoundRecord(new ResourceLocation("note.harp"), 1.0F,
+				Phrases.soundPitch(pitch), (float) mc.thePlayer.posX, (float) mc.thePlayer.posY, (float) mc.thePlayer.posZ));
 	}
 
 	/*
