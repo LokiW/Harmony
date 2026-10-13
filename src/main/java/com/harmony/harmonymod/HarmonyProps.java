@@ -46,6 +46,8 @@ public class HarmonyProps implements IExtendedEntityProperties {
 
 	// Client copy of the animal's mood (-1 unhappy, 0 content, 1 happy), sent by the server
 	public int mood;
+	// Client only: the mood changed in the last sync, for MoodIndicator to show
+	public boolean moodChanged;
 
 	// Player bonded with this animal (see Ownership), null while unbonded
 	public UUID ownerId;
@@ -181,9 +183,23 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	 * Client copy of the server's data, see AnimalSync. No AI is registered, the server runs that.
 	 */
 	public void readSyncedData(NBTTagCompound data) {
+		boolean hadData = isInitialized();
 		readData(data);
 		learning = data.getBoolean("Learning");
-		mood = data.getInteger("Mood");
+		int newMood = data.getInteger("Mood");
+		moodChanged = hadData && newMood != mood;
+		mood = newMood;
+	}
+
+	/*
+	 * Particles that show a mood: green sparkles happy, white puffs content, grey clouds unhappy
+	 */
+	public static String moodParticle(int mood) {
+		return mood > 0 ? "happyVillager" : (mood < 0 ? "angryVillager" : "cloud");
+	}
+
+	public static int moodParticleCount(int mood) {
+		return mood > 0 ? 6 : (mood < 0 ? 2 : 3);
 	}
 
 	/*

@@ -48,14 +48,14 @@ public class BreedingAI extends EntityAIBase
 			// Fed its breeding food. Vanilla put it in love mode, Harmony decides what happens instead.
 			pet.resetInLove();
 			hp.kept = true;
-			if (hp.canBreed()) {
-				return startBreeding();
+			if (!hp.canBreed()) {
+				hp.changeHappiness(FED_HAPPINESS);
 			}
-			hp.changeHappiness(FED_HAPPINESS);
-			pet.worldObj.setEntityState(pet, (byte)0);
-			((WorldServer) pet.worldObj).func_147487_a("angryVillager", pet.posX, pet.posY + pet.height + 0.3D,
-					pet.posZ, 2, 0.3D, 0.2D, 0.3D, 0.0D);
-			return false;
+			// Report how it feels after being fed
+			int mood = hp.getMood();
+			((WorldServer) pet.worldObj).func_147487_a(HarmonyProps.moodParticle(mood), pet.posX,
+					pet.posY + pet.height * 0.7D, pet.posZ, HarmonyProps.moodParticleCount(mood), 0.4D, 0.3D, 0.4D, 0.0D);
+			return hp.canBreed() && startBreeding();
 		}
 
 		long now = pet.worldObj.getTotalWorldTime();

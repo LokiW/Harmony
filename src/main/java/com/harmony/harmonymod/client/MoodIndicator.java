@@ -13,14 +13,11 @@ import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import java.util.Random;
 
 /*
- * Shows how kept animals feel: green sparkles when happy enough to breed, grey clouds when unhappy.
- * Wild animals show nothing, so the countryside doesn't sparkle.
+ * Shows a burst of mood particles (see HarmonyProps.moodParticle) when a kept animal's mood changes,
+ * so a calm pen stays quiet. Wild animals show nothing. Feeding also shows the mood, from the server.
  */
 @SideOnly(Side.CLIENT)
 public class MoodIndicator {
-	// Ticks between mood particles for each animal
-	private static final int INTERVAL = 100;
-
 	private final Random rand = new Random();
 
 	public static void register() {
@@ -31,17 +28,20 @@ public class MoodIndicator {
 	public void onLivingUpdate(LivingUpdateEvent event) {
 		EntityLivingBase animal = event.entityLiving;
 		clearLoveMode(animal);
-		// Staggered by entity id so a pen doesn't pulse all at once
-		if (!animal.worldObj.isRemote || (animal.ticksExisted + animal.getEntityId()) % INTERVAL != 0) {
+		if (!animal.worldObj.isRemote) {
 			return;
 		}
 		HarmonyProps hp = HarmonyProps.get(animal);
-		if (hp == null || !hp.isInitialized() || hp.mood == 0 || !isKept(animal, hp)) {
+		if (hp == null || !hp.moodChanged) {
+			return;
+		}
+		hp.moodChanged = false;
+		if (!isKept(animal, hp)) {
 			return;
 		}
 
-		String particle = hp.mood > 0 ? "happyVillager" : "angryVillager";
-		int count = hp.mood > 0 ? 3 : 1;
+		String particle = HarmonyProps.moodParticle(hp.mood);
+		int count = HarmonyProps.moodParticleCount(hp.mood);
 		for (int i = 0; i < count; i++) {
 			animal.worldObj.spawnParticle(particle,
 					animal.posX + (rand.nextDouble() - 0.5D) * animal.width * 1.5D,
