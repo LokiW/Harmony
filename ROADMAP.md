@@ -60,8 +60,9 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 
 ### Tricks and music
 
-- Animals listen for phrases: the notes they hear until a short pause. A single note is a one note
-  phrase, so core tricks can be taught with one noteblock and no redstone.
+- Animals listen for phrases: the notes they hear until a 1 second pause, up to 8 steps. A single note
+  is a one note phrase, so core tricks can be taught with one noteblock and no redstone. Notes played
+  in the same tick form a chord, which counts as one step.
 - An animal acts on a phrase immediately, unless a longer phrase it knows starts with the same notes,
   in which case it waits for the pause. Simple vocabularies stay instant.
 - Training: feed a glistering melon, play a phrase, the animal tries a trick, feed again to reward.
@@ -134,7 +135,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 
 - [ ] Reliable core tricks: follow, stay/sit, go to, guard, attack, come back
 - [x] Learning mode indicator: question marks while an animal is learning, hearts when it learns
-- [ ] Phrase based listening (single notes still instant)
+- [x] Phrase based listening (single notes still instant)
 - [ ] First handheld instrument
 - [x] Bonding and transfer (done with Phase 0 ownership)
 - [x] Golden / enchanted golden apple respawn tiers, spirit form waiting

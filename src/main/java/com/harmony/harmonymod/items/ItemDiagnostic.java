@@ -65,8 +65,8 @@ public class ItemDiagnostic extends HarmonyItem {
 		}
 
 		out = "Current trick: " + (hp.tricks.currentTrick == null ? "none" : hp.tricks.currentTrick.getClass().getSimpleName());
-		for (Map.Entry<Integer, ActionSet> phrase : hp.tricks.tricks.entrySet()) {
-			out += " | note " + phrase.getKey() + ": " + trickNames(phrase.getValue());
+		for (Map.Entry<String, ActionSet> phrase : hp.tricks.tricks.entrySet()) {
+			out += " | \"" + phrase.getKey() + "\": " + trickNames(phrase.getValue());
 		}
 		say(player, side + out);
 		return true;

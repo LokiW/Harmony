@@ -1,6 +1,11 @@
 package com.harmony.harmonymod.sounds;
 
 import com.harmony.harmonymod.HarmonyProps;
+import com.harmony.harmonymod.tricks.TrickHandler;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.gameevent.TickEvent.Phase;
+import cpw.mods.fml.common.gameevent.TickEvent.WorldTickEvent;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraftforge.event.world.*;
 import net.minecraft.entity.*;
 import net.minecraft.world.World;
@@ -26,14 +31,18 @@ public class SoundDB {
 			return db;
 
 		db = new SoundDB();
-		// Register to receive noteblock events
+		// Register to receive noteblock events, and ticks to check on listening animals
 		MinecraftForge.EVENT_BUS.register(db);
+		FMLCommonHandler.instance().bus().register(db);
 
 		return db;
 	}
 
 	// Other's can't instantiate
 	private SoundDB() {}
+
+	// Animals in the middle of hearing a phrase
+	private final Set<TrickHandler> listening = new LinkedHashSet<TrickHandler>();
 
 	/*
 	 * Record all noteblock events
@@ -57,7 +66,29 @@ public class SoundDB {
 		for(EntityLiving ent : entities) {
 			HarmonyProps hp = HarmonyProps.get(ent);
 			if(hp != null && hp.tricks != null && !w.isRemote) {
-				hp.tricks.updateCurrentTrick(note);
+				hp.tricks.hearNote(note);
+				listening.add(hp.tricks);
+			}
+		}
+	}
+
+	/*
+	 * After all of a tick's notes are in (so chords are complete), let listening animals act on what
+	 * they've heard
+	 */
+	@SubscribeEvent
+	public void onWorldTick(WorldTickEvent event) {
+		if (event.side != Side.SERVER || event.phase != Phase.END || listening.isEmpty()) {
+			return;
+		}
+		Iterator<TrickHandler> it = listening.iterator();
+		while (it.hasNext()) {
+			TrickHandler listener = it.next();
+			if (listener.pet.worldObj != event.world) {
+				continue;
+			}
+			if (listener.pet.isDead || !listener.listen()) {
+				it.remove();
 			}
 		}
 	}

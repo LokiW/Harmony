@@ -3,6 +3,7 @@ package com.harmony.harmonymod;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityTameable;
+import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
@@ -46,6 +47,10 @@ public class FeedAnimal {
 				&& ("item.speckledMelon".equals(heldName) || "item.appleGold".equals(heldName))) {
 			// Vanilla makes a tamed wolf or ocelot sit (or stand) when its owner right clicks it with
 			// anything that isn't food, which gets in the way of training. Cancelled on both sides.
+			e.setCanceled(true);
+		}
+		if (target instanceof EntityHorse && HarmonyProps.get(target) != null && "item.speckledMelon".equals(heldName)) {
+			// Same for horses, which the player would mount. Golden apples are horse food, so vanilla keeps those.
 			e.setCanceled(true);
 		}
 		if (target.worldObj.isRemote) {
