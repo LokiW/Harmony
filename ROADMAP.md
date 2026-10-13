@@ -136,6 +136,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 ### Phase 1: MVP
 
 - [ ] Reliable core tricks: follow, stay/sit, go to, guard, attack, come back
+      - Bug: animals sometimes clip through the floor after doing the Jump trick
 - [x] Learning mode indicator: question marks while an animal is learning, hearts when it learns
 - [x] Training treats: loot that instantly teaches a trick for a fixed phrase
 - [x] Phrase based listening (single notes still instant)
@@ -146,6 +147,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
       teleporting to catch up
 - [x] Traits: exponential stacking, first bad traits, polish breeding, Jump trait takes less fall damage
 - [x] Happiness gates breeding, tune existing factors
+- [ ] Bug: animals breed too fast, tune breeding rate
 - [ ] Overlay showing an animal's traits, happiness, tricks and owner (replaces the Harmony Diagnostics
       debug item)
 - [ ] Config cleanup (incl. option to quiet animal sounds), achievements or other in game hints so
