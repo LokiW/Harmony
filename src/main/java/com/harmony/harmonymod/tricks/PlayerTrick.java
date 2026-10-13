@@ -7,8 +7,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import java.util.UUID;
 
 /*
- * A trick about a player, e.g. following them. The player is the animal's bonded owner if they're
- * nearby, otherwise the nearest player.
+ * A trick about a player, e.g. following them. The player is whoever played the phrase on an
+ * instrument, or for noteblocks the animal's bonded owner if they're nearby, otherwise the nearest player.
  */
 public abstract class PlayerTrick extends Trick {
 	// How far away the animal notices a player for the trick
@@ -28,6 +28,9 @@ public abstract class PlayerTrick extends Trick {
 
 	private static EntityPlayer choosePlayer(EntityLiving pet) {
 		HarmonyProps hp = HarmonyProps.get(pet);
+		if (hp != null && hp.tricks != null && hp.tricks.commander != null) {
+			return hp.tricks.commander;
+		}
 		if (hp != null && hp.isBonded()) {
 			EntityPlayer owner = pet.worldObj.func_152378_a(hp.ownerId);
 			if (owner != null && owner.getDistanceSqToEntity(pet) <= PLAYER_RANGE * PLAYER_RANGE) {

@@ -1,6 +1,7 @@
 package com.harmony.harmonymod.sounds;
 
 import com.harmony.harmonymod.HarmonyProps;
+import net.minecraft.entity.player.EntityPlayer;
 import com.harmony.harmonymod.tricks.TrickHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
@@ -49,24 +50,33 @@ public class SoundDB {
 	 */
 	@SubscribeEvent
 	public void NoteBlockEvent(NoteBlockEvent.Play e) {
-		World w = e.world;
-		long tick = w.getWorldTime();
-		int note = getSound(e.instrument, e.getVanillaNoteId());
+		hear(e.world, e.x + 0.5D, e.y + 0.5D, e.z + 0.5D, getSound(e.instrument, e.getVanillaNoteId()), null);
+	}
 
-		// Find all entities that could hear this
+	/*
+	 * A note played at a point, by a noteblock (player null) or a player's instrument. Animals within
+	 * range hear it. Bonded animals ignore other players' instruments; noteblocks work for anyone.
+	 */
+	public void hear(World w, double x, double y, double z, int note, EntityPlayer player) {
+		if (w.isRemote) {
+			return;
+		}
 		AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(
-				e.x - MAX_NOTE_DISTANCE,
-				e.y - MAX_NOTE_DISTANCE,
-				e.z - MAX_NOTE_DISTANCE,
-				e.x + MAX_NOTE_DISTANCE,
-				e.y + MAX_NOTE_DISTANCE,
-				e.z + MAX_NOTE_DISTANCE);
+				x - MAX_NOTE_DISTANCE,
+				y - MAX_NOTE_DISTANCE,
+				z - MAX_NOTE_DISTANCE,
+				x + MAX_NOTE_DISTANCE,
+				y + MAX_NOTE_DISTANCE,
+				z + MAX_NOTE_DISTANCE);
 
 		List<EntityLiving> entities = w.getEntitiesWithinAABB(EntityLiving.class, aabb);
 		for(EntityLiving ent : entities) {
 			HarmonyProps hp = HarmonyProps.get(ent);
-			if(hp != null && hp.tricks != null && !w.isRemote) {
-				hp.tricks.hearNote(note);
+			if(hp != null && hp.tricks != null) {
+				if (player != null && hp.isBonded() && !hp.isOwner(player)) {
+					continue;
+				}
+				hp.tricks.hearNote(note, player);
 				listening.add(hp.tricks);
 			}
 		}
