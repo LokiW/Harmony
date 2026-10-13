@@ -94,8 +94,10 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - Golden apple: sets a respawn point, used up on the next death.
 - Enchanted golden apple: permanent respawn point. Modded apples (e.g. diamond apples) can be
   configured into the same tiers.
-- If the respawn point isn't loaded (far away, another dimension) the animal waits in spirit form until
-  it is.
+- Fainting is instant: the animal is healed (fire and potion effects cleared) and wakes up at its respawn
+  point, or the nearest spot with room. A plain golden apple after an enchanted one only moves the point.
+- If the respawn point isn't loaded (far away, another dimension) the animal waits in spirit form (saved
+  with the world) until it is. Bonded animals tell their owner when they faint, wait and wake up.
 - Respawning on the owner instead keeps a pet in the fight, so it's an expensive upgrade added to the
   animal later, not the default.
 - Pets follow their owner through portals into other dimensions, and when the owner teleports.
@@ -135,7 +137,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - [ ] Phrase based listening (single notes still instant)
 - [ ] First handheld instrument
 - [x] Bonding and transfer (done with Phase 0 ownership)
-- [ ] Golden / enchanted golden apple respawn tiers, spirit form waiting
+- [x] Golden / enchanted golden apple respawn tiers, spirit form waiting
 - [ ] Pets follow through dimensions and owner teleports, path to owner aggressively instead of
       teleporting to catch up
 - [x] Traits: exponential stacking, first bad traits, polish breeding, Jump trait takes less fall damage
