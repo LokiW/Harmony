@@ -79,7 +79,10 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - Training treats (dungeon, mineshaft, temple, stronghold and village loot) instantly teach one trick
   for the phrase written on the treat. `/harmony treat <trick> [phrase]` gives one for testing.
 - Handheld instruments store phrases so tricks can be used while adventuring. They add to noteblocks,
-  they don't replace them.
+  they don't replace them. One instrument per noteblock sound (harp, bass drum, snare, clicks, bass);
+  the harp is first. Phrases are written on a small sheet of music (click lines and spaces, notes in
+  the same column are a chord, right click for sharps), 4 slots per instrument. Bonded animals only
+  obey their owner's instruments; Follow and Come Back go to whoever played.
 - Noteblock automation: redstone driven noteblocks command animals with nobody around.
 
 ### Ownership (bonding)
@@ -145,7 +148,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - [x] Learning mode indicator: question marks while an animal is learning, hearts when it learns
 - [x] Training treats: loot that instantly teaches a trick for a fixed phrase
 - [x] Phrase based listening (single notes still instant)
-- [ ] First handheld instrument
+- [x] First handheld instrument (harp)
 - [x] Bonding and transfer (done with Phase 0 ownership)
 - [x] Golden / enchanted golden apple respawn tiers, spirit form waiting
 - [ ] Pets follow through dimensions and owner teleports, path to owner aggressively instead of
@@ -164,6 +167,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
       where I'm looking, flee, dig, fetch, collect items, activate, place, bark,
       galvanize (short tankiness buff), lay down / backflip / roll over
 - [ ] Trick chaining with phrases
+- [ ] Instruments for the other noteblock sounds: bass drum, snare, clicks, bass
 - [ ] Teaching by demonstration
 - [ ] Clear an animal's tricks to reset its training
 - [ ] More traits and bad traits

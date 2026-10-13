@@ -2,6 +2,7 @@ package com.harmony.harmonymod.tricks;
 
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.common.util.Constants;
@@ -95,7 +96,13 @@ public class TrickHandler extends EntityAIBase {
 	/*
 	 * A note was played nearby. SoundDB calls listen() at the end of the tick to act on it.
 	 */
-	public void hearNote(int note) {
+	// Who played the phrase being heard, if it came from an instrument (see PlayerTrick)
+	public EntityPlayer commander;
+
+	public void hearNote(int note, EntityPlayer player) {
+		if (player != null) {
+			this.commander = player;
+		}
 		long now = now();
 		if (!heard.isEmpty() && lastNoteTime == now) {
 			// Same tick as the last note: part of the same chord
@@ -127,12 +134,14 @@ public class TrickHandler extends EntityAIBase {
 			if (!isLearningTrick() && tricks.containsKey(phrase) && !knowsLongerPhrase(phrase)) {
 				heard.clear();
 				updateCurrentTrick(phrase);
+				this.commander = null;
 				return false;
 			}
 			return true;
 		}
 		if (now - lastNoteTime >= Phrases.PAUSE) {
 			finishPhrase();
+			this.commander = null;
 			return false;
 		}
 		return true;

@@ -3,6 +3,7 @@ package com.harmony.harmonymod;
 import com.harmony.harmonymod.horsefix.MountCorrectionMessage;
 import com.harmony.harmonymod.horsefix.MountMoveMessage;
 import com.harmony.harmonymod.sync.AnimalSyncMessage;
+import com.harmony.harmonymod.instruments.HarpUpdateMessage;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
@@ -18,5 +19,6 @@ public class HarmonyNetwork {
 		channel.registerMessage(MountMoveMessage.Handler.class, MountMoveMessage.class, 0, Side.SERVER);
 		channel.registerMessage(MountCorrectionMessage.Handler.class, MountCorrectionMessage.class, 1, Side.CLIENT);
 		channel.registerMessage(AnimalSyncMessage.Handler.class, AnimalSyncMessage.class, 2, Side.CLIENT);
+		channel.registerMessage(HarpUpdateMessage.Handler.class, HarpUpdateMessage.class, 3, Side.SERVER);
 	}
 }
