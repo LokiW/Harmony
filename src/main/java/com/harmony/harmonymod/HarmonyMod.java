@@ -7,6 +7,7 @@ import com.harmony.harmonymod.horsefix.HorseControl;
 import com.harmony.harmonymod.sync.AnimalSync;
 import com.harmony.harmonymod.ownership.Ownership;
 import com.harmony.harmonymod.tricks.Sit;
+import com.harmony.harmonymod.respawn.Respawn;
 import com.harmony.harmonymod.horsefix.HorseControlClient;
 import com.harmony.harmonymod.client.LearningIndicator;
 import com.harmony.harmonymod.client.MoodIndicator;
@@ -86,7 +87,7 @@ public class HarmonyMod
 		Sit.register();
 		SoundDB.getSoundDB();
 		FeedAnimal.register();
-		RespawnAnimal.register();
+		Respawn.register();
 		HorseControl.register();
 		if (event.getSide().isClient()) {
 			HorseControlClient.register();

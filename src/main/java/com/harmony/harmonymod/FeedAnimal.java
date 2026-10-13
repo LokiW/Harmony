@@ -8,6 +8,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.util.ChatComponentTranslation;
 import com.harmony.harmonymod.ownership.Ownership;
 import com.harmony.harmonymod.sync.AnimalSync;
 import net.minecraft.world.WorldServer;
@@ -83,9 +84,13 @@ public class FeedAnimal {
 				return;
 			}
 			hp.kept = true;
-			hp.tricks.xRespawn = target.posX;
-			hp.tricks.yRespawn = target.posY;
-			hp.tricks.zRespawn = target.posZ;
+			hp.tricks.setRespawn(target.posX, target.posY, target.posZ, target.dimension);
+			// An enchanted golden apple makes it permanent, a plain one after that only moves the point
+			if (held_items.getItemDamage() == 1) {
+				hp.tricks.permanentRespawn = true;
+			}
+			player.addChatComponentMessage(new ChatComponentTranslation(hp.tricks.permanentRespawn
+					? "harmony.respawn.set_permanent" : "harmony.respawn.set_once", target.getCommandSenderName()));
 			removeItem = true;
 		}
 

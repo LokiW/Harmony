@@ -24,8 +24,25 @@ public class TrickHandler extends EntityAIBase {
 	public double xLearned2; public double yLearned2 = -1.0; public double zLearned2;
 	public double xLearned3; public double yLearned3 = -1.0; public double zLearned3;
 
-	// Respawn on death location to be taught with a different item
+	// Respawn on death location, set by feeding a golden apple (see respawn.Respawn)
 	public double xRespawn; public double yRespawn = -1.0; public double zRespawn;
+	public int dimRespawn;
+	// Enchanted golden apple: the respawn point isn't used up by dying
+	public boolean permanentRespawn;
+
+	public boolean hasRespawn() {
+		return this.yRespawn >= 0.0;
+	}
+
+	public void setRespawn(double x, double y, double z, int dimension) {
+		this.xRespawn = x; this.yRespawn = y; this.zRespawn = z;
+		this.dimRespawn = dimension;
+	}
+
+	public void clearRespawn() {
+		this.yRespawn = -1.0;
+		this.permanentRespawn = false;
+	}
 
 	public  TrickHandler(EntityLiving pet) {
 		this.pet = pet;
@@ -223,6 +240,10 @@ public class TrickHandler extends EntityAIBase {
 		writeLocation(tag, "Location2", this.xLearned2, this.yLearned2, this.zLearned2);
 		writeLocation(tag, "Location3", this.xLearned3, this.yLearned3, this.zLearned3);
 		writeLocation(tag, "Respawn", this.xRespawn, this.yRespawn, this.zRespawn);
+		if (hasRespawn()) {
+			tag.getCompoundTag("Respawn").setInteger("Dim", this.dimRespawn);
+			tag.getCompoundTag("Respawn").setBoolean("Permanent", this.permanentRespawn);
+		}
 
 		NBTTagCompound current = Trick.saveTrick(this.currentTrick);
 		if (current != null) {
@@ -261,6 +282,8 @@ public class TrickHandler extends EntityAIBase {
 		if (tag.hasKey("Respawn")) {
 			NBTTagCompound l = tag.getCompoundTag("Respawn");
 			this.xRespawn = l.getDouble("X"); this.yRespawn = l.getDouble("Y"); this.zRespawn = l.getDouble("Z");
+			this.dimRespawn = l.getInteger("Dim");
+			this.permanentRespawn = l.getBoolean("Permanent");
 		}
 
 		if (tag.hasKey("Current")) {
