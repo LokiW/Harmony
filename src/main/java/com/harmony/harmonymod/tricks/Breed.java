@@ -19,6 +19,7 @@ public class Breed extends Trick {
 	private EntityLiving targetMate;
 	private int required;
 	private int spawnBabyDelay;
+	private int heartTicks;
 
 	public Breed(int required) {
 		this.required = required;
@@ -51,6 +52,11 @@ public class Breed extends Trick {
 			return false;
 		}
 
+
+		// Hearts while it's actually breeding (vanilla's love mode hearts are cleared, see MoodIndicator)
+		if (++this.heartTicks % 20 == 0) {
+			this.pet.worldObj.setEntityState(this.pet, (byte)18);
+		}
 
 		this.moveToEntity(this.targetMate, false);
 

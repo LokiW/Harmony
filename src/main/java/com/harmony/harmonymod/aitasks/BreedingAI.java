@@ -115,17 +115,18 @@ public class BreedingAI extends EntityAIBase
 		if (!(pet instanceof EntityAnimal))
 			return;
 
-		boolean canBreed = false;
+		// Takes over vanilla mating's priority, so e.g. a sitting wolf doesn't get up to breed
+		int priority = -1;
 		List<EntityAITaskEntry> t = pet.tasks.taskEntries;
 		for(int i = 0; i < t.size(); i++) {
 			if(t.get(i).action instanceof EntityAIMate) {
+				priority = t.get(i).priority;
 				t.remove(i);
-				canBreed = true;
 				i--;
 			}
 		}
-		if(canBreed) {
-			pet.tasks.addTask(1,new BreedingAI((EntityAnimal)pet));
+		if(priority >= 0) {
+			pet.tasks.addTask(priority, new BreedingAI((EntityAnimal)pet));
 		}
 	}
 }

@@ -21,6 +21,8 @@ public class HarmonyWanderAI extends EntityAIBase
 
 	// More animals than this in the 5x5 area around where it's going makes an animal unhappier
 	private static final int CROWDED = 8;
+	// Priority for animals without a vanilla wander task to replace
+	private static final int DEFAULT_PRIORITY = 5;
 
 	public HarmonyWanderAI(EntityAnimal entity) {
 		this.entity = entity;
@@ -103,13 +105,17 @@ public class HarmonyWanderAI extends EntityAIBase
 		if (!(pet instanceof EntityAnimal))
 			return;
 
+		// Takes over vanilla wander's priority, so it doesn't interrupt higher priority tasks like
+		// a wolf's sitting or a cow's panic
+		int priority = DEFAULT_PRIORITY;
 		List<EntityAITaskEntry> t = pet.tasks.taskEntries;
 		for(int i = 0; i < t.size(); i++) {
 			if(t.get(i).action instanceof EntityAIWander) {
+				priority = t.get(i).priority;
 				t.remove(i);
 				i--;
 			}
 		}
-		pet.tasks.addTask(1,new HarmonyWanderAI((EntityAnimal)pet));
+		pet.tasks.addTask(priority, new HarmonyWanderAI((EntityAnimal)pet));
 	}
 }
