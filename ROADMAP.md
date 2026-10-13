@@ -72,6 +72,8 @@ Thaumcraft 4, Witchery and Botania when they're installed.
   the trick a nearby animal performs for that phrase, which makes it much quicker to reward and
   narrow down. Babies start with no tricks and learn this way from trained animals.
 - A trained animal's tricks can be cleared to start teaching it again.
+- Training treats (dungeon, mineshaft, temple, stronghold and village loot) instantly teach one trick
+  for the phrase written on the treat. `/harmony treat <trick> [phrase]` gives one for testing.
 - Handheld instruments store phrases so tricks can be used while adventuring. They add to noteblocks,
   they don't replace them.
 - Noteblock automation: redstone driven noteblocks command animals with nobody around.
@@ -134,7 +136,9 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 ### Phase 1: MVP
 
 - [ ] Reliable core tricks: follow, stay/sit, go to, guard, attack, come back
+      - Bug: animals sometimes clip through the floor after doing the Jump trick
 - [x] Learning mode indicator: question marks while an animal is learning, hearts when it learns
+- [x] Training treats: loot that instantly teaches a trick for a fixed phrase
 - [x] Phrase based listening (single notes still instant)
 - [ ] First handheld instrument
 - [x] Bonding and transfer (done with Phase 0 ownership)
@@ -143,6 +147,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
       teleporting to catch up
 - [x] Traits: exponential stacking, first bad traits, polish breeding, Jump trait takes less fall damage
 - [x] Happiness gates breeding, tune existing factors
+- [ ] Bug: animals breed too fast, tune breeding rate
 - [ ] Overlay showing an animal's traits, happiness, tricks and owner (replaces the Harmony Diagnostics
       debug item)
 - [ ] Config cleanup (incl. option to quiet animal sounds), achievements or other in game hints so
