@@ -54,6 +54,17 @@ public abstract class PlayerTrick extends Trick {
 		return this.player;
 	}
 
+	/*
+	 * Name of the player, for showing what the animal is doing, or "" if they aren't around
+	 */
+	public String getPlayerName() {
+		if (this.playerId == null || this.pet == null) {
+			return "";
+		}
+		EntityPlayer player = this.pet.worldObj.func_152378_a(this.playerId);
+		return player != null ? player.getCommandSenderName() : "";
+	}
+
 	protected boolean hasPlayer() {
 		return this.playerId != null;
 	}

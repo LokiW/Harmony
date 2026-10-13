@@ -17,6 +17,7 @@ import com.harmony.harmonymod.tricks.TrickHandler;
 import com.harmony.harmonymod.aitasks.BreedingAI;
 import com.harmony.harmonymod.aitasks.HarmonyWanderAI;
 import java.util.UUID;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 
 
 /*
@@ -46,6 +47,9 @@ public class HarmonyProps implements IExtendedEntityProperties {
 
 	// Client copy of the animal's mood (-1 unhappy, 0 content, 1 happy), sent by the server
 	public int mood;
+	// Client copy of the animal's attack damage and its base value (clients aren't sent that attribute),
+	// 0 if it has none
+	public double attack, attackBase;
 	// Client only: the mood changed in the last sync, for MoodIndicator to show
 	public boolean moodChanged;
 
@@ -189,6 +193,8 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		int newMood = data.getInteger("Mood");
 		moodChanged = hadData && newMood != mood;
 		mood = newMood;
+		attack = data.getDouble("Attack");
+		attackBase = data.getDouble("AttackBase");
 	}
 
 	/*
@@ -209,6 +215,11 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		NBTTagCompound data = writeData();
 		data.setBoolean("Learning", tricks.isLearningTrick());
 		data.setInteger("Mood", getMood());
+		IAttributeInstance attackAttr = pet.getEntityAttribute(SharedMonsterAttributes.attackDamage);
+		if (attackAttr != null) {
+			data.setDouble("Attack", attackAttr.getAttributeValue());
+			data.setDouble("AttackBase", attackAttr.getBaseValue());
+		}
 		return data;
 	}
 

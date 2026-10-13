@@ -42,7 +42,8 @@ migration or compatibility code for old saves.
   (works from the server console too, spawning at world spawn).
 - `sync/` - sends animals' data to clients. `ownership/` - bonding and adoption papers.
 - `horsefix/` - client-driven horse riding (`HorseControl` server side, `HorseControlClient`).
-- `client/` - client-only rendering (learning particles). `items/` - the diagnostics debug item.
+- `client/` - client-only rendering (learning/mood particles, Pet Journal overlay). `info/` - Pet Journal and
+  `AnimalInfo` (what players can see about an animal). `compat/` - optional WAILA tooltip.
 
 ## Rules that bite in 1.7.10
 

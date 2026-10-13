@@ -27,11 +27,16 @@ minecraft {
 
 repositories {
     mavenCentral()
+    maven {
+        name = "GTNH Maven"
+        url = "https://nexus.gtnewhorizons.com/repository/public/"
+    }
 }
 
 dependencies {
-    // Put mod dependencies here, e.g.
-    // implementation rfg.deobf("curse.maven:some-mod-12345:67890")
+    // WAILA's API, for the optional WAILA tooltip (compat/WailaCompat). Only compiled against: Harmony
+    // works without WAILA and doesn't ship it. Same API as classic WAILA 1.5.x.
+    compileOnly("com.github.GTNewHorizons:waila:1.19.34:api") { transitive = false }
 }
 
 processResources {
