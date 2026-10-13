@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
 
 public class Traits {
 	private static Random r = new Random();
@@ -105,6 +106,21 @@ public class Traits {
 			return TRAIT.NONE;
 		}
 		return l.get(r.nextInt(l.size()));
+	}
+
+	// Upward speed of a vanilla jump
+	private static final double VANILLA_JUMP = 0.42D;
+
+	/*
+	 * How high a jump with this upward speed goes, with vanilla's gravity and drag
+	 */
+	static double jumpHeight(double motionY) {
+		double height = 0.0D;
+		while (motionY > 0.0D) {
+			height += motionY;
+			motionY = (motionY - 0.08D) * 0.98D;
+		}
+		return height;
 	}
 
 	public int count(TRAIT trait) {
@@ -246,6 +262,22 @@ public class Traits {
 			// Clients may not have the animal's traits yet
 			if(hp != null && hp.isInitialized()) {
 				e.motionY *= Math.pow(JUMP_PER_COPY, hp.traits.count(TRAIT.JUMP));
+			}
+		}
+
+		/*
+		 * Falls only count from above the height the animal can jump, so Jump animals don't hurt
+		 * themselves landing their own jumps
+		 */
+		@SubscribeEvent
+		public void ignoreOwnJumpHeight(LivingFallEvent event) {
+			HarmonyProps hp = HarmonyProps.get(event.entityLiving);
+			if (hp != null && hp.isInitialized()) {
+				int jumps = hp.traits.count(TRAIT.JUMP);
+				if (jumps > 0) {
+					double extra = jumpHeight(VANILLA_JUMP * Math.pow(JUMP_PER_COPY, jumps)) - jumpHeight(VANILLA_JUMP);
+					event.distance = Math.max(0.0F, event.distance - (float) extra);
+				}
 			}
 		}
 

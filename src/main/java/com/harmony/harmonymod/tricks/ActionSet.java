@@ -133,11 +133,11 @@ public class ActionSet {
 			case TrickEnum.GO:
 				return new MoveTo();
 			case TrickEnum.LEARNED_LOCATION_1:
-				return new LocationTrick(hp.tricks.xLearned1, hp.tricks.yLearned1, hp.tricks.zLearned1);
+				return goTo(hp.tricks.xLearned1, hp.tricks.yLearned1, hp.tricks.zLearned1);
 			case TrickEnum.LEARNED_LOCATION_2:
-				return new LocationTrick(hp.tricks.xLearned2, hp.tricks.yLearned2, hp.tricks.zLearned2);
+				return goTo(hp.tricks.xLearned2, hp.tricks.yLearned2, hp.tricks.zLearned2);
 			case TrickEnum.LEARNED_LOCATION_3:
-				return new LocationTrick(hp.tricks.xLearned3, hp.tricks.yLearned3, hp.tricks.zLearned3);
+				return goTo(hp.tricks.xLearned3, hp.tricks.yLearned3, hp.tricks.zLearned3);
 			case TrickEnum.ATTACK:
 				return new Attack();
 			case TrickEnum.GUARD:
@@ -147,11 +147,22 @@ public class ActionSet {
 			case TrickEnum.SIT:
 				return new Sit();
 			case TrickEnum.RESPAWN_LOCATION:
-				return new LocationTrick(hp.tricks.xRespawn, hp.tricks.yRespawn, hp.tricks.zRespawn);
+				return goTo(hp.tricks.xRespawn, hp.tricks.yRespawn, hp.tricks.zRespawn);
+			case TrickEnum.FOLLOW:
+				return new Follow();
+			case TrickEnum.COME_BACK:
+				return new ComeBack();
 			default:
 				break;
 		}
 		return null;
+	}
+
+	/*
+	 * Walk to a place, or nothing if the place hasn't been set (its y is negative)
+	 */
+	private static Trick goTo(double x, double y, double z) {
+		return y < 0.0 ? null : new MoveTo(new LocationTrick(x, y, z));
 	}
 
 	public String getTrickNameForAction(long action) {

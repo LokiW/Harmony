@@ -18,9 +18,26 @@ public class MoveTo extends Trick {
 	private LocationTrick wanderTarget;
 	private int wanderTicks;
 
+	// Going to a place gives up if it hasn't got a block closer in this many ticks
+	private static final int STUCK_TICKS = 200;
+
+	private double bestDistance = Double.MAX_VALUE;
+	private int ticksWithoutProgress;
+
+	public MoveTo() {}
+
+	/*
+	 * Go to a specific target (e.g. a learned place) rather than whatever the pet was doing
+	 */
+	public MoveTo(Trick target) {
+		this.targetTrick = target;
+	}
+
 	public void setupTrick(EntityLiving pet, Trick currentTrick) {
 		this.pet = pet;
-		this.targetTrick = currentTrick;
+		if (this.targetTrick == null) {
+			this.targetTrick = currentTrick;
+		}
 	}
 
 	public boolean act() {
@@ -35,6 +52,15 @@ public class MoveTo extends Trick {
 				return moveToEntity(target, false);
 			} else if (this.targetTrick instanceof LocationTrick) {
 				LocationTrick targetL = (LocationTrick) this.targetTrick;
+				double distance = this.pet.getDistance(targetL.targetX, targetL.targetY, targetL.targetZ);
+				if (distance < this.bestDistance - 1.0D) {
+					this.bestDistance = distance;
+					this.ticksWithoutProgress = 0;
+				} else if ((this.ticksWithoutProgress += 10) > STUCK_TICKS) {
+					// Can't get there
+					this.pet.getNavigator().clearPathEntity();
+					return false;
+				}
 				return moveToPoint(targetL.targetX, targetL.targetY, targetL.targetZ, false);
 			} else {
 				return wander();

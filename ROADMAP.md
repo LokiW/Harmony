@@ -68,6 +68,10 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - Training: feed a glistering melon, play a phrase, the animal tries a trick, feed again to reward.
   Repeated rewards narrow the phrase down to one trick.
 - Tricks chain: e.g. a location followed by Guard means guard that location.
+- Follow is a heel: the animal stays within a couple of blocks of its owner (or the nearest player),
+  speeding up when behind, until told otherwise. Come Back walks to them and stops.
+- A compass on an animal sets its next place (1, 2, 3, then 1 again) to where it stands; the Go to
+  Place tricks walk there.
 - Teaching by demonstration: when an animal in training hears a phrase, it is far more likely to try
   the trick a nearby animal performs for that phrase, which makes it much quicker to reward and
   narrow down. Babies start with no tricks and learn this way from trained animals.
@@ -135,8 +139,9 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 
 ### Phase 1: MVP
 
-- [ ] Reliable core tricks: follow, stay/sit, go to, guard, attack, come back
-      - Bug: animals sometimes clip through the floor after doing the Jump trick
+- [x] Reliable core tricks: follow, stay/sit, go to, guard, attack, come back
+      - Bug: animals sometimes clip through the floor after doing the Jump trick (jump now happens in
+        the animal's own update; confirm in game)
 - [x] Learning mode indicator: question marks while an animal is learning, hearts when it learns
 - [x] Training treats: loot that instantly teaches a trick for a fixed phrase
 - [x] Phrase based listening (single notes still instant)

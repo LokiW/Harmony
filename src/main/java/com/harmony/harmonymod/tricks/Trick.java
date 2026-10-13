@@ -93,6 +93,10 @@ public abstract class Trick {
 			trick = new EntityTrick();
 		} else if ("sit".equals(type)) {
 			trick = new Sit();
+		} else if ("follow".equals(type)) {
+			trick = new Follow();
+		} else if ("come_back".equals(type)) {
+			trick = new ComeBack();
 		} else {
 			System.out.println("HarmonyMod: Ignoring unknown saved trick type " + type);
 			return null;
@@ -197,12 +201,29 @@ public abstract class Trick {
 
 
 	/*
-	 * Teleport to given point.
+	 * Walk toward a point that may be further than pathfinding reaches, a few blocks at a time
+	 */
+	protected void stepToward(double x, double y, double z, double speed) {
+		double dx = x - this.pet.posX;
+		double dy = y - this.pet.boundingBox.minY;
+		double dz = z - this.pet.posZ;
+		double steps = Math.max(Math.max(Math.abs(dx), Math.abs(dz)), Math.abs(dy)) / 8.0D;
+		if (steps > 1.0D) {
+			dx /= steps;
+			dy /= steps;
+			dz /= steps;
+		}
+		this.pet.getNavigator().tryMoveToXYZ(this.pet.posX + dx, this.pet.boundingBox.minY + dy, this.pet.posZ + dz, speed);
+	}
+
+	/*
+	 * Teleport next to the given point (feet position), like a tamed wolf catching up with its owner:
+	 * a spot around it with solid ground and room to stand.
 	 */
 	protected boolean teleportHelper(double x, double y, double z) {
 		int i = MathHelper.floor_double(x) - 2;
-		int j = MathHelper.floor_double(y) - 2;
-		int k = MathHelper.floor_double(z);
+		int j = MathHelper.floor_double(z) - 2;
+		int k = MathHelper.floor_double(y);
 
 		World theWorld = pet.worldObj;
 

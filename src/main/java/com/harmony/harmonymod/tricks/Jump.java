@@ -23,7 +23,10 @@ public class Jump extends Trick {
 
 	public boolean act() {
 		if (this.delayCounter == 0) {
-			if (this.pet.onGround || canFly()) {
+			if (this.pet.onGround) {
+				// Jumps in its own next update, like vanilla AI jumps
+				this.pet.getJumpHelper().setJumping();
+			} else if (canFly()) {
 				jump();
 			}
 		} else if (this.delayCounter == LEARNING_DELAY) {
@@ -43,8 +46,8 @@ public class Jump extends Trick {
 	}
 
 	/*
-	 * Same as EntityLivingBase.jump(), which is protected. Animals don't sprint, so its sprint boost is left out.
-	 * The Forge jump event is what lets the JUMP trait boost the jump.
+	 * Same as EntityLivingBase.jump(), which is protected, for jumping in mid air (FLY). Animals don't
+	 * sprint, so its sprint boost is left out. The Forge jump event is what lets the JUMP trait boost it.
 	 */
 	private void jump() {
 		this.pet.motionY = 0.41999998688697815D;

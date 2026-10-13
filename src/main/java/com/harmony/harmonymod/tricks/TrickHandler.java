@@ -30,6 +30,25 @@ public class TrickHandler extends EntityAIBase {
 	public double xLearned2; public double yLearned2 = -1.0; public double zLearned2;
 	public double xLearned3; public double yLearned3 = -1.0; public double zLearned3;
 
+	// Which place a compass sets next, 1 to 3
+	public int nextPlace = 1;
+
+	/*
+	 * Set the next place for the Go to Place tricks, returning which one it was
+	 */
+	public int setNextPlace(double x, double y, double z) {
+		int place = this.nextPlace;
+		if (place == 1) {
+			this.xLearned1 = x; this.yLearned1 = y; this.zLearned1 = z;
+		} else if (place == 2) {
+			this.xLearned2 = x; this.yLearned2 = y; this.zLearned2 = z;
+		} else {
+			this.xLearned3 = x; this.yLearned3 = y; this.zLearned3 = z;
+		}
+		this.nextPlace = place % 3 + 1;
+		return place;
+	}
+
 	// Respawn on death location, set by feeding a golden apple (see respawn.Respawn)
 	public double xRespawn; public double yRespawn = -1.0; public double zRespawn;
 	public int dimRespawn;
@@ -310,6 +329,7 @@ public class TrickHandler extends EntityAIBase {
 		writeLocation(tag, "Location1", this.xLearned1, this.yLearned1, this.zLearned1);
 		writeLocation(tag, "Location2", this.xLearned2, this.yLearned2, this.zLearned2);
 		writeLocation(tag, "Location3", this.xLearned3, this.yLearned3, this.zLearned3);
+		tag.setInteger("NextPlace", this.nextPlace);
 		writeLocation(tag, "Respawn", this.xRespawn, this.yRespawn, this.zRespawn);
 		if (hasRespawn()) {
 			tag.getCompoundTag("Respawn").setInteger("Dim", this.dimRespawn);
@@ -338,6 +358,9 @@ public class TrickHandler extends EntityAIBase {
 			}
 		}
 
+		if (tag.hasKey("NextPlace")) {
+			this.nextPlace = tag.getInteger("NextPlace");
+		}
 		if (tag.hasKey("Location1")) {
 			NBTTagCompound l = tag.getCompoundTag("Location1");
 			this.xLearned1 = l.getDouble("X"); this.yLearned1 = l.getDouble("Y"); this.zLearned1 = l.getDouble("Z");

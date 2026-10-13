@@ -44,3 +44,6 @@ harmony.trick.SIT=Sit
 harmony.trick.RESPAWN_LOCATION=Go to Respawn Point
 harmony.command.unknown_trick=Unknown trick %s
 harmony.command.treat_given=Gave a %s Treat for the phrase "%s"
+harmony.trick.FOLLOW=Follow
+harmony.trick.COME_BACK=Come Back
+harmony.place.set=Place %1$s set for %2$s. Teach it a Go to Place %1$s phrase to send it here

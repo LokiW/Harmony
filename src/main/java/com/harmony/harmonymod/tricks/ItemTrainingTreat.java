@@ -34,7 +34,7 @@ import java.util.TreeSet;
  */
 public class ItemTrainingTreat extends HarmonyItem {
 	// Tricks treats can teach: the ones that work without a learned location
-	public static final String[] TRICKS = {"STOP", "GO", "ATTACK", "GUARD", "JUMP", "SIT"};
+	public static final String[] TRICKS = {"STOP", "GO", "ATTACK", "GUARD", "JUMP", "SIT", "FOLLOW", "COME_BACK"};
 	// Chest loot weight (a dungeon saddle is 10)
 	private static final int LOOT_WEIGHT = 5;
 	private static final String[] LOOT_CHESTS = {
