@@ -9,17 +9,29 @@ import net.minecraft.entity.ai.EntityAIMate;
 import net.minecraft.entity.ai.EntityAITasks.EntityAITaskEntry;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.world.WorldServer;
+import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.EntityTameable;
 
+/*
+ * Replaces vanilla breeding. Happy animals breed: kept animals (see HarmonyProps.kept) on their own,
+ * any animal right away when a player feeds it its breeding food. Unhappy animals fed their food get
+ * happier instead.
+ */
 public class BreedingAI extends EntityAIBase
 {
+	// How often kept animals check whether they can breed on their own
+	private static final int NATURAL_INTERVAL = 200;
+	// Happiness from being fed while too unhappy to breed
+	private static final int FED_HAPPINESS = 3;
+
 	private EntityAnimal pet;
 	private Breed breedTrick;
-	private int delayCounter;
+	private long nextNaturalCheck;
 
 
 	public BreedingAI(EntityAnimal pet) {
 		this.pet = pet;
-		this.delayCounter = 0;
 		this.setMutexBits(3);
 	}
 
@@ -27,25 +39,52 @@ public class BreedingAI extends EntityAIBase
 	 * Returns whether the EntityAIBase should begin execution.
 	 */
 	public boolean shouldExecute() {
-		HarmonyProps hp;
-		if(pet.isInLove()) {
-			pet.resetInLove();
-			pet.worldObj.setEntityState(pet, (byte)0);
-			hp = HarmonyProps.get(pet);
-			hp.happiness += 5; //TODO this shouldn't be hardcoded
+		HarmonyProps hp = HarmonyProps.get(pet);
+		if (hp == null || !hp.isInitialized()) {
+			return false;
 		}
 
-		delayCounter++;
-		if(!(delayCounter % 256 == 0))
-			return false;
+		if(pet.isInLove()) {
+			// Fed its breeding food. Vanilla put it in love mode, Harmony decides what happens instead.
+			pet.resetInLove();
+			hp.kept = true;
+			if (!hp.canBreed()) {
+				hp.changeHappiness(FED_HAPPINESS);
+			}
+			// Report how it feels after being fed
+			int mood = hp.getMood();
+			((WorldServer) pet.worldObj).func_147487_a(HarmonyProps.moodParticle(mood), pet.posX,
+					pet.posY + pet.height * 0.7D, pet.posZ, HarmonyProps.moodParticleCount(mood), 0.4D, 0.3D, 0.4D, 0.0D);
+			return hp.canBreed() && startBreeding();
+		}
 
-		hp = HarmonyProps.get(pet);
-		if(hp != null && hp.happiness >= HarmonyMod.breedingHappiness) {
-			breedTrick = new Breed(HarmonyMod.breedingHappiness);
-			breedTrick.setupTrick(pet, null);
-			return true;
+		long now = pet.worldObj.getTotalWorldTime();
+		if (now < nextNaturalCheck) {
+			return false;
+		}
+		nextNaturalCheck = now + NATURAL_INTERVAL;
+
+		if (isKept(hp) && hp.canBreed()) {
+			return startBreeding();
 		}
 		return false;
+	}
+
+	/*
+	 * Kept by a player, or tamed the vanilla way
+	 */
+	private boolean isKept(HarmonyProps hp) {
+		return hp.kept || (pet instanceof EntityTameable && ((EntityTameable) pet).isTamed())
+				|| (pet instanceof EntityHorse && ((EntityHorse) pet).isTame());
+	}
+
+	/*
+	 * Look for a mate, Breed ends straight away if there's none or there are too many animals around
+	 */
+	private boolean startBreeding() {
+		breedTrick = new Breed(HarmonyMod.breedingHappiness);
+		breedTrick.setupTrick(pet, null);
+		return true;
 	}
 
 	/**
@@ -76,17 +115,18 @@ public class BreedingAI extends EntityAIBase
 		if (!(pet instanceof EntityAnimal))
 			return;
 
-		boolean canBreed = false;
+		// Takes over vanilla mating's priority, so e.g. a sitting wolf doesn't get up to breed
+		int priority = -1;
 		List<EntityAITaskEntry> t = pet.tasks.taskEntries;
 		for(int i = 0; i < t.size(); i++) {
 			if(t.get(i).action instanceof EntityAIMate) {
+				priority = t.get(i).priority;
 				t.remove(i);
-				canBreed = true;
 				i--;
 			}
 		}
-		if(canBreed) {
-			pet.tasks.addTask(1,new BreedingAI((EntityAnimal)pet));
+		if(priority >= 0) {
+			pet.tasks.addTask(priority, new BreedingAI((EntityAnimal)pet));
 		}
 	}
 }

@@ -9,6 +9,7 @@ import com.harmony.harmonymod.ownership.Ownership;
 import com.harmony.harmonymod.tricks.Sit;
 import com.harmony.harmonymod.horsefix.HorseControlClient;
 import com.harmony.harmonymod.client.LearningIndicator;
+import com.harmony.harmonymod.client.MoodIndicator;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -52,6 +53,9 @@ public class HarmonyMod
 	//constants related to breeding's interactions with happiness
 	public static int breedingHappiness;
 	public static int breedingCost;
+	// Animals won't breed with this many of their species within populationRadius blocks
+	public static int populationCap;
+	public static int populationRadius;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -86,6 +90,7 @@ public class HarmonyMod
 		HorseControl.register();
 		if (event.getSide().isClient()) {
 			HorseControlClient.register();
+			MoodIndicator.register();
 		}
 		Traits.register();
 	}
@@ -114,6 +119,10 @@ public class HarmonyMod
 					breedingHappiness = p.getInt();
 					p = config.get(MODID, "breedingCost", 5);
 					breedingCost = p.getInt();
+					p = config.get(MODID, "populationCap", 16, "animals won't breed with this many of their species nearby");
+					populationCap = p.getInt();
+					p = config.get(MODID, "populationRadius", 16, "how far (in blocks) populationCap counts animals");
+					populationRadius = p.getInt();
 				} else {
 					//for each mob
 					Property p;
@@ -144,8 +153,10 @@ public class HarmonyMod
 
 	private static void generateConfig() {
 
-		config.get(MODID, "breedingHappiness", 10, "required happiness to breed naturally");
-		config.get(MODID, "breedingCost", 5, "penalty for successfully breeding");
+		config.get(MODID, "breedingHappiness", 10, "required happiness to breed, out of 20");
+		config.get(MODID, "breedingCost", 5, "happiness lost by breeding");
+		config.get(MODID, "populationCap", 16, "animals won't breed with this many of their species nearby");
+		config.get(MODID, "populationRadius", 16, "how far (in blocks) populationCap counts animals");
 
 		// Which traits wild animals can get, per species: good ones that fit the species, and bad ones
 		addSpecies("EntityCow", "VICIOUS,HARDY", "SLOW,WEAK");

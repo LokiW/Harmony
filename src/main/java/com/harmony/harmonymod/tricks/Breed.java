@@ -19,6 +19,7 @@ public class Breed extends Trick {
 	private EntityLiving targetMate;
 	private int required;
 	private int spawnBabyDelay;
+	private int heartTicks;
 
 	public Breed(int required) {
 		this.required = required;
@@ -35,7 +36,7 @@ public class Breed extends Trick {
 		}
 
 		//are we valid for mating
-		if(!canBreed(pet)) {
+		if(!canBreed(pet) || isOverPopulated()) {
 			targetMate = null;
 		}
 
@@ -51,6 +52,11 @@ public class Breed extends Trick {
 			return false;
 		}
 
+
+		// Hearts while it's actually breeding (vanilla's love mode hearts are cleared, see MoodIndicator)
+		if (++this.heartTicks % 20 == 0) {
+			this.pet.worldObj.setEntityState(this.pet, (byte)18);
+		}
 
 		this.moveToEntity(this.targetMate, false);
 
@@ -73,9 +79,9 @@ public class Breed extends Trick {
 					this.spawnBaby();
 				}
 
-				hp1.happiness -= HarmonyMod.breedingCost;
+				hp1.changeHappiness(-HarmonyMod.breedingCost);
 				e1.setGrowingAge(6000);
-				hp2.happiness -= HarmonyMod.breedingCost;
+				hp2.changeHappiness(-HarmonyMod.breedingCost);
 				e2.setGrowingAge(6000);
 
 				this.pet.worldObj.setEntityState(this.pet, (byte)0);
@@ -105,6 +111,16 @@ public class Breed extends Trick {
 		accum &= ((EntityAnimal)e).getGrowingAge() == 0;
 		accum &= hp.happiness >= required;
 		return accum;
+	}
+
+	/*
+	 * Whether there are already populationCap animals of this species around, then nobody breeds,
+	 * so herds and pens can't grow without limit
+	 */
+	private boolean isOverPopulated() {
+		double r = HarmonyMod.populationRadius;
+		List nearby = pet.worldObj.getEntitiesWithinAABB(this.pet.getClass(), this.pet.boundingBox.expand(r, r / 2, r));
+		return nearby.size() >= HarmonyMod.populationCap;
 	}
 
 	/**
@@ -146,7 +162,10 @@ public class Breed extends Trick {
 
 			activateAchievement();
 
-			HarmonyProps.get(child).constructProperties(this.pet, this.targetMate);
+			HarmonyProps childProps = HarmonyProps.get(child);
+			childProps.constructProperties(this.pet, this.targetMate);
+			// Born in someone's pen
+			childProps.kept = true;
 			child.setGrowingAge(-24000);
 			child.setLocationAndAngles(this.pet.posX, this.pet.posY, this.pet.posZ, 0.0F, 0.0F);
 			w.spawnEntityInWorld(child);

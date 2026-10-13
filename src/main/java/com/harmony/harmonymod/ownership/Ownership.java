@@ -130,6 +130,7 @@ public class Ownership {
 	public static void setOwner(EntityLiving animal, HarmonyProps hp, UUID id, String name) {
 		hp.ownerId = id;
 		hp.ownerName = name;
+		hp.kept = true;
 
 		if (animal instanceof EntityTameable && ((EntityTameable) animal).isTamed()) {
 			((EntityTameable) animal).func_152115_b(id.toString());
