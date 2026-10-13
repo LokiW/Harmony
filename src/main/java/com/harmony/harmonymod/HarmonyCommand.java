@@ -1,6 +1,9 @@
 package com.harmony.harmonymod;
 
 import com.harmony.harmonymod.Traits.TRAIT;
+import com.harmony.harmonymod.tricks.ItemTrainingTreat;
+import com.harmony.harmonymod.tricks.TrickEnum;
+import net.minecraft.item.ItemStack;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -39,6 +42,10 @@ public class HarmonyCommand extends CommandBase {
 
 	@Override
 	public void processCommand(ICommandSender sender, String[] args) {
+		if (args.length >= 2 && "treat".equals(args[0])) {
+			giveTreat(sender, args);
+			return;
+		}
 		if (args.length < 2 || !"spawn".equals(args[0])) {
 			throw new WrongUsageException("harmony.command.usage");
 		}
@@ -84,7 +91,10 @@ public class HarmonyCommand extends CommandBase {
 	@Override
 	public List addTabCompletionOptions(ICommandSender sender, String[] args) {
 		if (args.length == 1) {
-			return getListOfStringsMatchingLastWord(args, "spawn");
+			return getListOfStringsMatchingLastWord(args, "spawn", "treat");
+		}
+		if ("treat".equals(args[0])) {
+			return args.length == 2 ? getListOfStringsMatchingLastWord(args, ItemTrainingTreat.TRICKS) : null;
 		}
 		if (args.length == 2) {
 			return getListOfStringsMatchingLastWord(args, harmonyAnimalNames());
@@ -97,6 +107,27 @@ public class HarmonyCommand extends CommandBase {
 			return getListOfStringsMatchingLastWord(args, names);
 		}
 		return null;
+	}
+
+	/*
+	 * /harmony treat <trick> [phrase]: gives the player a training treat, with a random phrase if none
+	 * is given. The phrase is written like the treats' tooltips, e.g. "harp 3, harp 7".
+	 */
+	private void giveTreat(ICommandSender sender, String[] args) {
+		EntityPlayerMP player = getCommandSenderAsPlayer(sender);
+		String trick = args[1].toUpperCase();
+		if (TrickEnum.fromName(trick) == 0) {
+			throw new CommandException("harmony.command.unknown_trick", args[1]);
+		}
+		String phrase = func_82360_a(sender, args, 2).trim();
+		if (phrase.isEmpty()) {
+			phrase = ItemTrainingTreat.randomPhrase(player.getRNG());
+		}
+		ItemStack treat = HarmonyMod.trainingTreat.makeTreat(trick, phrase);
+		if (!player.inventory.addItemStackToInventory(treat)) {
+			player.dropPlayerItemWithRandomChoice(treat, false);
+		}
+		func_152373_a(sender, this, "harmony.command.treat_given", ItemTrainingTreat.trickDisplayName(trick), phrase);
 	}
 
 	/*
