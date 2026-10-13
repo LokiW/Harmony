@@ -87,7 +87,10 @@ public class JournalOverlay {
 		Vec3 end = eye.addVector(look.xCoord * RANGE, look.yCoord * RANGE, look.zCoord * RANGE);
 
 		double reach = RANGE;
-		MovingObjectPosition block = mc.theWorld.rayTraceBlocks(eye, end);
+		// rayTraceBlocks moves the start vector along the ray as it goes, so give it copies
+		MovingObjectPosition block = mc.theWorld.rayTraceBlocks(
+				Vec3.createVectorHelper(eye.xCoord, eye.yCoord, eye.zCoord),
+				Vec3.createVectorHelper(end.xCoord, end.yCoord, end.zCoord));
 		if (block != null) {
 			reach = block.hitVec.distanceTo(eye);
 		}
