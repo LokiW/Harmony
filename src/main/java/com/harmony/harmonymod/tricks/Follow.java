@@ -1,5 +1,6 @@
 package com.harmony.harmonymod.tricks;
 
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
@@ -122,8 +123,10 @@ public class Follow extends PlayerTrick {
 						continue;
 					}
 					this.pet.setPosition(x + 0.5D, y, z + 0.5D);
+					// Not in a portal either, or it would go straight through it
 					boolean room = world.getCollidingBoundingBoxes(this.pet, this.pet.boundingBox).isEmpty()
-							&& !world.isAnyLiquid(this.pet.boundingBox);
+							&& !world.isAnyLiquid(this.pet.boundingBox)
+							&& !world.isMaterialInBB(this.pet.boundingBox, Material.portal);
 					double distance = player.getDistanceSq(x + 0.5D, y, z + 0.5D);
 					if (room && distance < bestDistance) {
 						bestDistance = distance;

@@ -67,6 +67,9 @@ public class HarmonyMod
 	// Animals won't breed with this many of their species within populationRadius blocks
 	public static int populationCap;
 	public static int populationRadius;
+	// Dimension ids pets won't follow their player into
+	public static Set<Integer> noFollowDimensions = new HashSet<Integer>();
+	private static final String NO_FOLLOW_COMMENT = "dimension ids pets won't follow their player into, e.g. 1 for the End";
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -144,6 +147,11 @@ public class HarmonyMod
 					populationCap = p.getInt();
 					p = config.get(MODID, "populationRadius", 16, "how far (in blocks) populationCap counts animals");
 					populationRadius = p.getInt();
+					p = config.get(MODID, "noFollowDimensions", new int[0], NO_FOLLOW_COMMENT);
+					noFollowDimensions.clear();
+					for (int dim : p.getIntList()) {
+						noFollowDimensions.add(dim);
+					}
 				} else {
 					//for each mob
 					Property p;
@@ -178,6 +186,7 @@ public class HarmonyMod
 		config.get(MODID, "breedingCost", 5, "happiness lost by breeding");
 		config.get(MODID, "populationCap", 16, "animals won't breed with this many of their species nearby");
 		config.get(MODID, "populationRadius", 16, "how far (in blocks) populationCap counts animals");
+		config.get(MODID, "noFollowDimensions", new int[0], NO_FOLLOW_COMMENT);
 
 		// Which traits wild animals can get, per species: good ones that fit the species, and bad ones
 		addSpecies("EntityCow", "VICIOUS,HARDY", "SLOW,WEAK");

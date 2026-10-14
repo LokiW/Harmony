@@ -1,5 +1,6 @@
 package com.harmony.harmonymod.tricks;
 
+import com.harmony.harmonymod.HarmonyMod;
 import com.harmony.harmonymod.HarmonyProps;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -23,7 +24,8 @@ import java.util.UUID;
 
 /*
  * Pets following a player (Follow) go with them into another dimension: through a portal, or out of
- * the End. Only pets that were close by come along, and not when the player died and respawned.
+ * the End. Only pets that were close by come along, not when the player died and respawned, and not
+ * into dimensions listed in the noFollowDimensions config.
  */
 public class FollowTravel {
 	// Players who died, so their respawn doesn't bring pets along
@@ -62,7 +64,7 @@ public class FollowTravel {
 	 * player moved, while the world they left still has the pets loaded.
 	 */
 	private static void bringPets(EntityPlayer player) {
-		if (player.worldObj.isRemote) {
+		if (player.worldObj.isRemote || HarmonyMod.noFollowDimensions.contains(player.dimension)) {
 			return;
 		}
 		WorldServer target = (WorldServer) player.worldObj;
@@ -109,6 +111,8 @@ public class FollowTravel {
 		}
 		pet.setDead();
 		moved.dimension = target.provider.dimensionId;
+		// Like anything that just changed dimension, don't take a portal straight back
+		moved.timeUntilPortal = moved.getPortalCooldown();
 		HarmonyProps hp = HarmonyProps.get(moved);
 		if (hp != null && hp.tricks != null && hp.tricks.currentTrick instanceof Follow) {
 			((Follow) hp.tricks.currentTrick).arriveNear(player);
