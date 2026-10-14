@@ -55,7 +55,7 @@ public class BreedingAI extends EntityAIBase
 			int mood = hp.getMood();
 			((WorldServer) pet.worldObj).func_147487_a(HarmonyProps.moodParticle(mood), pet.posX,
 					pet.posY + pet.height * 0.7D, pet.posZ, HarmonyProps.moodParticleCount(mood), 0.4D, 0.3D, 0.4D, 0.0D);
-			return hp.canBreed() && startBreeding();
+			return hp.canBreed() && startBreeding(false);
 		}
 
 		long now = pet.worldObj.getTotalWorldTime();
@@ -64,8 +64,8 @@ public class BreedingAI extends EntityAIBase
 		}
 		nextNaturalCheck = now + NATURAL_INTERVAL;
 
-		if (isKept(hp) && hp.canBreed()) {
-			return startBreeding();
+		if (isKept(hp) && hp.canBreed() && hp.readyToBreedNaturally()) {
+			return startBreeding(true);
 		}
 		return false;
 	}
@@ -79,10 +79,11 @@ public class BreedingAI extends EntityAIBase
 	}
 
 	/*
-	 * Look for a mate, Breed ends straight away if there's none or there are too many animals around
+	 * Look for a mate, Breed ends straight away if there's none or there are too many animals around.
+	 * Breeding on its own (natural) needs a mate that's also waited long enough since its last litter.
 	 */
-	private boolean startBreeding() {
-		breedTrick = new Breed(HarmonyMod.breedingHappiness);
+	private boolean startBreeding(boolean natural) {
+		breedTrick = new Breed(HarmonyMod.breedingHappiness, natural);
 		breedTrick.setupTrick(pet, null);
 		return true;
 	}

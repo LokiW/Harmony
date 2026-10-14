@@ -20,9 +20,12 @@ public class Breed extends Trick {
 	private int required;
 	private int spawnBabyDelay;
 	private int heartTicks;
+	// Breeding on its own rather than fed: the mate must be ready to breed naturally too
+	private boolean natural;
 
-	public Breed(int required) {
+	public Breed(int required, boolean natural) {
 		this.required = required;
+		this.natural = natural;
 		this.spawnBabyDelay = 0;
 	}
 
@@ -79,10 +82,13 @@ public class Breed extends Trick {
 					this.spawnBaby();
 				}
 
+				long now = this.pet.worldObj.getTotalWorldTime();
 				hp1.changeHappiness(-HarmonyMod.breedingCost);
 				e1.setGrowingAge(6000);
+				hp1.lastBred = now;
 				hp2.changeHappiness(-HarmonyMod.breedingCost);
 				e2.setGrowingAge(6000);
+				hp2.lastBred = now;
 
 				this.pet.worldObj.setEntityState(this.pet, (byte)0);
 				return false;
@@ -110,6 +116,7 @@ public class Breed extends Trick {
 		accum &= !e.isDead;
 		accum &= ((EntityAnimal)e).getGrowingAge() == 0;
 		accum &= hp.happiness >= required;
+		accum &= !natural || hp.readyToBreedNaturally();
 		return accum;
 	}
 

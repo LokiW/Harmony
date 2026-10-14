@@ -55,6 +55,12 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - Mood particles (green sparkles happy, white puffs content, grey clouds unhappy) show when a kept
   animal's mood changes and when any animal is fed its breeding food, so calm pens stay quiet.
 - Happiness alone isn't synced to clients, only mood changes, to keep network traffic down.
+- Animals breeding on their own wait between litters, per species (config, e.g. cows 20 minutes).
+  Feeding still breeds after vanilla's 5 minutes.
+- Planned rebalance: wild conditions only keep an animal content, they don't make it happy. Grass
+  never raises happiness, it lowers it when missing; overcrowding is a huge penalty. Domestication
+  comforts (hay, water troughs, shelter with sky access, bedding) are what make animals happy enough
+  to breed.
 - Later: water, flowers, light, and preferences that differ by species (set in config).
   No block variety scoring, it's too easy to cheese.
 
@@ -155,7 +161,13 @@ Thaumcraft 4, Witchery and Botania when they're installed.
       teleporting to catch up
 - [x] Traits: exponential stacking, first bad traits, polish breeding, Jump trait takes less fall damage
 - [x] Happiness gates breeding, tune existing factors
-- [ ] Bug: animals breed too fast, tune breeding rate
+- [x] Bug: animals breed too fast, tune breeding rate (per species timer between litters for animals
+      breeding on their own)
+- [ ] Happiness rebalance and domestication comforts: grass never raises happiness, only lowers it
+      when missing; overcrowding and having nowhere to wander are much bigger penalties; happiness
+      comes from comforts players provide (hay bales, water troughs, shelter with access to the sky,
+      bedding). Then shorten the breeding timers.
+- [ ] Pets don't follow (path or teleport) into lava or fire unless they're fire resistant
 - [x] Overlay showing an animal's traits, happiness, tricks and owner: the Pet Journal (replaces the
       Harmony Diagnostics debug item), plus a WAILA tooltip when WAILA is installed
 - [ ] Config cleanup (incl. option to quiet animal sounds), achievements or other in game hints so
