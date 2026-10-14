@@ -65,6 +65,10 @@ public abstract class PlayerTrick extends Trick {
 		return player != null ? player.getCommandSenderName() : "";
 	}
 
+	public boolean isPlayer(EntityPlayer player) {
+		return this.playerId != null && this.playerId.equals(player.getUniqueID());
+	}
+
 	protected boolean hasPlayer() {
 		return this.playerId != null;
 	}
