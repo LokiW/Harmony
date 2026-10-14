@@ -73,6 +73,45 @@ public class Phrases {
 		return steps;
 	}
 
+	// Note names of the 25 note block pitches, F#3 to F#5
+	private static final String[] PITCH_NAMES = {
+		"F#3", "G3", "G#3", "A3", "A#3", "B3", "C4", "C#4", "D4", "D#4", "E4", "F4",
+		"F#4", "G4", "G#4", "A4", "A#4", "B4", "C5", "C#5", "D5", "D#5", "E5", "F5", "F#5",
+	};
+	// Short instrument names shown before notes (harp, the default, shows none)
+	private static final String[] INSTRUMENT_TAGS = {"", "Drum ", "Snare ", "Hat ", "Bass "};
+
+	/*
+	 * A phrase for players: note names, chords joined with "+", harp left out, e.g. "F#4 A4+C#5"
+	 */
+	public static String display(String key) {
+		StringBuilder out = new StringBuilder();
+		for (SortedSet<Integer> step : parse(key)) {
+			if (out.length() > 0) {
+				out.append(' ');
+			}
+			boolean first = true;
+			for (int note : step) {
+				if (!first) {
+					out.append('+');
+				}
+				int instrument = note >> 8;
+				out.append(instrument < INSTRUMENT_TAGS.length ? INSTRUMENT_TAGS[instrument] : "");
+				out.append(PITCH_NAMES[note & 0xFF]);
+				first = false;
+			}
+		}
+		return out.length() > 0 ? out.toString() : key;
+	}
+
+	/*
+	 * display(), cut short with "..." if it's longer than maxChars
+	 */
+	public static String display(String key, int maxChars) {
+		String text = display(key);
+		return text.length() <= maxChars ? text : text.substring(0, Math.max(0, maxChars - 3)).trim() + "...";
+	}
+
 	/*
 	 * Note id as SoundDB makes it: pitch in the low byte, instrument above
 	 */

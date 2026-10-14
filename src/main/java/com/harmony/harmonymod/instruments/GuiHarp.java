@@ -343,7 +343,8 @@ public class GuiHarp extends GuiScreen {
 				steps.add(column);
 			}
 		}
-		String phrase = steps.isEmpty() ? StatCollector.translateToLocal("harmony.harp.tooltip.empty") : phraseKey(steps);
+		String phrase = steps.isEmpty() ? StatCollector.translateToLocal("harmony.harp.tooltip.empty")
+				: Phrases.display(phraseKey(steps));
 		phrase = fontRendererObj.trimStringToWidth(phrase, WIDTH - 24);
 		fontRendererObj.drawString(phrase, left + 12, positionY(0) + 10, PAPER_EDGE);
 

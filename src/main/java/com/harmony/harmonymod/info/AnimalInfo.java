@@ -2,6 +2,7 @@ package com.harmony.harmonymod.info;
 
 import com.harmony.harmonymod.HarmonyProps;
 import com.harmony.harmonymod.Traits.TRAIT;
+import com.harmony.harmonymod.sounds.Phrases;
 import com.harmony.harmonymod.tricks.ActionSet;
 import com.harmony.harmonymod.tricks.Attack;
 import com.harmony.harmonymod.tricks.ComeBack;
@@ -29,6 +30,10 @@ import java.util.Map;
 public class AnimalInfo {
 	// Most learned phrases listed before "and N more"
 	private static final int MAX_KNOWN = 6;
+	// Most phrases listed as still being learned
+	private static final int MAX_LEARNING = 3;
+	// Longest phrase shown before it's cut short
+	private static final int PHRASE_CHARS = 24;
 
 	private static final TRAIT[] GOOD = {TRAIT.FAST, TRAIT.HARDY, TRAIT.VICIOUS, TRAIT.JUMP, TRAIT.FERTILE};
 
@@ -68,11 +73,17 @@ public class AnimalInfo {
 					lines.add(gray("  " + t("harmony.info.more", known.size() - MAX_KNOWN)));
 					break;
 				}
-				lines.add("  " + EnumChatFormatting.AQUA + entry.getValue() + EnumChatFormatting.RESET + gray(": " + entry.getKey()));
+				lines.add("  " + EnumChatFormatting.AQUA + entry.getValue() + EnumChatFormatting.RESET
+						+ gray(": " + Phrases.display(entry.getKey(), PHRASE_CHARS)));
 			}
 		}
 		if (!learning.isEmpty()) {
-			lines.add(t("harmony.info.learning") + " " + gray(join(learning)));
+			List<String> shown = new ArrayList<String>();
+			for (int i = 0; i < learning.size() && i < MAX_LEARNING; i++) {
+				shown.add(Phrases.display(learning.get(i), PHRASE_CHARS));
+			}
+			String more = learning.size() > MAX_LEARNING ? ", " + t("harmony.info.more", learning.size() - MAX_LEARNING) : "";
+			lines.add(t("harmony.info.learning") + " " + gray(join(shown) + more));
 		}
 
 		List<String> places = new ArrayList<String>();

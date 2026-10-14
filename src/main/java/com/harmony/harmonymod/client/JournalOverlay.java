@@ -31,6 +31,7 @@ public class JournalOverlay {
 	private static final double RANGE = 8.0D;
 	private static final int BACKGROUND = 0xC0201810;
 	private static final int BORDER = 0xFF8B6B3E;
+	private static final int MAX_WIDTH = 200;
 
 	public static void register() {
 		MinecraftForge.EVENT_BUS.register(new JournalOverlay());
@@ -58,8 +59,15 @@ public class JournalOverlay {
 		lines.add(0, "§l" + animal.getCommandSenderName());
 
 		FontRenderer font = mc.fontRenderer;
+		// No line gets wider than this, so the page always fits beside the crosshair
+		int maxWidth = Math.min(MAX_WIDTH, event.resolution.getScaledWidth() / 2 - 24);
 		int width = 0;
-		for (String line : lines) {
+		for (int i = 0; i < lines.size(); i++) {
+			String line = lines.get(i);
+			if (font.getStringWidth(line) > maxWidth) {
+				line = font.trimStringToWidth(line, maxWidth - font.getStringWidth("...")) + "...";
+				lines.set(i, line);
+			}
 			width = Math.max(width, font.getStringWidth(line));
 		}
 		ScaledResolution res = event.resolution;

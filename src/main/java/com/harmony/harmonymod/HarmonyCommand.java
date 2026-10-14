@@ -3,6 +3,7 @@ package com.harmony.harmonymod;
 import com.harmony.harmonymod.Traits.TRAIT;
 import com.harmony.harmonymod.tricks.ItemTrainingTreat;
 import com.harmony.harmonymod.tricks.TrickEnum;
+import com.harmony.harmonymod.sounds.Phrases;
 import net.minecraft.item.ItemStack;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -127,7 +128,7 @@ public class HarmonyCommand extends CommandBase {
 		if (!player.inventory.addItemStackToInventory(treat)) {
 			player.dropPlayerItemWithRandomChoice(treat, false);
 		}
-		func_152373_a(sender, this, "harmony.command.treat_given", ItemTrainingTreat.trickDisplayName(trick), phrase);
+		func_152373_a(sender, this, "harmony.command.treat_given", ItemTrainingTreat.trickDisplayName(trick), Phrases.display(phrase));
 	}
 
 	/*
