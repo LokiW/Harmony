@@ -151,7 +151,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - [x] First handheld instrument (harp)
 - [x] Bonding and transfer (done with Phase 0 ownership)
 - [x] Golden / enchanted golden apple respawn tiers, spirit form waiting
-- [ ] Pets follow through dimensions and owner teleports, path to owner aggressively instead of
+- [x] Pets follow through dimensions and owner teleports, path to owner aggressively instead of
       teleporting to catch up
 - [x] Traits: exponential stacking, first bad traits, polish breeding, Jump trait takes less fall damage
 - [x] Happiness gates breeding, tune existing factors

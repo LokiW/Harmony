@@ -9,6 +9,7 @@ import com.harmony.harmonymod.horsefix.HorseControl;
 import com.harmony.harmonymod.sync.AnimalSync;
 import com.harmony.harmonymod.ownership.Ownership;
 import com.harmony.harmonymod.tricks.Sit;
+import com.harmony.harmonymod.tricks.FollowTravel;
 import com.harmony.harmonymod.tricks.ItemTrainingTreat;
 import com.harmony.harmonymod.instruments.ItemHarp;
 import com.harmony.harmonymod.instruments.HarpPlayer;
@@ -105,6 +106,7 @@ public class HarmonyMod
 		SoundDB.getSoundDB();
 		FeedAnimal.register();
 		Respawn.register();
+		FollowTravel.register();
 		HorseControl.register();
 		if (event.getSide().isClient()) {
 			HorseControlClient.register();

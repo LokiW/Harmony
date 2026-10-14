@@ -9,8 +9,8 @@ import net.minecraft.world.World;
  *
  * Stricter than vanilla following: it repaths every few ticks, speeds up the further behind it is,
  * and never stops trying. The trick AI runs above wandering, breeding and panicking, so nothing pulls
- * it away. It only teleports when the player does (or jumps far, e.g. an ender pearl), and waits if
- * the player leaves the dimension.
+ * it away. It only teleports when the player does (or jumps far, e.g. an ender pearl), and goes along
+ * when the player changes dimension near it (FollowTravel). If the player leaves without it, it waits.
  */
 public class Follow extends PlayerTrick {
 	// Close enough: stop walking
@@ -34,6 +34,8 @@ public class Follow extends PlayerTrick {
 	private static final int SPOT_RANGE = 3;
 	private static final int SPOT_ABOVE = 2;
 	private static final int SPOT_BELOW = 8;
+	// Close enough to the player when they change dimension to go with them
+	private static final double TRAVEL_RANGE = 16.0D;
 
 	public boolean act() {
 		if (!hasPlayer()) {
@@ -79,6 +81,26 @@ public class Follow extends PlayerTrick {
 			stepToward(player.posX, player.boundingBox.minY, player.posZ, speed);
 		}
 		return true;
+	}
+
+	/*
+	 * Whether the pet was following this player, close by, when last checked
+	 */
+	public boolean isFollowingClosely(EntityPlayer player) {
+		return isPlayer(player) && this.seenPlayer
+				&& this.pet.getDistanceSq(this.lastPlayerX, this.lastPlayerY, this.lastPlayerZ) <= TRAVEL_RANGE * TRAVEL_RANGE;
+	}
+
+	/*
+	 * Put a pet that just arrived in the player's world next to them
+	 */
+	public void arriveNear(EntityPlayer player) {
+		this.pet.setLocationAndAngles(player.posX, player.boundingBox.minY, player.posZ, player.rotationYaw, 0.0F);
+		teleportNear(player);
+		this.lastPlayerX = player.posX;
+		this.lastPlayerY = player.posY;
+		this.lastPlayerZ = player.posZ;
+		this.seenPlayer = true;
 	}
 
 	/*
