@@ -95,11 +95,17 @@ public class AnimalInfo {
 				: t(tricks.permanentRespawn ? "harmony.info.respawn_permanent" : "harmony.info.respawn_once");
 		lines.add(t("harmony.info.respawn", respawn));
 
-		String stats = t("harmony.info.health", String.format("%.0f/%.0f", animal.getHealth(), animal.getMaxHealth()))
-				+ multiplier(animal, SharedMonsterAttributes.maxHealth.getAttributeUnlocalizedName())
+		/* Health and attack as numbers, green or red when traits raised or lowered them */
+		IAttributeInstance maxHealth = animal.getAttributeMap()
+				.getAttributeInstanceByName(SharedMonsterAttributes.maxHealth.getAttributeUnlocalizedName());
+		String health = String.format("%.0f/%.0f", animal.getHealth(), animal.getMaxHealth());
+		if (maxHealth != null) {
+			health = colored(health, maxHealth.getAttributeValue(), maxHealth.getBaseValue());
+		}
+		String stats = t("harmony.info.health", health)
 				+ "  " + t("harmony.info.speed") + multiplier(animal, SharedMonsterAttributes.movementSpeed.getAttributeUnlocalizedName());
 		if (hp.attackBase > 0.0) {
-			stats += "  " + t("harmony.info.attack") + times(hp.attack / hp.attackBase);
+			stats += "  " + t("harmony.info.attack", colored(number(hp.attack), hp.attack, hp.attackBase));
 		}
 		lines.add(stats);
 		return lines;
@@ -159,6 +165,23 @@ public class AnimalInfo {
 			return "";
 		}
 		return times(attribute.getAttributeValue() / attribute.getBaseValue());
+	}
+
+	/*
+	 * text in green if value is above base, red if below
+	 */
+	private static String colored(String text, double value, double base) {
+		if (Math.abs(value - base) < 0.005) {
+			return text;
+		}
+		return (value > base ? EnumChatFormatting.GREEN : EnumChatFormatting.RED) + text + EnumChatFormatting.RESET;
+	}
+
+	/*
+	 * "3" or "2.5"
+	 */
+	private static String number(double value) {
+		return Math.abs(value - Math.round(value)) < 0.05 ? String.valueOf(Math.round(value)) : String.format("%.1f", value);
 	}
 
 	private static String times(double m) {
