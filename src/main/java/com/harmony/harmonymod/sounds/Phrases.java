@@ -78,14 +78,16 @@ public class Phrases {
 		"F#3", "G3", "G#3", "A3", "A#3", "B3", "C4", "C#4", "D4", "D#4", "E4", "F4",
 		"F#4", "G4", "G#4", "A4", "A#4", "B4", "C5", "C#5", "D5", "D#5", "E5", "F5", "F#5",
 	};
-	// Short instrument names shown before notes (harp, the default, shows none)
-	private static final String[] INSTRUMENT_TAGS = {"", "Drum ", "Snare ", "Hat ", "Bass "};
+	// Short instrument names shown before notes
+	private static final String[] INSTRUMENT_TAGS = {"Harp ", "Drum ", "Snare ", "Hat ", "Bass "};
 
 	/*
-	 * A phrase for players: note names, chords joined with "+", harp left out, e.g. "F#4 A4+C#5"
+	 * A phrase for players: note names, chords joined with "+", and the instrument named only where it
+	 * changes, e.g. "Bass A3 F#4+C#5 Harp A3 A3"
 	 */
 	public static String display(String key) {
 		StringBuilder out = new StringBuilder();
+		int lastInstrument = -1;
 		for (SortedSet<Integer> step : parse(key)) {
 			if (out.length() > 0) {
 				out.append(' ');
@@ -96,7 +98,10 @@ public class Phrases {
 					out.append('+');
 				}
 				int instrument = note >> 8;
-				out.append(instrument < INSTRUMENT_TAGS.length ? INSTRUMENT_TAGS[instrument] : "");
+				if (instrument != lastInstrument) {
+					out.append(instrument < INSTRUMENT_TAGS.length ? INSTRUMENT_TAGS[instrument] : "");
+					lastInstrument = instrument;
+				}
 				out.append(PITCH_NAMES[note & 0xFF]);
 				first = false;
 			}
