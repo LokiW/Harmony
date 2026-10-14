@@ -46,8 +46,12 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - Gives a mechanical reason to build nice looking pens.
 - Happiness runs 0-20, new animals start at 5. Animals breed at 10+ (configurable) and are unhappy
   below 5. Happiness never affects tricks, so pets still work on rough adventures.
-- Factors today: wandering to grass (+1), being hurt, confined, overcrowded (more than 8 animals in a
-  5x5 area) or near monsters (-1 each).
+- Wild conditions only keep an animal content; domestication comforts make it happy. Checked each time
+  an animal picks somewhere to wander: each comfort within 8 blocks +1 (hay bale = food, water or a
+  filled cauldron = water, both roofed and open ground = shelter, carpet under a roof = bedding).
+  Overcrowded (more than 8 animals in a 5x5 area around it) -4, confined (can barely walk anywhere)
+  -2, wandering somewhere without grass, hurt, near monsters, or out in the rain with no shelter -1
+  each. Comforts don't count while it's hurt, crowded, confined or near monsters.
 - Feeding an animal its breeding food: if it's happy it looks for a mate right away, otherwise it gets
   happier (+3). Either way it shows its mood.
 - Only kept animals (fed, trained, bonded, tamed, or born to kept parents) breed on their own, so wild
@@ -57,10 +61,6 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - Happiness alone isn't synced to clients, only mood changes, to keep network traffic down.
 - Animals breeding on their own wait between litters, per species (config, e.g. cows 20 minutes).
   Feeding still breeds after vanilla's 5 minutes.
-- Planned rebalance: wild conditions only keep an animal content, they don't make it happy. Grass
-  never raises happiness, it lowers it when missing; overcrowding is a huge penalty. Domestication
-  comforts (hay, water troughs, shelter with sky access, bedding) are what make animals happy enough
-  to breed.
 - Later: water, flowers, light, and preferences that differ by species (set in config).
   No block variety scoring, it's too easy to cheese.
 
@@ -163,10 +163,10 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - [x] Happiness gates breeding, tune existing factors
 - [x] Bug: animals breed too fast, tune breeding rate (per species timer between litters for animals
       breeding on their own)
-- [ ] Happiness rebalance and domestication comforts: grass never raises happiness, only lowers it
+- [x] Happiness rebalance and domestication comforts: grass never raises happiness, only lowers it
       when missing; overcrowding and having nowhere to wander are much bigger penalties; happiness
       comes from comforts players provide (hay bales, water troughs, shelter with access to the sky,
-      bedding). Then shorten the breeding timers.
+      bedding). Shorten the breeding timers once comforts have been playtested.
 - [ ] Pets don't follow (path or teleport) into lava or fire unless they're fire resistant
 - [x] Overlay showing an animal's traits, happiness, tricks and owner: the Pet Journal (replaces the
       Harmony Diagnostics debug item), plus a WAILA tooltip when WAILA is installed
