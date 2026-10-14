@@ -121,7 +121,7 @@ public class ItemTrainingTreat extends HarmonyItem {
 		((WorldServer) animal.worldObj).func_147487_a("heart", animal.posX, animal.posY + animal.height + 0.3D,
 				animal.posZ, 7, 0.4D, 0.3D, 0.4D, 0.0D);
 		player.addChatComponentMessage(new ChatComponentTranslation("harmony.treat.learned",
-				animal.getCommandSenderName(), trickDisplayName(trick), phrase));
+				animal.getCommandSenderName(), trickDisplayName(trick), Phrases.display(phrase, 40)));
 		if (!player.capabilities.isCreativeMode) {
 			held.stackSize--;
 			if (held.stackSize <= 0) {
@@ -144,7 +144,7 @@ public class ItemTrainingTreat extends HarmonyItem {
 	public void addInformation(ItemStack stack, EntityPlayer player, List lines, boolean advanced) {
 		String phrase = getPhrase(stack);
 		if (!phrase.isEmpty()) {
-			lines.add(StatCollector.translateToLocalFormatted("harmony.treat.tooltip", phrase));
+			lines.add(StatCollector.translateToLocalFormatted("harmony.treat.tooltip", Phrases.display(phrase, 32)));
 		}
 	}
 

@@ -2,7 +2,9 @@ package com.harmony.harmonymod;
 
 import com.harmony.harmonymod.sounds.SoundDB;
 import com.harmony.harmonymod.Traits.TRAIT;
-import com.harmony.harmonymod.items.ItemDiagnostic;
+import com.harmony.harmonymod.info.ItemPetJournal;
+import com.harmony.harmonymod.client.JournalOverlay;
+import cpw.mods.fml.common.event.FMLInterModComms;
 import com.harmony.harmonymod.horsefix.HorseControl;
 import com.harmony.harmonymod.sync.AnimalSync;
 import com.harmony.harmonymod.ownership.Ownership;
@@ -46,6 +48,7 @@ public class HarmonyMod
 
 	public static ItemTrainingTreat trainingTreat;
 	public static ItemHarp harp;
+	public static ItemPetJournal petJournal;
 
 	//default traits that can appear on wild animals
 	public static Map<String, List<TRAIT>> slot1 = new HashMap<String, List<TRAIT>>();
@@ -75,7 +78,7 @@ public class HarmonyMod
 			LearningIndicator.register();
 		}
 
-		new ItemDiagnostic("diagnostics");
+		petJournal = new ItemPetJournal("pet_journal");
 		Ownership.registerItems();
 		trainingTreat = new ItemTrainingTreat("training_treat");
 		harp = new ItemHarp("harp");
@@ -94,6 +97,9 @@ public class HarmonyMod
 		Ownership.register();
 		trainingTreat.register();
 		harp.register();
+		petJournal.register();
+		// Optional WAILA tooltip, by name so WailaCompat only loads if WAILA is installed
+		FMLInterModComms.sendMessage("Waila", "register", "com.harmony.harmonymod.compat.WailaCompat.callbackRegister");
 		HarpPlayer.register();
 		Sit.register();
 		SoundDB.getSoundDB();
@@ -103,6 +109,7 @@ public class HarmonyMod
 		if (event.getSide().isClient()) {
 			HorseControlClient.register();
 			MoodIndicator.register();
+			JournalOverlay.register();
 		}
 		Traits.register();
 	}

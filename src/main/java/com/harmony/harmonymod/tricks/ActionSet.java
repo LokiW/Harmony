@@ -40,6 +40,20 @@ public class ActionSet {
 	}
 
 	/*
+	 * Fully learned: narrowed down to one trick
+	 */
+	public boolean isLearned() {
+		return Long.bitCount(this.actions) == 1;
+	}
+
+	/*
+	 * The trick's saved name if it's fully learned, otherwise null
+	 */
+	public String learnedTrickName() {
+		return isLearned() ? TrickEnum.getName(this.actions) : null;
+	}
+
+	/*
 	 * Save as a list of trick names, so saves don't depend on trick bit order
 	 */
 	public NBTTagList writeToNBT() {

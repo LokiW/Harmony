@@ -1,6 +1,7 @@
 package com.harmony.harmonymod.instruments;
 
 import com.harmony.harmonymod.HarmonyProps;
+import com.harmony.harmonymod.sounds.Phrases;
 import com.harmony.harmonymod.items.HarmonyItem;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -104,7 +105,7 @@ public class ItemHarp extends HarmonyItem {
 		int active = getActive(stack);
 		String phrase = getSlot(stack, active);
 		lines.add(StatCollector.translateToLocalFormatted("harmony.harp.tooltip.active", active + 1,
-				phrase.isEmpty() ? StatCollector.translateToLocal("harmony.harp.tooltip.empty") : phrase));
+				phrase.isEmpty() ? StatCollector.translateToLocal("harmony.harp.tooltip.empty") : Phrases.display(phrase, 32)));
 		lines.add(StatCollector.translateToLocal("harmony.harp.tooltip.help"));
 	}
 }

@@ -156,8 +156,8 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - [x] Traits: exponential stacking, first bad traits, polish breeding, Jump trait takes less fall damage
 - [x] Happiness gates breeding, tune existing factors
 - [ ] Bug: animals breed too fast, tune breeding rate
-- [ ] Overlay showing an animal's traits, happiness, tricks and owner (replaces the Harmony Diagnostics
-      debug item)
+- [x] Overlay showing an animal's traits, happiness, tricks and owner: the Pet Journal (replaces the
+      Harmony Diagnostics debug item), plus a WAILA tooltip when WAILA is installed
 - [ ] Config cleanup (incl. option to quiet animal sounds), achievements or other in game hints so
       players can discover the systems
 
