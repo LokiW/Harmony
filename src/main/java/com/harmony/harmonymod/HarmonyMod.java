@@ -26,6 +26,7 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.entity.EntityLiving;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,6 +68,10 @@ public class HarmonyMod
 	// Animals won't breed with this many of their species within populationRadius blocks
 	public static int populationCap;
 	public static int populationRadius;
+	// Minutes between litters for animals breeding on their own (not fed), per species
+	public static Map<String, Integer> naturalBreedingMinutes = new HashMap<String, Integer>();
+	private static final int DEFAULT_BREEDING_MINUTES = 20;
+	private static final String BREEDING_MINUTES_COMMENT = "minutes between litters when breeding on their own; feeding still breeds after vanilla's 5 minutes";
 	// Dimension ids pets won't follow their player into
 	public static Set<Integer> noFollowDimensions = new HashSet<Integer>();
 	private static final String NO_FOLLOW_COMMENT = "dimension ids pets won't follow their player into, e.g. 1 for the End";
@@ -164,6 +169,9 @@ public class HarmonyMod
 					p = config.get(s, "slot3", "");
 					slot3.put(s,parse(p.getString()));
 				
+					p = config.get(s, "naturalBreedingMinutes", DEFAULT_BREEDING_MINUTES, BREEDING_MINUTES_COMMENT);
+					naturalBreedingMinutes.put(s, p.getInt());
+
 					p = config.get(s, "needsAttackAttr", false);
 					if(p.getBoolean())
 						needsAttackAttr.add(s);
@@ -189,12 +197,12 @@ public class HarmonyMod
 		config.get(MODID, "noFollowDimensions", new int[0], NO_FOLLOW_COMMENT);
 
 		// Which traits wild animals can get, per species: good ones that fit the species, and bad ones
-		addSpecies("EntityCow", "VICIOUS,HARDY", "SLOW,WEAK");
-		addSpecies("EntitySheep", "HARDY,FERTILE", "FRAIL,SLOW");
-		addSpecies("EntityPig", "FAST,HARDY", "SLOW,CLUMSY");
-		addSpecies("EntityChicken", "FERTILE,JUMP", "FRAIL,CLUMSY");
-		addSpecies("EntityWolf", "JUMP,HARDY,FAST,VICIOUS", "SLOW,FRAIL,WEAK,CLUMSY");
-		addSpecies("EntityHorse", "FAST,HARDY,JUMP", "SLOW,FRAIL,CLUMSY");
+		addSpecies("EntityCow", "VICIOUS,HARDY", "SLOW,WEAK", 20);
+		addSpecies("EntitySheep", "HARDY,FERTILE", "FRAIL,SLOW", 15);
+		addSpecies("EntityPig", "FAST,HARDY", "SLOW,CLUMSY", 15);
+		addSpecies("EntityChicken", "FERTILE,JUMP", "FRAIL,CLUMSY", 10);
+		addSpecies("EntityWolf", "JUMP,HARDY,FAST,VICIOUS", "SLOW,FRAIL,WEAK,CLUMSY", 20);
+		addSpecies("EntityHorse", "FAST,HARDY,JUMP", "SLOW,FRAIL,CLUMSY", 30);
 
 		config.save();
 
@@ -204,7 +212,7 @@ public class HarmonyMod
 	 * Each slot picks one entry at random from its list, so repeating an entry makes it more likely.
 	 * NONE fills two thirds of each list, so a wild animal usually has no more than one trait.
 	 */
-	private static void addSpecies(String species, String good, String bad) {
+	private static void addSpecies(String species, String good, String bad, int breedingMinutes) {
 		String traits = good + "," + bad;
 		int traitCount = traits.split(",").length;
 		String slot = traits;
@@ -215,7 +223,16 @@ public class HarmonyMod
 		config.get(species, "slot1", slot, comment);
 		config.get(species, "slot2", slot, comment);
 		config.get(species, "slot3", slot, comment);
+		config.get(species, "naturalBreedingMinutes", breedingMinutes, BREEDING_MINUTES_COMMENT);
 		config.get(species, "needsAttackAttr", true);
+	}
+
+	/*
+	 * Ticks an animal breeding on its own waits after a litter
+	 */
+	public static long naturalBreedingTicks(EntityLiving pet) {
+		Integer minutes = naturalBreedingMinutes.get(pet.getClass().getSimpleName().toLowerCase());
+		return (minutes != null ? minutes : DEFAULT_BREEDING_MINUTES) * 1200L;
 	}
 
 	private static List<TRAIT> parse(String in) {

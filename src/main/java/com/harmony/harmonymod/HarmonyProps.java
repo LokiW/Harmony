@@ -53,6 +53,10 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	// Client only: the mood changed in the last sync, for MoodIndicator to show
 	public boolean moodChanged;
 
+	// World time of the animal's last litter, -1 if it never bred. Animals breeding on their own wait
+	// HarmonyMod.naturalBreedingTicks after it.
+	public long lastBred = -1;
+
 	// Player bonded with this animal (see Ownership), null while unbonded
 	public UUID ownerId;
 	public String ownerName;
@@ -79,6 +83,13 @@ public class HarmonyProps implements IExtendedEntityProperties {
 
 	public boolean canBreed() {
 		return happiness >= HarmonyMod.breedingHappiness;
+	}
+
+	/*
+	 * Long enough since its last litter to breed on its own again
+	 */
+	public boolean readyToBreedNaturally() {
+		return lastBred < 0 || pet.worldObj.getTotalWorldTime() - lastBred >= HarmonyMod.naturalBreedingTicks(pet);
 	}
 
 	/*
@@ -143,6 +154,9 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		data.setInteger("Version", DATA_VERSION);
 		data.setInteger("Happiness", happiness);
 		data.setBoolean("Kept", kept);
+		if (lastBred >= 0) {
+			data.setLong("LastBred", lastBred);
+		}
 		if (ownerId != null) {
 			data.setString("OwnerId", ownerId.toString());
 			data.setString("OwnerName", ownerName);
@@ -158,6 +172,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	private void readData(NBTTagCompound data) {
 		happiness = data.getInteger("Happiness");
 		kept = data.getBoolean("Kept");
+		lastBred = data.hasKey("LastBred") ? data.getLong("LastBred") : -1;
 		ownerId = data.hasKey("OwnerId") ? UUID.fromString(data.getString("OwnerId")) : null;
 		ownerName = data.getString("OwnerName");
 		traits = Traits.readFromNBT(data);
