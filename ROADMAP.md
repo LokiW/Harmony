@@ -52,8 +52,9 @@ Thaumcraft 4, Witchery and Botania when they're installed.
   (not past its pen's fence) (hay bale +2,
   water or a filled cauldron +2, shelter = both roofed and open ground +1, carpet under a roof as
   bedding +1) + fed its breeding food in the last 5 minutes (+3), minus what bothers it: crowding
-  (more than 6 animals within 6 blocks: -1, -3, -6, ... for each extra), confined or monsters or hurt
-  (-2), wandering somewhere without grass or out in the rain with no shelter (-1).
+  (more than 6 animals within 6 blocks: -1, -3, -6, ... for each extra), no room (fewer than 16 spots
+  it can walk to), monsters or hurt (-2), less than half the ground it can walk to is grass, or out in
+  the rain with no shelter (-1). Grass and room come from the same look as comforts.
 - All comforts take a content animal to 11, just past breeding, so a pen's animals breed until
   crowding pulls them under 10: better and bigger pens hold more animals.
 - The Pet Journal shows an animal's comforts and what bothers it.

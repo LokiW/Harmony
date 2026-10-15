@@ -4,6 +4,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockFence;
 import net.minecraft.block.BlockFenceGate;
 import net.minecraft.block.BlockWall;
+import net.minecraft.block.IGrowable;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.init.Blocks;
@@ -21,7 +22,8 @@ import java.util.Map;
  * water (water or a filled cauldron), shelter (both roofed and open ground) and bedding (carpet under
  * a roof). Only comforts the animal can walk to count, so ones on the other side of its pen's fence
  * don't: the ground it can reach is flood filled from where it stands, through gaps and open gates
- * but not over fences, walls or closed gates.
+ * but not over fences, walls or closed gates. The same look tells whether that ground is mostly grass
+ * and whether it has room to walk around.
  *
  * Looking around is the expensive part, so it's only repeated every RECHECK_TICKS, and animals in the
  * same small area that can reach each other (in the same pen) share one look.
@@ -31,6 +33,11 @@ public class Comforts {
 	public static final int WATER = 2;
 	public static final int SHELTER = 4;
 	public static final int BEDDING = 8;
+	// Not comforts but found by the same look: less than half the ground it can reach is grass, and
+	// it can reach fewer than MIN_ROOM spots
+	public static final int LITTLE_GRASS = 16;
+	public static final int CRAMPED = 32;
+	private static final int MIN_ROOM = 16;
 
 	// How far around the animal comforts count
 	private static final int RANGE = 8;
@@ -80,7 +87,7 @@ public class Comforts {
 	}
 
 	/*
-	 * Comforts around the animal, as FOOD | WATER | ...
+	 * Comforts around the animal, as FOOD | WATER | ..., plus LITTLE_GRASS and CRAMPED
 	 */
 	public static int get(EntityLiving animal) {
 		World world = animal.worldObj;
@@ -223,6 +230,7 @@ public class Comforts {
 			int[] queue = new int[SIZE * SIZE * LEVELS];
 			int head = 0, tail = 0;
 			int found = 0;
+			int spots = 0, grassSpots = 0;
 			boolean openGround = false, roofedGround = false;
 			// Where it stands counts even if it isn't ordinary ground (e.g. on a slab)
 			int start = spot(RANGE, BELOW, RANGE);
@@ -240,6 +248,10 @@ public class Comforts {
 					continue;
 				}
 				int lx = (x - RANGE + dx) & 15, lz = (z - RANGE + dz) & 15;
+				spots++;
+				if (block(dx, by - 1, dz) instanceof IGrowable) {
+					grassSpots++;
+				}
 				if (chunk.canBlockSeeTheSky(lx, by, lz)) {
 					openGround = true;
 				} else {
@@ -282,12 +294,15 @@ public class Comforts {
 						}
 					}
 				}
-				if ((found & (FOOD | WATER | BEDDING)) == (FOOD | WATER | BEDDING) && openGround && roofedGround) {
-					break;
-				}
 			}
 			if (openGround && roofedGround) {
 				found |= SHELTER;
+			}
+			if (grassSpots * 2 < spots) {
+				found |= LITTLE_GRASS;
+			}
+			if (spots < MIN_ROOM) {
+				found |= CRAMPED;
 			}
 			return new Area(now, found, x, y, z, reached);
 		}

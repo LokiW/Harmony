@@ -11,10 +11,6 @@ import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.monster.EntityMob;
-import net.minecraft.block.Block;
-import net.minecraft.block.IGrowable;
-import net.minecraft.pathfinding.PathEntity;
-import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
@@ -45,8 +41,6 @@ public class HarmonyWanderAI extends EntityAIBase
 	private static final int HURT_COST = 2;
 	private static final int NO_GRASS_COST = 1;
 	private static final int RAIN_COST = 1;
-	// Blocks an animal must be able to walk towards where it wants to go, or it's confined
-	private static final double ROOM_TO_WALK = 3.0D;
 	// Priority for animals without a vanilla wander task to replace
 	private static final int DEFAULT_PRIORITY = 5;
 
@@ -105,40 +99,21 @@ public class HarmonyWanderAI extends EntityAIBase
 			target -= MONSTER_COST;
 		}
 
-		boolean wandering = var1 != null && this.entity.getNavigator().tryMoveToXYZ(var1.xCoord, var1.yCoord, var1.zCoord, 1.0);
-		if (!wandering) {
-			// Nowhere to go
+		// Room and grass come from the same look as the comforts: the ground it can walk to
+		if ((comforts & Comforts.CRAMPED) != 0) {
 			bothers |= CONFINED;
 			target -= CONFINED_COST;
-		} else {
-			// The wander target can be up in the air, the animal walks to the ground below it
-			int tx = MathHelper.floor_double(var1.xCoord);
-			int tz = MathHelper.floor_double(var1.zCoord);
-			int groundY = groundBelow(world, tx, MathHelper.floor_double(var1.yCoord), tz);
-
-			// It can barely move towards where it wants to go (penned in tightly): confined, though it
-			// still wanders. A pen with room to walk around is fine.
-			PathEntity path = this.entity.getNavigator().getPath();
-			PathPoint end = path != null ? path.getFinalPathPoint() : null;
-			if (end == null || (horizontalDistance(this.entity, tx, tz) > ROOM_TO_WALK
-					&& horizontalDistance(this.entity, end.xCoord, end.zCoord) < ROOM_TO_WALK)) {
-				bothers |= CONFINED;
-				target -= CONFINED_COST;
-			}
-
-			// Grass to graze is expected, having none bothers it
-			if (!(world.getBlock(tx, groundY, tz) instanceof IGrowable)) {
-				bothers |= NO_GRASS;
-				target -= NO_GRASS_COST;
-			}
+		}
+		if ((comforts & Comforts.LITTLE_GRASS) != 0) {
+			bothers |= NO_GRASS;
+			target -= NO_GRASS_COST;
 		}
 
-		hp.comforts = comforts;
+		hp.comforts = comforts & (Comforts.FOOD | Comforts.WATER | Comforts.SHELTER | Comforts.BEDDING);
 		hp.bothers = bothers;
 		hp.moveHappinessTowards(target);
-		return wandering;
+		return var1 != null && this.entity.getNavigator().tryMoveToXYZ(var1.xCoord, var1.yCoord, var1.zCoord, 1.0);
 	}
-
 	/**
 	 * Returns whether an in-progress EntityAIBase should continue executing
 	 */
@@ -146,25 +121,6 @@ public class HarmonyWanderAI extends EntityAIBase
 		return !this.entity.getNavigator().noPath();
 	}
 
-
-	private static double horizontalDistance(EntityLiving entity, int x, int z) {
-		double dx = x + 0.5D - entity.posX, dz = z + 0.5D - entity.posZ;
-		return Math.sqrt(dx * dx + dz * dz);
-	}
-
-	/*
-	 * The ground under a spot: the first block going down that's solid or grows (grass, tall grass)
-	 */
-	private static int groundBelow(World world, int x, int y, int z) {
-		int lowest = Math.max(0, y - 16);
-		for (int gy = y; gy > lowest; gy--) {
-			Block block = world.getBlock(x, gy, z);
-			if (block.getMaterial().isSolid() || block instanceof IGrowable) {
-				return gy;
-			}
-		}
-		return lowest;
-	}
 
 	/**
 	 * Updates the task
