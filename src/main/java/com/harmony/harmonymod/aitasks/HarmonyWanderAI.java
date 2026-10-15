@@ -1,6 +1,7 @@
 package com.harmony.harmonymod.aitasks;
 
 import com.harmony.harmonymod.HarmonyProps;
+import com.harmony.harmonymod.tricks.Hazards;
 import java.util.List;
 import net.minecraft.util.Vec3;
 import net.minecraft.util.AxisAlignedBB;
@@ -112,7 +113,11 @@ public class HarmonyWanderAI extends EntityAIBase
 		hp.comforts = comforts & (Comforts.FOOD | Comforts.WATER | Comforts.SHELTER | Comforts.BEDDING);
 		hp.bothers = bothers;
 		hp.moveHappinessTowards(target);
-		return var1 != null && this.entity.getNavigator().tryMoveToXYZ(var1.xCoord, var1.yCoord, var1.zCoord, 1.0);
+		if (var1 == null || !this.entity.getNavigator().tryMoveToXYZ(var1.xCoord, var1.yCoord, var1.zCoord, 1.0)) {
+			return false;
+		}
+		Hazards.trimPath(this.entity);
+		return !this.entity.getNavigator().noPath();
 	}
 	/**
 	 * Returns whether an in-progress EntityAIBase should continue executing

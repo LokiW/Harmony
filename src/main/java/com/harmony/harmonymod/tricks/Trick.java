@@ -142,7 +142,9 @@ public abstract class Trick {
 
 		PathNavigate petPathfinder = this.pet.getNavigator();
 
-		if (!petPathfinder.tryMoveToEntityLiving(target, 1.0)) {
+		boolean pathed = petPathfinder.tryMoveToEntityLiving(target, 1.0);
+		Hazards.trimPath(this.pet);
+		if (!pathed) {
 			// Teleport to location near owner if too far away
 			if (teleport) {
 				if (this.pet.getDistanceSqToEntity(target) >= 144.0D) {
@@ -181,7 +183,9 @@ public abstract class Trick {
 		}
 
 		// x, y, z, speed multiplier of entity's speed attribute
-		if (!petPathfinder.tryMoveToXYZ(tempTargetX, tempTargetY, tempTargetZ, 1.0)) {
+		boolean pathed = petPathfinder.tryMoveToXYZ(tempTargetX, tempTargetY, tempTargetZ, 1.0);
+		Hazards.trimPath(this.pet);
+		if (!pathed) {
 
 			// Teleport to location near owner if too far away
 			if (teleport) {
@@ -214,6 +218,7 @@ public abstract class Trick {
 			dz /= steps;
 		}
 		this.pet.getNavigator().tryMoveToXYZ(this.pet.posX + dx, this.pet.boundingBox.minY + dy, this.pet.posZ + dz, speed);
+		Hazards.trimPath(this.pet);
 	}
 
 	/*
@@ -232,7 +237,8 @@ public abstract class Trick {
 				if ((l < 1 || i1 < 1 || l > 3 || i1 > 3)
 						&& theWorld.doesBlockHaveSolidTopSurface(theWorld, i + l, k - 1, j + i1)
 						&& !theWorld.getBlock(i + l, k, j + i1).isNormalCube()
-						&& !theWorld.getBlock(i + l, k + 1, j + i1).isNormalCube()) {
+						&& !theWorld.getBlock(i + l, k + 1, j + i1).isNormalCube()
+						&& (Hazards.fireproof(this.pet) || !Hazards.burning(theWorld, i + l, k, j + i1))) {
 					this.pet.setLocationAndAngles(
 						(double)((float)(i + l) + 0.5F),
 						(double)k,

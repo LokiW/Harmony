@@ -77,7 +77,9 @@ public class Follow extends PlayerTrick {
 		}
 
 		double speed = distance > SPRINT ? 1.8D : (distance > BRISK ? 1.4D : 1.0D);
-		if (!this.pet.getNavigator().tryMoveToEntityLiving(player, speed)) {
+		if (this.pet.getNavigator().tryMoveToEntityLiving(player, speed)) {
+			Hazards.trimPath(this.pet);
+		} else {
 			// Out of pathfinding range: head toward them a few blocks at a time
 			stepToward(player.posX, player.boundingBox.minY, player.posZ, speed);
 		}
@@ -123,10 +125,11 @@ public class Follow extends PlayerTrick {
 						continue;
 					}
 					this.pet.setPosition(x + 0.5D, y, z + 0.5D);
-					// Not in a portal either, or it would go straight through it
+					// Not in a portal either, or it would go straight through it, nor in fire
 					boolean room = world.getCollidingBoundingBoxes(this.pet, this.pet.boundingBox).isEmpty()
 							&& !world.isAnyLiquid(this.pet.boundingBox)
-							&& !world.isMaterialInBB(this.pet.boundingBox, Material.portal);
+							&& !world.isMaterialInBB(this.pet.boundingBox, Material.portal)
+							&& (Hazards.fireproof(this.pet) || !Hazards.burning(world, x, y, z));
 					double distance = player.getDistanceSq(x + 0.5D, y, z + 0.5D);
 					if (room && distance < bestDistance) {
 						bestDistance = distance;

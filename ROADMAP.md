@@ -180,7 +180,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
       bedding). Happiness moves towards a target from current conditions instead of adding up, with
       crowding growing steeply so pens settle at a density. Shorten the breeding timers once comforts
       have been playtested.
-- [ ] Pets don't follow (path or teleport) into lava or fire unless they're fire resistant
+- [x] Pets don't follow (path or teleport) into lava or fire unless they're fire resistant
 - [ ] Pet Journal pages: right click with the journal to turn to the next page of information, so it
       can show more than fits on one page
 - [x] Bug: ocelots/cats and mooshrooms aren't Harmony animals; make every animal that breeds one,

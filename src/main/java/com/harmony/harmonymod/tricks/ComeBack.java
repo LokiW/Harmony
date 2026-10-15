@@ -35,7 +35,9 @@ public class ComeBack extends PlayerTrick {
 			return false;
 		}
 		double speed = distance > 8.0D ? 1.6D : 1.2D;
-		if (!this.pet.getNavigator().tryMoveToEntityLiving(player, speed)) {
+		if (this.pet.getNavigator().tryMoveToEntityLiving(player, speed)) {
+			Hazards.trimPath(this.pet);
+		} else {
 			stepToward(player.posX, player.boundingBox.minY, player.posZ, speed);
 		}
 		return true;
