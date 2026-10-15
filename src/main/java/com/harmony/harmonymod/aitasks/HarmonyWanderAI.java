@@ -61,7 +61,7 @@ public class HarmonyWanderAI extends EntityAIBase
 			Vec3 var1 = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
 			hp = HarmonyProps.get(this.entity);
 			World world = this.entity.worldObj;
-			int comforts = Comforts.get(this.entity, hp);
+			int comforts = Comforts.get(this.entity);
 
 			if (this.entity.getHealth() < this.entity.getMaxHealth()) {
 				change -= HURT_COST;
@@ -77,14 +77,21 @@ public class HarmonyWanderAI extends EntityAIBase
 			// Only overcrowding is bad, small groups and pairs are fine. Measured where the animal is.
 			AxisAlignedBB boxToCheck = AxisAlignedBB.getBoundingBox(this.entity.posX - 2.5D, this.entity.posY - 1.0D,
 					this.entity.posZ - 2.5D, this.entity.posX + 2.5D, this.entity.posY + 3.0D, this.entity.posZ + 2.5D);
-			List<Object> entities = world.getEntitiesWithinAABB(EntityAnimal.class, boxToCheck);
-			if (entities.size() > CROWDED) {
+			// One look at the entities around it for both crowding and monsters
+			int animals = 1;
+			boolean monsters = false;
+			for (Object o : world.getEntitiesWithinAABBExcludingEntity(this.entity, boxToCheck)) {
+				if (o instanceof EntityAnimal) {
+					animals++;
+				} else if (o instanceof EntityMob) {
+					monsters = true;
+				}
+			}
+			if (animals > CROWDED) {
 				change -= CROWDED_COST;
 				canHappinessIncrease = false;
 			}
-
-			entities = world.getEntitiesWithinAABB(EntityMob.class, boxToCheck);
-			if (entities.size() > 0) {
+			if (monsters) {
 				change -= MONSTER_COST;
 				canHappinessIncrease = false;
 			}

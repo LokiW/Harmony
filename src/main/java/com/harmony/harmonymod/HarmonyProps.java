@@ -66,10 +66,6 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	// Data last sent to clients, so only changes are sent. Server only, see AnimalSync.
 	public NBTTagCompound lastSynced;
 
-	// Server only: comforts around the animal and when they were last looked up, see Comforts
-	public int comforts;
-	public long comfortsCheckedAt = -1;
-
 	// Client copy of whether the animal is learning a trick (the server's is in tricks)
 	public boolean learning;
 
