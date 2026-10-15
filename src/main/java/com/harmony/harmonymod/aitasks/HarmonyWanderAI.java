@@ -18,20 +18,33 @@ import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
+/*
+ * Wandering that also works out how happy an animal is. Each time it looks for somewhere to go, its
+ * happiness moves a point towards a target: HarmonyProps.BASELINE (content), plus comforts players
+ * built (see Comforts) and being fed recently, minus what bothers it. Crowding costs more the more
+ * crowded it gets, so a pen's animals breed until it's as full as its comforts allow, then stop.
+ */
 public class HarmonyWanderAI extends EntityAIBase
 {
 	private EntityAnimal entity;
 
-	// More animals than this in the 5x5 area around where it's going makes an animal unhappier
-	private static final int CROWDED = 8;
-	// Happiness changes each time an animal looks for somewhere to wander
-	private static final int CROWDED_COST = 4;
+	// What bothers an animal, see HarmonyProps.bothers
+	public static final int CROWDED = 1;
+	public static final int CONFINED = 2;
+	public static final int NO_GRASS = 4;
+	public static final int MONSTERS = 8;
+	public static final int RAIN = 16;
+	public static final int HURT = 32;
+
+	// Crowding counts animals within this many blocks. Up to COMFORTABLE (itself included) is fine,
+	// each one past that costs one more than the last: -1, -3, -6, ...
+	private static final double CROWD_RANGE = 6.0D;
+	private static final int COMFORTABLE = 6;
 	private static final int CONFINED_COST = 2;
-	private static final int HURT_COST = 1;
-	private static final int MONSTER_COST = 1;
+	private static final int MONSTER_COST = 2;
+	private static final int HURT_COST = 2;
 	private static final int NO_GRASS_COST = 1;
 	private static final int RAIN_COST = 1;
-	private static final int PER_COMFORT = 1;
 	// Blocks an animal must be able to walk towards where it wants to go, or it's confined
 	private static final double ROOM_TO_WALK = 3.0D;
 	// Priority for animals without a vanilla wander task to replace
@@ -46,62 +59,58 @@ public class HarmonyWanderAI extends EntityAIBase
 	 * Returns whether the EntityAIBase should begin execution.
 	 */
 	public boolean shouldExecute() {
-		HarmonyProps hp;
-		if (this.entity.getAge() >= 100) {
+		if (this.entity.getAge() >= 100 || this.entity.getRNG().nextInt(120) != 0) {
 			return false;
-		} else if (this.entity.getRNG().nextInt(120) != 0) {
-			return false;
+		}
+		HarmonyProps hp = HarmonyProps.get(this.entity);
+		World world = this.entity.worldObj;
+		Vec3 var1 = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
+		int comforts = Comforts.get(this.entity);
+		int bothers = 0;
+		int target = HarmonyProps.BASELINE + Comforts.happiness(comforts);
+		if (hp.recentlyFed()) {
+			target += HarmonyProps.FED_HAPPINESS;
+		}
+
+		if (this.entity.getHealth() < this.entity.getMaxHealth()) {
+			bothers |= HURT;
+			target -= HURT_COST;
+		}
+		// Left out in the rain with nowhere to shelter
+		if (world.isRaining() && (comforts & Comforts.SHELTER) == 0 && world.canLightningStrikeAt(
+				MathHelper.floor_double(this.entity.posX), MathHelper.floor_double(this.entity.posY) + 1,
+				MathHelper.floor_double(this.entity.posZ))) {
+			bothers |= RAIN;
+			target -= RAIN_COST;
+		}
+
+		// One look at the entities around it for both crowding and monsters
+		AxisAlignedBB around = this.entity.boundingBox.expand(CROWD_RANGE, 2.0D, CROWD_RANGE);
+		int animals = 1;
+		boolean monsters = false;
+		for (Object o : world.getEntitiesWithinAABBExcludingEntity(this.entity, around)) {
+			if (o instanceof EntityAnimal) {
+				animals++;
+			} else if (o instanceof EntityMob) {
+				monsters = true;
+			}
+		}
+		int extra = animals - COMFORTABLE;
+		if (extra > 0) {
+			bothers |= CROWDED;
+			target -= extra * (extra + 1) / 2;
+		}
+		if (monsters) {
+			bothers |= MONSTERS;
+			target -= MONSTER_COST;
+		}
+
+		boolean wandering = var1 != null && this.entity.getNavigator().tryMoveToXYZ(var1.xCoord, var1.yCoord, var1.zCoord, 1.0);
+		if (!wandering) {
+			// Nowhere to go
+			bothers |= CONFINED;
+			target -= CONFINED_COST;
 		} else {
-			/*
-			 * Wild conditions (grass, room to roam, no crowds or monsters) only keep an animal content.
-			 * What makes it happy are comforts players provide, see Comforts.
-			 */
-			boolean canHappinessIncrease = true;
-			int change = 0;
-			Vec3 var1 = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
-			hp = HarmonyProps.get(this.entity);
-			World world = this.entity.worldObj;
-			int comforts = Comforts.get(this.entity);
-
-			if (this.entity.getHealth() < this.entity.getMaxHealth()) {
-				change -= HURT_COST;
-				canHappinessIncrease = false;
-			}
-			// Left out in the rain with nowhere to shelter
-			if (world.isRaining() && (comforts & Comforts.SHELTER) == 0 && world.canLightningStrikeAt(
-					MathHelper.floor_double(this.entity.posX), MathHelper.floor_double(this.entity.posY) + 1,
-					MathHelper.floor_double(this.entity.posZ))) {
-				change -= RAIN_COST;
-			}
-
-			// Only overcrowding is bad, small groups and pairs are fine. Measured where the animal is.
-			AxisAlignedBB boxToCheck = AxisAlignedBB.getBoundingBox(this.entity.posX - 2.5D, this.entity.posY - 1.0D,
-					this.entity.posZ - 2.5D, this.entity.posX + 2.5D, this.entity.posY + 3.0D, this.entity.posZ + 2.5D);
-			// One look at the entities around it for both crowding and monsters
-			int animals = 1;
-			boolean monsters = false;
-			for (Object o : world.getEntitiesWithinAABBExcludingEntity(this.entity, boxToCheck)) {
-				if (o instanceof EntityAnimal) {
-					animals++;
-				} else if (o instanceof EntityMob) {
-					monsters = true;
-				}
-			}
-			if (animals > CROWDED) {
-				change -= CROWDED_COST;
-				canHappinessIncrease = false;
-			}
-			if (monsters) {
-				change -= MONSTER_COST;
-				canHappinessIncrease = false;
-			}
-
-			if (var1 == null || !this.entity.getNavigator().tryMoveToXYZ(var1.xCoord, var1.yCoord, var1.zCoord, 1.0)) {
-				// Nowhere to go: confined
-				hp.changeHappiness(change - CONFINED_COST);
-				return false;
-			}
-
 			// The wander target can be up in the air, the animal walks to the ground below it
 			int tx = MathHelper.floor_double(var1.xCoord);
 			int tz = MathHelper.floor_double(var1.zCoord);
@@ -113,22 +122,21 @@ public class HarmonyWanderAI extends EntityAIBase
 			PathPoint end = path != null ? path.getFinalPathPoint() : null;
 			if (end == null || (horizontalDistance(this.entity, tx, tz) > ROOM_TO_WALK
 					&& horizontalDistance(this.entity, end.xCoord, end.zCoord) < ROOM_TO_WALK)) {
-				change -= CONFINED_COST;
-				canHappinessIncrease = false;
+				bothers |= CONFINED;
+				target -= CONFINED_COST;
 			}
 
-			// Grass to graze doesn't make an animal happier, but having none makes it unhappier
-			Block target = world.getBlock(tx, groundY, tz);
-			if (!(target instanceof IGrowable)) {
-				change -= NO_GRASS_COST;
+			// Grass to graze is expected, having none bothers it
+			if (!(world.getBlock(tx, groundY, tz) instanceof IGrowable)) {
+				bothers |= NO_GRASS;
+				target -= NO_GRASS_COST;
 			}
-
-			if (canHappinessIncrease) {
-				change += Comforts.count(comforts) * PER_COMFORT;
-			}
-			hp.changeHappiness(change);
-			return true;
 		}
+
+		hp.comforts = comforts;
+		hp.bothers = bothers;
+		hp.moveHappinessTowards(target);
+		return wandering;
 	}
 
 	/**

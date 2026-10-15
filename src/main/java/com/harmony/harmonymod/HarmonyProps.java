@@ -31,11 +31,16 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	private static final int DATA_VERSION = 2;
 
 	// Happiness runs from 0 to MAX_HAPPINESS. Animals breed from HarmonyMod.breedingHappiness up,
-	// and are unhappy below UNHAPPY_BELOW.
+	// and are unhappy below UNHAPPY_BELOW. It moves a point at a time towards a target: BASELINE plus
+	// offsets for the animal's current conditions (see HarmonyWanderAI).
 	public static final int MAX_HAPPINESS = 20;
 	public static final int UNHAPPY_BELOW = 5;
-	// New animals start neutral
-	public static final int STARTING_HAPPINESS = 5;
+	public static final int BASELINE = 5;
+	// New animals start content
+	public static final int STARTING_HAPPINESS = BASELINE;
+	// Being fed its breeding food adds this much to its target for FED_TICKS
+	public static final int FED_HAPPINESS = 3;
+	private static final int FED_TICKS = 6000;
 
 	public TrickHandler tricks;
 	public Traits traits;
@@ -56,6 +61,13 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	// World time of the animal's last litter, -1 if it never bred. Animals breeding on their own wait
 	// HarmonyMod.naturalBreedingTicks after it.
 	public long lastBred = -1;
+	// World time until which the animal counts as recently fed, -1 if never fed
+	public long fedUntil = -1;
+
+	// What it last noticed around it, see Comforts and HarmonyWanderAI: comforts and bothers as bit
+	// flags. Worked out on the server, sent to clients for the Pet Journal.
+	public int comforts;
+	public int bothers;
 
 	// Player bonded with this animal (see Ownership), null while unbonded
 	public UUID ownerId;
@@ -79,6 +91,22 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	 */
 	public void changeHappiness(int delta) {
 		happiness = Math.max(0, Math.min(MAX_HAPPINESS, happiness + delta));
+	}
+
+	/*
+	 * One point closer to target
+	 */
+	public void moveHappinessTowards(int target) {
+		target = Math.max(0, Math.min(MAX_HAPPINESS, target));
+		changeHappiness(Integer.signum(target - happiness));
+	}
+
+	public void fed() {
+		fedUntil = pet.worldObj.getTotalWorldTime() + FED_TICKS;
+	}
+
+	public boolean recentlyFed() {
+		return fedUntil >= 0 && pet.worldObj.getTotalWorldTime() < fedUntil;
 	}
 
 	public boolean canBreed() {
@@ -157,6 +185,9 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		if (lastBred >= 0) {
 			data.setLong("LastBred", lastBred);
 		}
+		if (fedUntil >= 0) {
+			data.setLong("FedUntil", fedUntil);
+		}
 		if (ownerId != null) {
 			data.setString("OwnerId", ownerId.toString());
 			data.setString("OwnerName", ownerName);
@@ -173,6 +204,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		happiness = data.getInteger("Happiness");
 		kept = data.getBoolean("Kept");
 		lastBred = data.hasKey("LastBred") ? data.getLong("LastBred") : -1;
+		fedUntil = data.hasKey("FedUntil") ? data.getLong("FedUntil") : -1;
 		ownerId = data.hasKey("OwnerId") ? UUID.fromString(data.getString("OwnerId")) : null;
 		ownerName = data.getString("OwnerName");
 		traits = Traits.readFromNBT(data);
@@ -210,6 +242,8 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		mood = newMood;
 		attack = data.getDouble("Attack");
 		attackBase = data.getDouble("AttackBase");
+		comforts = data.getInteger("Comforts");
+		bothers = data.getInteger("Bothers");
 	}
 
 	/*
@@ -230,6 +264,8 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		NBTTagCompound data = writeData();
 		data.setBoolean("Learning", tricks.isLearningTrick());
 		data.setInteger("Mood", getMood());
+		data.setInteger("Comforts", comforts);
+		data.setInteger("Bothers", bothers);
 		IAttributeInstance attackAttr = pet.getEntityAttribute(SharedMonsterAttributes.attackDamage);
 		if (attackAttr != null) {
 			data.setDouble("Attack", attackAttr.getAttributeValue());

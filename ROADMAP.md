@@ -44,14 +44,18 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 ### Happiness
 
 - Gives a mechanical reason to build nice looking pens.
-- Happiness runs 0-20, new animals start at 5. Animals breed at 10+ (configurable) and are unhappy
-  below 5. Happiness never affects tricks, so pets still work on rough adventures.
-- Wild conditions only keep an animal content; domestication comforts make it happy. Checked each time
-  an animal picks somewhere to wander: each comfort within 8 blocks +1 (hay bale = food, water or a
-  filled cauldron = water, both roofed and open ground = shelter, carpet under a roof = bedding).
-  Overcrowded (more than 8 animals in a 5x5 area around it) -4, confined (can barely walk anywhere)
-  -2, wandering somewhere without grass, hurt, near monsters, or out in the rain with no shelter -1
-  each. Comforts don't count while it's hurt, crowded, confined or near monsters.
+- Happiness runs 0-20. Animals breed at 10+ (configurable) and are unhappy below 5. Happiness never
+  affects tricks, so pets still work on rough adventures.
+- Happiness isn't a running total: it moves a point at a time (each time an animal looks for somewhere
+  to wander) towards a target set by its current conditions, so it can't run away.
+- Target = baseline 5 (content, where wild animals sit) + comforts within 8 blocks (hay bale +2,
+  water or a filled cauldron +2, shelter = both roofed and open ground +1, carpet under a roof as
+  bedding +1) + fed its breeding food in the last 5 minutes (+3), minus what bothers it: crowding
+  (more than 6 animals within 6 blocks: -1, -3, -6, ... for each extra), confined or monsters or hurt
+  (-2), wandering somewhere without grass or out in the rain with no shelter (-1).
+- All comforts take a content animal to 11, just past breeding, so a pen's animals breed until
+  crowding pulls them under 10: better and bigger pens hold more animals.
+- The Pet Journal shows an animal's comforts and what bothers it.
 - Feeding an animal its breeding food: if it's happy it looks for a mate right away, otherwise it gets
   happier (+3). Either way it shows its mood.
 - Only kept animals (fed, trained, bonded, tamed, or born to kept parents) breed on their own, so wild
@@ -166,8 +170,12 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - [x] Happiness rebalance and domestication comforts: grass never raises happiness, only lowers it
       when missing; overcrowding and having nowhere to wander are much bigger penalties; happiness
       comes from comforts players provide (hay bales, water troughs, shelter with access to the sky,
-      bedding). Shorten the breeding timers once comforts have been playtested.
+      bedding). Happiness moves towards a target from current conditions instead of adding up, with
+      crowding growing steeply so pens settle at a density. Shorten the breeding timers once comforts
+      have been playtested.
 - [ ] Pets don't follow (path or teleport) into lava or fire unless they're fire resistant
+- [ ] Pet Journal pages: right click with the journal to turn to the next page of information, so it
+      can show more than fits on one page
 - [x] Overlay showing an animal's traits, happiness, tricks and owner: the Pet Journal (replaces the
       Harmony Diagnostics debug item), plus a WAILA tooltip when WAILA is installed
 - [ ] Config cleanup (incl. option to quiet animal sounds), achievements or other in game hints so

@@ -73,8 +73,17 @@ public class Comforts {
 		return area.comforts;
 	}
 
-	public static int count(int comforts) {
-		return Integer.bitCount(comforts);
+	/*
+	 * How much happier these comforts make an animal. All of them take a content animal just past
+	 * breeding happiness.
+	 */
+	public static int happiness(int comforts) {
+		int points = 0;
+		if ((comforts & FOOD) != 0) points += 2;
+		if ((comforts & WATER) != 0) points += 2;
+		if ((comforts & SHELTER) != 0) points += 1;
+		if ((comforts & BEDDING) != 0) points += 1;
+		return points;
 	}
 
 	private static void forgetOld(long now) {

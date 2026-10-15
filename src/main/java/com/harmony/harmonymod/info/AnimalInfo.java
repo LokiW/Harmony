@@ -2,6 +2,8 @@ package com.harmony.harmonymod.info;
 
 import com.harmony.harmonymod.HarmonyProps;
 import com.harmony.harmonymod.Traits.TRAIT;
+import com.harmony.harmonymod.aitasks.Comforts;
+import com.harmony.harmonymod.aitasks.HarmonyWanderAI;
 import com.harmony.harmonymod.sounds.Phrases;
 import com.harmony.harmonymod.tricks.ActionSet;
 import com.harmony.harmonymod.tricks.Attack;
@@ -47,6 +49,10 @@ public class AnimalInfo {
 		lines.add(t("harmony.info.traits", traits(hp)));
 		if (!full) {
 			return lines;
+		}
+		lines.add(t("harmony.info.comforts", comforts(hp)));
+		if (hp.bothers != 0) {
+			lines.add(t("harmony.info.bothers", bothers(hp.bothers)));
 		}
 
 		TrickHandler tricks = hp.tricks;
@@ -131,6 +137,30 @@ public class AnimalInfo {
 			names.add((good ? EnumChatFormatting.GREEN : EnumChatFormatting.RED) + name + EnumChatFormatting.RESET);
 		}
 		return join(names);
+	}
+
+	/*
+	 * What's making it happier: comforts around it and being fed recently
+	 */
+	private static String comforts(HarmonyProps hp) {
+		List<String> names = new ArrayList<String>();
+		if ((hp.comforts & Comforts.FOOD) != 0) names.add(t("harmony.comfort.food"));
+		if ((hp.comforts & Comforts.WATER) != 0) names.add(t("harmony.comfort.water"));
+		if ((hp.comforts & Comforts.SHELTER) != 0) names.add(t("harmony.comfort.shelter"));
+		if ((hp.comforts & Comforts.BEDDING) != 0) names.add(t("harmony.comfort.bedding"));
+		if (hp.recentlyFed()) names.add(t("harmony.comfort.fed"));
+		return names.isEmpty() ? gray(t("harmony.info.none")) : EnumChatFormatting.GREEN + join(names) + EnumChatFormatting.RESET;
+	}
+
+	private static String bothers(int bothers) {
+		List<String> names = new ArrayList<String>();
+		if ((bothers & HarmonyWanderAI.CROWDED) != 0) names.add(t("harmony.bother.crowded"));
+		if ((bothers & HarmonyWanderAI.CONFINED) != 0) names.add(t("harmony.bother.confined"));
+		if ((bothers & HarmonyWanderAI.NO_GRASS) != 0) names.add(t("harmony.bother.no_grass"));
+		if ((bothers & HarmonyWanderAI.MONSTERS) != 0) names.add(t("harmony.bother.monsters"));
+		if ((bothers & HarmonyWanderAI.RAIN) != 0) names.add(t("harmony.bother.rain"));
+		if ((bothers & HarmonyWanderAI.HURT) != 0) names.add(t("harmony.bother.hurt"));
+		return EnumChatFormatting.RED + join(names) + EnumChatFormatting.RESET;
 	}
 
 	private static String mood(int mood) {
