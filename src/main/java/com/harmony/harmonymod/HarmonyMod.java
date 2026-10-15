@@ -27,6 +27,7 @@ import net.minecraftforge.common.config.Property;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.passive.EntityAnimal;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,6 +69,12 @@ public class HarmonyMod
 	// Animals won't breed with this many of their species within populationRadius blocks
 	public static int populationCap;
 	public static int populationRadius;
+	// Every animal that breeds (EntityAnimal) is a Harmony animal, other mods' included. Species without
+	// their own config section use the OTHER_ANIMALS one.
+	public static boolean allAnimals = true;
+	public static final String OTHER_ANIMALS = "other_animals";
+	private static final String ALL_ANIMALS_COMMENT = "every animal that breeds is a Harmony animal, including other mods' animals; "
+			+ "ones without their own section use the " + OTHER_ANIMALS + " section";
 	// Minutes between litters for animals breeding on their own (not fed), per species
 	public static Map<String, Integer> naturalBreedingMinutes = new HashMap<String, Integer>();
 	private static final int DEFAULT_BREEDING_MINUTES = 20;
@@ -139,6 +146,9 @@ public class HarmonyMod
 			if(config.getCategoryNames().size() < 2) {
 				generateConfig();
 			}
+			if (!config.hasCategory(OTHER_ANIMALS)) {
+				addOtherAnimals();
+			}
 
 			for(String s : config.getCategoryNames()) {
 				if(s.equals(MODID)) {
@@ -152,6 +162,8 @@ public class HarmonyMod
 					populationCap = p.getInt();
 					p = config.get(MODID, "populationRadius", 16, "how far (in blocks) populationCap counts animals");
 					populationRadius = p.getInt();
+					p = config.get(MODID, "allAnimals", true, ALL_ANIMALS_COMMENT);
+					allAnimals = p.getBoolean();
 					p = config.get(MODID, "noFollowDimensions", new int[0], NO_FOLLOW_COMMENT);
 					noFollowDimensions.clear();
 					for (int dim : p.getIntList()) {
@@ -176,7 +188,9 @@ public class HarmonyMod
 					if(p.getBoolean())
 						needsAttackAttr.add(s);
 	
-					harmonyMobs.add(s);
+					if (!s.equals(OTHER_ANIMALS)) {
+						harmonyMobs.add(s);
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -194,6 +208,7 @@ public class HarmonyMod
 		config.get(MODID, "breedingCost", 5, "happiness lost by breeding");
 		config.get(MODID, "populationCap", 16, "animals won't breed with this many of their species nearby");
 		config.get(MODID, "populationRadius", 16, "how far (in blocks) populationCap counts animals");
+		config.get(MODID, "allAnimals", true, ALL_ANIMALS_COMMENT);
 		config.get(MODID, "noFollowDimensions", new int[0], NO_FOLLOW_COMMENT);
 
 		// Which traits wild animals can get, per species: good ones that fit the species, and bad ones
@@ -203,6 +218,9 @@ public class HarmonyMod
 		addSpecies("EntityChicken", "FERTILE,JUMP", "FRAIL,CLUMSY", 10);
 		addSpecies("EntityWolf", "JUMP,HARDY,FAST,VICIOUS", "SLOW,FRAIL,WEAK,CLUMSY", 20);
 		addSpecies("EntityHorse", "FAST,HARDY,JUMP", "SLOW,FRAIL,CLUMSY", 30);
+		addSpecies("EntityMooshroom", "VICIOUS,HARDY", "SLOW,WEAK", 20);
+		addSpecies("EntityOcelot", "FAST,JUMP,VICIOUS", "FRAIL,CLUMSY,WEAK", 20);
+		addOtherAnimals();
 
 		config.save();
 
@@ -228,10 +246,33 @@ public class HarmonyMod
 	}
 
 	/*
+	 * Traits and breeding for animals without their own section, e.g. other mods' animals
+	 */
+	private static void addOtherAnimals() {
+		addSpecies(OTHER_ANIMALS, "FAST,HARDY,JUMP,FERTILE", "SLOW,FRAIL,CLUMSY", DEFAULT_BREEDING_MINUTES);
+	}
+
+	/*
+	 * Whether Harmony adds its data and AI to animals of this class
+	 */
+	public static boolean isHarmonyAnimal(Class<?> c) {
+		return harmonyMobs.contains(c.getSimpleName().toLowerCase())
+				|| (allAnimals && EntityAnimal.class.isAssignableFrom(c));
+	}
+
+	/*
+	 * The config section for an animal: its species', or OTHER_ANIMALS if it has none
+	 */
+	public static String speciesKey(EntityLiving pet) {
+		String name = pet.getClass().getSimpleName().toLowerCase();
+		return harmonyMobs.contains(name) ? name : OTHER_ANIMALS;
+	}
+
+	/*
 	 * Ticks an animal breeding on its own waits after a litter
 	 */
 	public static long naturalBreedingTicks(EntityLiving pet) {
-		Integer minutes = naturalBreedingMinutes.get(pet.getClass().getSimpleName().toLowerCase());
+		Integer minutes = naturalBreedingMinutes.get(speciesKey(pet));
 		return (minutes != null ? minutes : DEFAULT_BREEDING_MINUTES) * 1200L;
 	}
 
