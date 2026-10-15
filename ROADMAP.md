@@ -48,7 +48,8 @@ Thaumcraft 4, Witchery and Botania when they're installed.
   affects tricks, so pets still work on rough adventures.
 - Happiness isn't a running total: it moves a point at a time (each time an animal looks for somewhere
   to wander) towards a target set by its current conditions, so it can't run away.
-- Target = baseline 5 (content, where wild animals sit) + comforts within 8 blocks (hay bale +2,
+- Target = baseline 5 (content, where wild animals sit) + comforts it can walk to within 8 blocks
+  (not past its pen's fence) (hay bale +2,
   water or a filled cauldron +2, shelter = both roofed and open ground +1, carpet under a roof as
   bedding +1) + fed its breeding food in the last 5 minutes (+3), minus what bothers it: crowding
   (more than 6 animals within 6 blocks: -1, -3, -6, ... for each extra), confined or monsters or hurt
