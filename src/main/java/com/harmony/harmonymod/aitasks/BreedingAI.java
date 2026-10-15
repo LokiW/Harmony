@@ -22,8 +22,6 @@ public class BreedingAI extends EntityAIBase
 {
 	// How often kept animals check whether they can breed on their own
 	private static final int NATURAL_INTERVAL = 200;
-	// Happiness from being fed while too unhappy to breed
-	private static final int FED_HAPPINESS = 3;
 
 	private EntityAnimal pet;
 	private Breed breedTrick;
@@ -48,8 +46,10 @@ public class BreedingAI extends EntityAIBase
 			// Fed its breeding food. Vanilla put it in love mode, Harmony decides what happens instead.
 			pet.resetInLove();
 			hp.kept = true;
+			// Happier straight away, and for a while after (see HarmonyWanderAI)
+			hp.fed();
 			if (!hp.canBreed()) {
-				hp.changeHappiness(FED_HAPPINESS);
+				hp.changeHappiness(HarmonyProps.FED_HAPPINESS);
 			}
 			// Report how it feels after being fed
 			int mood = hp.getMood();
