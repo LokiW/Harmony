@@ -139,8 +139,7 @@ public class HarmonyCommand extends CommandBase {
 		List<String> names = new ArrayList<String>();
 		for (Object o : EntityList.stringToClassMapping.entrySet()) {
 			Map.Entry entry = (Map.Entry) o;
-			String className = ((Class) entry.getValue()).getSimpleName().toLowerCase();
-			if (HarmonyMod.harmonyMobs.contains(className)) {
+			if (HarmonyMod.isHarmonyAnimal((Class) entry.getValue())) {
 				names.add(((String) entry.getKey()).replaceFirst("^Entity", ""));
 			}
 		}

@@ -306,8 +306,15 @@ public class HarmonyProps implements IExtendedEntityProperties {
 				return;
 			}
 			HarmonyProps props = HarmonyProps.get(e.entity);
-			if(props != null && !props.isInitialized()) {
+			if (props == null) {
+				return;
+			}
+			boolean addedAttack = addAttackDamage(props.pet);
+			if (!props.isInitialized()) {
 				props.constructProperties();
+			} else if (addedAttack) {
+				// Saved or newborn animals: their attack traits couldn't be applied without the attribute
+				props.traits.applyAttackTraits(props.pet);
 			}
 
 
@@ -316,17 +323,26 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	}
 
 	public static void addHarmonyProperties(EntityLiving pet) {
-		String className = pet.getClass().getSimpleName().toLowerCase();
-		if(HarmonyMod.harmonyMobs.contains(className) && pet.getExtendedProperties(PROP_NAME) == null) {
+		if (HarmonyMod.isHarmonyAnimal(pet.getClass()) && pet.getExtendedProperties(PROP_NAME) == null) {
 			pet.registerExtendedProperties(PROP_NAME, new HarmonyProps(pet));
-
-			// Register attacking for passive mobs
-			if (HarmonyMod.needsAttackAttr.contains(className)) {
-				BaseAttributeMap bam = pet.getAttributeMap();
-				bam.registerAttribute(SharedMonsterAttributes.attackDamage);
-				pet.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(1.0);
-			}
 		}
+	}
+
+	/*
+	 * Give passive animals attack damage so they can attack (and the Vicious trait does something),
+	 * if their species wants it and they don't have it. Done once they've joined the world, after their
+	 * own constructor: another mod's animal may add the attribute itself, and adding it twice crashes.
+	 * Returns whether it was added.
+	 */
+	private static boolean addAttackDamage(EntityLiving pet) {
+		if (!HarmonyMod.needsAttackAttr.contains(HarmonyMod.speciesKey(pet))
+				|| pet.getEntityAttribute(SharedMonsterAttributes.attackDamage) != null) {
+			return false;
+		}
+		BaseAttributeMap bam = pet.getAttributeMap();
+		bam.registerAttribute(SharedMonsterAttributes.attackDamage);
+		pet.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(1.0);
+		return true;
 	}
 
 	// Required to implement, never called

@@ -99,7 +99,7 @@ public class Traits {
 	 * A random trait from the species' config list for a slot, as wild animals get
 	 */
 	private static TRAIT randomWildTrait(EntityLiving pet, int slot) {
-		String key = pet.getClass().getSimpleName().toLowerCase();
+		String key = HarmonyMod.speciesKey(pet);
 		Map<String, List<TRAIT>> slots = slot == 0 ? HarmonyMod.slot1 : (slot == 1 ? HarmonyMod.slot2 : HarmonyMod.slot3);
 		List<TRAIT> l = slots.get(key);
 		if (l == null || l.isEmpty()) {
@@ -236,10 +236,22 @@ public class Traits {
 				modifierValue, modifierType);
 
 		IAttributeInstance attrInst = pet.getEntityAttribute(attr);
-		if(attrInst == null) {
-			System.out.println("HarmonyMod: Warning, could not apply modifier " + attr + " to " + pet);
-		} else {
+		// Attack damage is added when the animal joins the world, see applyAttackTraits
+		if (attrInst != null) {
 			attrInst.applyModifier(modifier);
+		}
+	}
+
+	/*
+	 * Attack damage traits, for an animal whose attack damage attribute was only just added
+	 */
+	public void applyAttackTraits(EntityLiving pet) {
+		for (int i = 0; i < traits.length; i++) {
+			if (traits[i] == TRAIT.VICIOUS) {
+				applyAttr(pet, VICIOUS_PER_COPY - 1, 2, SharedMonsterAttributes.attackDamage, i);
+			} else if (traits[i] == TRAIT.WEAK) {
+				applyAttr(pet, 1 / VICIOUS_PER_COPY - 1, 2, SharedMonsterAttributes.attackDamage, i);
+			}
 		}
 	}
 

@@ -183,7 +183,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - [ ] Pets don't follow (path or teleport) into lava or fire unless they're fire resistant
 - [ ] Pet Journal pages: right click with the journal to turn to the next page of information, so it
       can show more than fits on one page
-- [ ] Bug: ocelots/cats and mooshrooms aren't Harmony animals; make every animal that breeds one,
+- [x] Bug: ocelots/cats and mooshrooms aren't Harmony animals; make every animal that breeds one,
       including other mods' animals (generic traits, config switch to turn off)
 - [ ] Happiness affects produce: unhappy animals lay eggs and regrow wool less, happy ones more
 - [x] Overlay showing an animal's traits, happiness, tricks and owner: the Pet Journal (replaces the
