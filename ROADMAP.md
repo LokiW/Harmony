@@ -23,7 +23,12 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - All passive and neutral animals are Harmony animals: cows, sheep, pigs, chickens, mooshrooms,
   wolves, ocelots, horses, etc.
 - Hostile mobs are considered case by case later (pet spiders yes, zombies no).
-- Animals from other mods are added through config and integrations.
+- Animals from other mods are Harmony animals automatically (any animal that breeds, i.e. EntityAnimal),
+  with a generic trait list; a config switch turns this off, and config or integrations can give them
+  their own traits.
+- Happiness affects produce: unhappy animals produce less (eggs half as often, wool regrows half the
+  time), content ones at vanilla rates, happy ones a bit more (e.g. eggs faster, a chance of extra
+  wool when shearing).
 
 ### Genetics (traits)
 
@@ -178,6 +183,9 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - [ ] Pets don't follow (path or teleport) into lava or fire unless they're fire resistant
 - [ ] Pet Journal pages: right click with the journal to turn to the next page of information, so it
       can show more than fits on one page
+- [ ] Bug: ocelots/cats and mooshrooms aren't Harmony animals; make every animal that breeds one,
+      including other mods' animals (generic traits, config switch to turn off)
+- [ ] Happiness affects produce: unhappy animals lay eggs and regrow wool less, happy ones more
 - [x] Overlay showing an animal's traits, happiness, tricks and owner: the Pet Journal (replaces the
       Harmony Diagnostics debug item), plus a WAILA tooltip when WAILA is installed
 - [ ] Config cleanup (incl. option to quiet animal sounds), achievements or other in game hints so
