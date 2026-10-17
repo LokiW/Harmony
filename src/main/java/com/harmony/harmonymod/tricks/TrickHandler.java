@@ -220,6 +220,16 @@ public class TrickHandler extends EntityAIBase {
 	/*
 	 * End whatever the pet is doing
 	 */
+	/*
+	 * Forget every phrase, learned or half learned, to start training afresh. Places and the respawn
+	 * point are kept.
+	 */
+	public void clearTraining() {
+		stopCurrentTrick();
+		this.tricks.clear();
+		this.isLearning = null;
+	}
+
 	public void stopCurrentTrick() {
 		endCurrentTrick();
 	}

@@ -24,6 +24,10 @@ public class Phrases {
 	// Their sounds, "note." + name
 	private static final String[] SOUNDS = {"harp", "bd", "snare", "hat", "bassattack"};
 	public static final int HARP = 0;
+	public static final int BASS_DRUM = 1;
+	public static final int SNARE = 2;
+	public static final int CLICKS = 3;
+	public static final int BASS = 4;
 
 	public static int note(int instrument, int pitch) {
 		return pitch | (instrument << 8);
@@ -79,7 +83,7 @@ public class Phrases {
 		"F#4", "G4", "G#4", "A4", "A#4", "B4", "C5", "C#5", "D5", "D#5", "E5", "F5", "F#5",
 	};
 	// Short instrument names shown before notes
-	private static final String[] INSTRUMENT_TAGS = {"Harp ", "Drum ", "Snare ", "Hat ", "Bass "};
+	private static final String[] INSTRUMENT_TAGS = {"Harp ", "Drum ", "Snare ", "Clicks ", "Bass "};
 
 	/*
 	 * A phrase for players: note names, chords joined with "+", and the instrument named only where it

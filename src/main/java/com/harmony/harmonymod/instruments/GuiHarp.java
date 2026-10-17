@@ -65,8 +65,12 @@ public class GuiHarp extends GuiScreen {
 
 	private int left, top;
 
+	// Noteblock instrument of the held instrument item, which every note is written in
+	private final int instrument;
+
 	public GuiHarp(ItemStack harp) {
 		this.harp = harp;
+		this.instrument = ((ItemHarp) harp.getItem()).instrument;
 		this.active = ItemHarp.getActive(harp);
 		for (int s = 0; s < ItemHarp.SLOTS; s++) {
 			List<SortedSet<Integer>> columns = new ArrayList<SortedSet<Integer>>();
@@ -236,7 +240,7 @@ public class GuiHarp extends GuiScreen {
 	 * Full volume at the player, as loud as really playing it (vanilla's GUI sounds are quiet)
 	 */
 	private void playNote(int pitch) {
-		mc.getSoundHandler().playSound(new PositionedSoundRecord(new ResourceLocation("note.harp"), 1.0F,
+		mc.getSoundHandler().playSound(new PositionedSoundRecord(new ResourceLocation(Phrases.soundName(Phrases.note(instrument, pitch))), 1.0F,
 				Phrases.soundPitch(pitch), (float) mc.thePlayer.posX, (float) mc.thePlayer.posY, (float) mc.thePlayer.posZ));
 	}
 
@@ -262,12 +266,12 @@ public class GuiHarp extends GuiScreen {
 		ItemHarp.setSlots(harp, phrases, active);
 	}
 
-	private static String phraseKey(List<SortedSet<Integer>> pitchSteps) {
+	private String phraseKey(List<SortedSet<Integer>> pitchSteps) {
 		List<SortedSet<Integer>> steps = new ArrayList<SortedSet<Integer>>();
 		for (SortedSet<Integer> pitches : pitchSteps) {
 			SortedSet<Integer> step = new TreeSet<Integer>();
 			for (int pitch : pitches) {
-				step.add(Phrases.note(Phrases.HARP, pitch));
+				step.add(Phrases.note(instrument, pitch));
 			}
 			steps.add(step);
 		}

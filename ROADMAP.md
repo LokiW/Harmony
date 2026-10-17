@@ -198,15 +198,15 @@ Thaumcraft 4, Witchery and Botania when they're installed.
       where I'm looking, flee, dig, fetch, collect items, activate, place, bark,
       galvanize (short tankiness buff), lay down / backflip / roll over
 - [ ] Trick chaining with phrases
-- [ ] Instruments for the other noteblock sounds: bass drum, snare, clicks, bass
+- [x] Instruments for the other noteblock sounds: bass drum, snare, clicks, bass
 - [ ] Teaching by demonstration
-- [ ] Clear an animal's tricks to reset its training
+- [x] Clear an animal's tricks to reset its training (milk bucket, owner only)
 - [ ] More traits and bad traits
 - [ ] Happiness: water, flowers, light, eating grass, per species preferences
-- [ ] Trick indicators, e.g. wolves look different while attacking, and don't attack sheep unless told to
+- [x] Trick indicators, e.g. wolves look different while attacking, and don't attack sheep unless told to
 - [ ] Animals holding items
 - [ ] Sitting poses for animals without a vanilla one (cows, pigs, sheep, chickens, horses)
-- [ ] Pet armor (enchantable) and potions
+- [ ] Pet armor (enchantable) and potions (potions done: drinkable potions can be given to animals)
 - [ ] Rituals and magical traits
 - [ ] Integrations: Thaumcraft, Botania, Witchery
 - [ ] Respawn on owner upgrade

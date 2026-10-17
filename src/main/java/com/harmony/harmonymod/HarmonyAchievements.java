@@ -1,5 +1,6 @@
 package com.harmony.harmonymod;
 
+import com.harmony.harmonymod.instruments.ItemHarp;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
@@ -70,7 +71,7 @@ public class HarmonyAchievements {
 		}
 		if (event.crafting.getItem() == HarmonyMod.petJournal) {
 			award(event.player, journal);
-		} else if (event.crafting.getItem() == HarmonyMod.harp) {
+		} else if (event.crafting.getItem() instanceof ItemHarp) {
 			award(event.player, harp);
 		}
 	}

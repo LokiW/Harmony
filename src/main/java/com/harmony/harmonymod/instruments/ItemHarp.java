@@ -18,18 +18,24 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import java.util.List;
 
 /*
- * A small harp that stores phrases to command animals away from noteblocks. Right click plays the
- * active phrase, sneak + right click opens the sheet music to compose them (GuiHarp).
+ * A handheld instrument that stores phrases to command animals away from noteblocks: the harp, and one
+ * for each other noteblock sound (bass drum, snare, clicks, bass). Right click plays the active phrase,
+ * sneak + right click opens the sheet music to compose them (GuiHarp), in the instrument's sound.
  */
 public class ItemHarp extends HarmonyItem {
 	public static final int SLOTS = 4;
 
-	public ItemHarp(String name) {
+	// Noteblock instrument it plays, see Phrases
+	public final int instrument;
+
+	public ItemHarp(String name, int instrument) {
 		super(name);
+		this.instrument = instrument;
 		this.setMaxStackSize(1);
 	}
 
@@ -37,11 +43,28 @@ public class ItemHarp extends HarmonyItem {
 	 * Recipe and handlers, during init
 	 */
 	public void register() {
-		GameRegistry.addShapedRecipe(new ItemStack(this),
-				"SG ",
-				"TTS",
-				"SN ",
-				'G', Items.gold_ingot, 'S', Items.stick, 'N', Blocks.noteblock, 'T', Items.string);
+		switch (instrument) {
+			case Phrases.HARP:
+				GameRegistry.addShapedRecipe(new ItemStack(this), "SG ", "TTS", "SN ",
+						'G', Items.gold_ingot, 'S', Items.stick, 'N', Blocks.noteblock, 'T', Items.string);
+				break;
+			case Phrases.BASS_DRUM:
+				GameRegistry.addShapedRecipe(new ItemStack(this), "LLL", "PNP", "PPP",
+						'L', Items.leather, 'P', new ItemStack(Blocks.planks, 1, OreDictionary.WILDCARD_VALUE), 'N', Blocks.noteblock);
+				break;
+			case Phrases.SNARE:
+				GameRegistry.addShapedRecipe(new ItemStack(this), "LLL", "TNT", "III",
+						'L', Items.leather, 'T', Items.string, 'I', Items.iron_ingot, 'N', Blocks.noteblock);
+				break;
+			case Phrases.CLICKS:
+				GameRegistry.addShapelessRecipe(new ItemStack(this), Items.stick, Items.stick, Blocks.noteblock);
+				break;
+			case Phrases.BASS:
+				GameRegistry.addShapedRecipe(new ItemStack(this), "TST", "TNT", "PSP",
+						'T', Items.string, 'S', Items.stick, 'N', Blocks.noteblock,
+						'P', new ItemStack(Blocks.planks, 1, OreDictionary.WILDCARD_VALUE));
+				break;
+		}
 		MinecraftForge.EVENT_BUS.register(this);
 	}
 

@@ -74,7 +74,7 @@ public class HarpUpdateMessage implements IMessage {
 			}
 			String[] phrases = new String[ItemHarp.SLOTS];
 			for (int s = 0; s < ItemHarp.SLOTS; s++) {
-				phrases[s] = toPhrase(message.slots.get(s));
+				phrases[s] = toPhrase(message.slots.get(s), ((ItemHarp) held.getItem()).instrument);
 			}
 			ItemHarp.setSlots(held, phrases, message.active);
 			return null;
@@ -83,13 +83,13 @@ public class HarpUpdateMessage implements IMessage {
 		/*
 		 * Phrase key for harp pitches, dropping anything invalid
 		 */
-		private static String toPhrase(List<SortedSet<Integer>> pitchSteps) {
+		private static String toPhrase(List<SortedSet<Integer>> pitchSteps, int instrument) {
 			List<SortedSet<Integer>> steps = new ArrayList<SortedSet<Integer>>();
 			for (SortedSet<Integer> pitches : pitchSteps) {
 				SortedSet<Integer> step = new TreeSet<Integer>();
 				for (int pitch : pitches) {
 					if (pitch >= 0 && pitch <= 24) {
-						step.add(Phrases.note(Phrases.HARP, pitch));
+						step.add(Phrases.note(instrument, pitch));
 					}
 				}
 				if (!step.isEmpty() && steps.size() < Phrases.MAX_STEPS) {

@@ -14,6 +14,7 @@ import net.minecraft.world.World;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.entity.ai.attributes.BaseAttributeMap;
 import com.harmony.harmonymod.tricks.TrickHandler;
+import com.harmony.harmonymod.tricks.TrickIndicators;
 import com.harmony.harmonymod.aitasks.BreedingAI;
 import com.harmony.harmonymod.aitasks.HarmonyWanderAI;
 import java.util.UUID;
@@ -281,6 +282,7 @@ public class HarmonyProps implements IExtendedEntityProperties {
 		tricks.registerTask();
 		BreedingAI.registerTask(this.pet);
 		HarmonyWanderAI.registerTask(this.pet);
+		TrickIndicators.stopHunting(this.pet);
 	}
 
 

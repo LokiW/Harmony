@@ -10,9 +10,11 @@ import com.harmony.harmonymod.sync.AnimalSync;
 import com.harmony.harmonymod.ownership.Ownership;
 import com.harmony.harmonymod.tricks.Sit;
 import com.harmony.harmonymod.tricks.FollowTravel;
+import com.harmony.harmonymod.tricks.TrickIndicators;
 import com.harmony.harmonymod.aitasks.Produce;
 import com.harmony.harmonymod.tricks.ItemTrainingTreat;
 import com.harmony.harmonymod.instruments.ItemHarp;
+import com.harmony.harmonymod.sounds.Phrases;
 import com.harmony.harmonymod.instruments.HarpPlayer;
 import com.harmony.harmonymod.respawn.Respawn;
 import com.harmony.harmonymod.horsefix.HorseControlClient;
@@ -52,6 +54,8 @@ public class HarmonyMod
 
 	public static ItemTrainingTreat trainingTreat;
 	public static ItemHarp harp;
+	// The other handheld instruments, one per noteblock sound
+	public static ItemHarp bassDrum, snareDrum, claves, doubleBass;
 	public static ItemPetJournal petJournal;
 
 	//default traits that can appear on wild animals
@@ -102,7 +106,11 @@ public class HarmonyMod
 		petJournal = new ItemPetJournal("pet_journal");
 		Ownership.registerItems();
 		trainingTreat = new ItemTrainingTreat("training_treat");
-		harp = new ItemHarp("harp");
+		harp = new ItemHarp("harp", Phrases.HARP);
+		bassDrum = new ItemHarp("bass_drum", Phrases.BASS_DRUM);
+		snareDrum = new ItemHarp("snare_drum", Phrases.SNARE);
+		claves = new ItemHarp("claves", Phrases.CLICKS);
+		doubleBass = new ItemHarp("double_bass", Phrases.BASS);
 	}
 
 	/*
@@ -118,6 +126,10 @@ public class HarmonyMod
 		Ownership.register();
 		trainingTreat.register();
 		harp.register();
+		bassDrum.register();
+		snareDrum.register();
+		claves.register();
+		doubleBass.register();
 		petJournal.register();
 		// Optional WAILA tooltip, by name so WailaCompat only loads if WAILA is installed
 		FMLInterModComms.sendMessage("Waila", "register", "com.harmony.harmonymod.compat.WailaCompat.callbackRegister");
@@ -130,6 +142,7 @@ public class HarmonyMod
 		Produce.register();
 		AnimalSounds.register();
 		HarmonyAchievements.register();
+		TrickIndicators.register();
 		HorseControl.register();
 		if (event.getSide().isClient()) {
 			HorseControlClient.register();
