@@ -1,5 +1,6 @@
 package com.harmony.harmonymod.aitasks;
 
+import com.harmony.harmonymod.HarmonyAchievements;
 import com.harmony.harmonymod.HarmonyProps;
 import com.harmony.harmonymod.tricks.Hazards;
 import java.util.List;
@@ -112,7 +113,11 @@ public class HarmonyWanderAI extends EntityAIBase
 
 		hp.comforts = comforts & (Comforts.FOOD | Comforts.WATER | Comforts.SHELTER | Comforts.BEDDING);
 		hp.bothers = bothers;
+		int moodBefore = hp.getMood();
 		hp.moveHappinessTowards(target);
+		if (moodBefore <= 0 && hp.getMood() > 0) {
+			HarmonyAchievements.awardFor(this.entity, hp, HarmonyAchievements.happy);
+		}
 		if (var1 == null || !this.entity.getNavigator().tryMoveToXYZ(var1.xCoord, var1.yCoord, var1.zCoord, 1.0)) {
 			return false;
 		}

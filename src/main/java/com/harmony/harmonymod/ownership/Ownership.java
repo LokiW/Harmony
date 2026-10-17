@@ -1,5 +1,6 @@
 package com.harmony.harmonymod.ownership;
 
+import com.harmony.harmonymod.HarmonyAchievements;
 import com.harmony.harmonymod.HarmonyProps;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -80,6 +81,7 @@ public class Ownership {
 					if (newBond) {
 						setOwner(animal, hp, player.getUniqueID(), player.getCommandSenderName());
 						tell(player, "harmony.bond.bonded", animal.getCommandSenderName());
+						HarmonyAchievements.award(player, HarmonyAchievements.bond);
 					}
 				}
 			} else if (server) {

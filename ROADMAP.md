@@ -63,6 +63,7 @@ Thaumcraft 4, Witchery and Botania when they're installed.
 - All comforts take a content animal to 11, just past breeding, so a pen's animals breed until
   crowding pulls them under 10: better and bigger pens hold more animals.
 - The Pet Journal shows an animal's comforts and what bothers it.
+- Animals' sounds can be thinned out for big farms (config animalSounds); hurt and death sounds always play.
 - Feeding an animal its breeding food: if it's happy it looks for a mate right away, otherwise it gets
   happier (+3). Either way it shows its mood.
 - Only kept animals (fed, trained, bonded, tamed, or born to kept parents) breed on their own, so wild
@@ -181,14 +182,14 @@ Thaumcraft 4, Witchery and Botania when they're installed.
       crowding growing steeply so pens settle at a density. Shorten the breeding timers once comforts
       have been playtested.
 - [x] Pets don't follow (path or teleport) into lava or fire unless they're fire resistant
-- [ ] Pet Journal pages: right click with the journal to turn to the next page of information, so it
+- [x] Pet Journal pages: right click with the journal to turn to the next page of information, so it
       can show more than fits on one page
 - [x] Bug: ocelots/cats and mooshrooms aren't Harmony animals; make every animal that breeds one,
       including other mods' animals (generic traits, config switch to turn off)
-- [ ] Happiness affects produce: unhappy animals lay eggs and regrow wool less, happy ones more
+- [x] Happiness affects produce: unhappy animals lay eggs and regrow wool less, happy ones more
 - [x] Overlay showing an animal's traits, happiness, tricks and owner: the Pet Journal (replaces the
       Harmony Diagnostics debug item), plus a WAILA tooltip when WAILA is installed
-- [ ] Config cleanup (incl. option to quiet animal sounds), achievements or other in game hints so
+- [x] Config cleanup (incl. option to quiet animal sounds), achievements or other in game hints so
       players can discover the systems
 
 ### Phase 2: Depth

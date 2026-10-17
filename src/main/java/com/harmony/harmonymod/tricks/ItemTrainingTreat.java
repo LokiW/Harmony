@@ -1,5 +1,6 @@
 package com.harmony.harmonymod.tricks;
 
+import com.harmony.harmonymod.HarmonyAchievements;
 import com.harmony.harmonymod.HarmonyProps;
 import com.harmony.harmonymod.items.HarmonyItem;
 import com.harmony.harmonymod.ownership.Ownership;
@@ -116,6 +117,7 @@ public class ItemTrainingTreat extends HarmonyItem {
 		}
 		EntityLiving animal = (EntityLiving) event.target;
 		hp.tricks.tricks.put(phrase, new ActionSet(action));
+		HarmonyAchievements.award(player, HarmonyAchievements.treat);
 		hp.kept = true;
 		AnimalSync.syncNow(animal);
 		((WorldServer) animal.worldObj).func_147487_a("heart", animal.posX, animal.posY + animal.height + 0.3D,

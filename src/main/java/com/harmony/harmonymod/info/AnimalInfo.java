@@ -31,7 +31,7 @@ import java.util.Map;
  */
 public class AnimalInfo {
 	// Most learned phrases listed before "and N more"
-	private static final int MAX_KNOWN = 6;
+	private static final int MAX_KNOWN = 10;
 	// Most phrases listed as still being learned
 	private static final int MAX_LEARNING = 3;
 	// Longest phrase shown before it's cut short
@@ -39,7 +39,10 @@ public class AnimalInfo {
 
 	private static final TRAIT[] GOOD = {TRAIT.FAST, TRAIT.HARDY, TRAIT.VICIOUS, TRAIT.JUMP, TRAIT.FERTILE};
 
-	public static List<String> describe(EntityLiving animal, HarmonyProps hp, boolean full) {
+	/*
+	 * The short version, for WAILA's tooltip and the top of the journal's first page
+	 */
+	public static List<String> describe(EntityLiving animal, HarmonyProps hp) {
 		List<String> lines = new ArrayList<String>();
 		if (hp == null || !hp.isInitialized()) {
 			return lines;
@@ -47,20 +50,43 @@ public class AnimalInfo {
 		lines.add(hp.isBonded() ? t("harmony.info.owner", hp.ownerName) : gray(t("harmony.info.unbonded")));
 		lines.add(t("harmony.info.mood", mood(hp.mood)) + (hp.kept ? gray(" " + t("harmony.info.kept")) : ""));
 		lines.add(t("harmony.info.traits", traits(hp)));
-		if (!full) {
-			return lines;
+		return lines;
+	}
+
+	/*
+	 * The Pet Journal's pages: the animal (mood, what it's doing, stats), then its training
+	 */
+	public static List<List<String>> pages(EntityLiving animal, HarmonyProps hp) {
+		List<List<String>> pages = new ArrayList<List<String>>();
+		if (hp == null || !hp.isInitialized()) {
+			return pages;
 		}
+		List<String> lines = describe(animal, hp);
 		lines.add(t("harmony.info.comforts", comforts(hp)));
 		if (hp.bothers != 0) {
 			lines.add(t("harmony.info.bothers", bothers(hp.bothers)));
 		}
-
 		TrickHandler tricks = hp.tricks;
 		String doing = doing(tricks.currentTrick);
 		if (doing != null) {
 			lines.add(t("harmony.info.doing", doing));
 		}
+		/* Health and attack as numbers, green or red when traits raised or lowered them */
+		IAttributeInstance maxHealth = animal.getAttributeMap()
+				.getAttributeInstanceByName(SharedMonsterAttributes.maxHealth.getAttributeUnlocalizedName());
+		String health = String.format("%.0f/%.0f", animal.getHealth(), animal.getMaxHealth());
+		if (maxHealth != null) {
+			health = colored(health, maxHealth.getAttributeValue(), maxHealth.getBaseValue());
+		}
+		String stats = t("harmony.info.health", health)
+				+ "  " + t("harmony.info.speed") + multiplier(animal, SharedMonsterAttributes.movementSpeed.getAttributeUnlocalizedName());
+		if (hp.attackBase > 0.0) {
+			stats += "  " + t("harmony.info.attack", colored(number(hp.attack), hp.attack, hp.attackBase));
+		}
+		lines.add(stats);
+		pages.add(lines);
 
+		lines = new ArrayList<String>();
 		Map<String, String> known = new LinkedHashMap<String, String>();
 		List<String> learning = new ArrayList<String>();
 		for (Map.Entry<String, ActionSet> phrase : tricks.tricks.entrySet()) {
@@ -92,6 +118,9 @@ public class AnimalInfo {
 			lines.add(t("harmony.info.learning") + " " + gray(join(shown) + more));
 		}
 
+		if (known.isEmpty() && learning.isEmpty()) {
+			lines.add(gray(t("harmony.info.no_tricks")));
+		}
 		List<String> places = new ArrayList<String>();
 		if (tricks.yLearned1 >= 0.0) places.add("1");
 		if (tricks.yLearned2 >= 0.0) places.add("2");
@@ -101,20 +130,8 @@ public class AnimalInfo {
 				: t(tricks.permanentRespawn ? "harmony.info.respawn_permanent" : "harmony.info.respawn_once");
 		lines.add(t("harmony.info.respawn", respawn));
 
-		/* Health and attack as numbers, green or red when traits raised or lowered them */
-		IAttributeInstance maxHealth = animal.getAttributeMap()
-				.getAttributeInstanceByName(SharedMonsterAttributes.maxHealth.getAttributeUnlocalizedName());
-		String health = String.format("%.0f/%.0f", animal.getHealth(), animal.getMaxHealth());
-		if (maxHealth != null) {
-			health = colored(health, maxHealth.getAttributeValue(), maxHealth.getBaseValue());
-		}
-		String stats = t("harmony.info.health", health)
-				+ "  " + t("harmony.info.speed") + multiplier(animal, SharedMonsterAttributes.movementSpeed.getAttributeUnlocalizedName());
-		if (hp.attackBase > 0.0) {
-			stats += "  " + t("harmony.info.attack", colored(number(hp.attack), hp.attack, hp.attackBase));
-		}
-		lines.add(stats);
-		return lines;
+		pages.add(lines);
+		return pages;
 	}
 
 	private static String traits(HarmonyProps hp) {

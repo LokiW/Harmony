@@ -10,6 +10,7 @@ import com.harmony.harmonymod.sync.AnimalSync;
 import com.harmony.harmonymod.ownership.Ownership;
 import com.harmony.harmonymod.tricks.Sit;
 import com.harmony.harmonymod.tricks.FollowTravel;
+import com.harmony.harmonymod.aitasks.Produce;
 import com.harmony.harmonymod.tricks.ItemTrainingTreat;
 import com.harmony.harmonymod.instruments.ItemHarp;
 import com.harmony.harmonymod.instruments.HarpPlayer;
@@ -79,6 +80,10 @@ public class HarmonyMod
 	public static Map<String, Integer> naturalBreedingMinutes = new HashMap<String, Integer>();
 	private static final int DEFAULT_BREEDING_MINUTES = 20;
 	private static final String BREEDING_MINUTES_COMMENT = "minutes between litters when breeding on their own; feeding still breeds after vanilla's 5 minutes";
+	private static final String SLOT_COMMENT = "traits wild animals can get in this slot, one picked at random; repeat an entry to make it more likely";
+	private static final String ATTACK_COMMENT = "give the animal attack damage so it can attack when told to (and Vicious does something)";
+	// Share of Harmony animals' sounds that play, 0 to 1, see AnimalSounds
+	public static float animalSounds = 1.0F;
 	// Dimension ids pets won't follow their player into
 	public static Set<Integer> noFollowDimensions = new HashSet<Integer>();
 	private static final String NO_FOLLOW_COMMENT = "dimension ids pets won't follow their player into, e.g. 1 for the End";
@@ -122,6 +127,9 @@ public class HarmonyMod
 		FeedAnimal.register();
 		Respawn.register();
 		FollowTravel.register();
+		Produce.register();
+		AnimalSounds.register();
+		HarmonyAchievements.register();
 		HorseControl.register();
 		if (event.getSide().isClient()) {
 			HorseControlClient.register();
@@ -149,48 +157,32 @@ public class HarmonyMod
 			if (!config.hasCategory(OTHER_ANIMALS)) {
 				addOtherAnimals();
 			}
+			readGeneral();
 
 			for(String s : config.getCategoryNames()) {
-				if(s.equals(MODID)) {
-					//general config values
-					Property p;
-					p = config.get(MODID, "breedingHappiness", 10);
-					breedingHappiness = p.getInt();
-					p = config.get(MODID, "breedingCost", 5);
-					breedingCost = p.getInt();
-					p = config.get(MODID, "populationCap", 16, "animals won't breed with this many of their species nearby");
-					populationCap = p.getInt();
-					p = config.get(MODID, "populationRadius", 16, "how far (in blocks) populationCap counts animals");
-					populationRadius = p.getInt();
-					p = config.get(MODID, "allAnimals", true, ALL_ANIMALS_COMMENT);
-					allAnimals = p.getBoolean();
-					p = config.get(MODID, "noFollowDimensions", new int[0], NO_FOLLOW_COMMENT);
-					noFollowDimensions.clear();
-					for (int dim : p.getIntList()) {
-						noFollowDimensions.add(dim);
-					}
-				} else {
-					//for each mob
-					Property p;
-					p = config.get(s, "slot1", "");
-					slot1.put(s,parse(p.getString()));
+				if (s.equals(MODID)) {
+					continue;
+				}
+				// Each other section is a species
+				Property p;
+				p = config.get(s, "slot1", "", SLOT_COMMENT);
+				slot1.put(s,parse(p.getString()));
 
-					p = config.get(s, "slot2", "");
-					slot2.put(s,parse(p.getString()));
-					
-					p = config.get(s, "slot3", "");
-					slot3.put(s,parse(p.getString()));
+				p = config.get(s, "slot2", "", SLOT_COMMENT);
+				slot2.put(s,parse(p.getString()));
 				
-					p = config.get(s, "naturalBreedingMinutes", DEFAULT_BREEDING_MINUTES, BREEDING_MINUTES_COMMENT);
-					naturalBreedingMinutes.put(s, p.getInt());
+				p = config.get(s, "slot3", "", SLOT_COMMENT);
+				slot3.put(s,parse(p.getString()));
+			
+				p = config.get(s, "naturalBreedingMinutes", DEFAULT_BREEDING_MINUTES, BREEDING_MINUTES_COMMENT);
+				naturalBreedingMinutes.put(s, p.getInt());
 
-					p = config.get(s, "needsAttackAttr", false);
-					if(p.getBoolean())
-						needsAttackAttr.add(s);
-	
-					if (!s.equals(OTHER_ANIMALS)) {
-						harmonyMobs.add(s);
-					}
+				p = config.get(s, "needsAttackAttr", false, ATTACK_COMMENT);
+				if(p.getBoolean())
+					needsAttackAttr.add(s);
+
+				if (!s.equals(OTHER_ANIMALS)) {
+					harmonyMobs.add(s);
 				}
 			}
 		} catch (Exception e) {
@@ -202,15 +194,25 @@ public class HarmonyMod
 		}
 	}
 
+	/*
+	 * Settings that aren't per species, in the "harmony" section
+	 */
+	private static void readGeneral() {
+		breedingHappiness = config.get(MODID, "breedingHappiness", 10, "happiness (out of 20) animals need to breed").getInt();
+		breedingCost = config.get(MODID, "breedingCost", 5, "happiness lost by breeding").getInt();
+		populationCap = config.get(MODID, "populationCap", 16, "animals won't breed with this many of their species nearby").getInt();
+		populationRadius = config.get(MODID, "populationRadius", 16, "how far (in blocks) populationCap counts animals").getInt();
+		allAnimals = config.get(MODID, "allAnimals", true, ALL_ANIMALS_COMMENT).getBoolean();
+		noFollowDimensions.clear();
+		for (int dim : config.get(MODID, "noFollowDimensions", new int[0], NO_FOLLOW_COMMENT).getIntList()) {
+			noFollowDimensions.add(dim);
+		}
+		animalSounds = (float) Math.max(0.0D, Math.min(1.0D, config.get(MODID, "animalSounds", 1.0D,
+				"how many of Harmony animals' sounds play, 0 (none) to 1 (all, like vanilla), to quiet big farms; "
+				+ "hurt and death sounds always play").getDouble()));
+	}
+
 	private static void generateConfig() {
-
-		config.get(MODID, "breedingHappiness", 10, "required happiness to breed, out of 20");
-		config.get(MODID, "breedingCost", 5, "happiness lost by breeding");
-		config.get(MODID, "populationCap", 16, "animals won't breed with this many of their species nearby");
-		config.get(MODID, "populationRadius", 16, "how far (in blocks) populationCap counts animals");
-		config.get(MODID, "allAnimals", true, ALL_ANIMALS_COMMENT);
-		config.get(MODID, "noFollowDimensions", new int[0], NO_FOLLOW_COMMENT);
-
 		// Which traits wild animals can get, per species: good ones that fit the species, and bad ones
 		addSpecies("EntityCow", "VICIOUS,HARDY", "SLOW,WEAK", 20);
 		addSpecies("EntitySheep", "HARDY,FERTILE", "FRAIL,SLOW", 15);
@@ -237,12 +239,11 @@ public class HarmonyMod
 		for (int i = 0; i < traitCount * 2; i++) {
 			slot = "NONE," + slot;
 		}
-		String comment = "Traits wild animals can get in this slot, one picked at random. Repeat an entry to make it more likely.";
-		config.get(species, "slot1", slot, comment);
-		config.get(species, "slot2", slot, comment);
-		config.get(species, "slot3", slot, comment);
+		config.get(species, "slot1", slot, SLOT_COMMENT);
+		config.get(species, "slot2", slot, SLOT_COMMENT);
+		config.get(species, "slot3", slot, SLOT_COMMENT);
 		config.get(species, "naturalBreedingMinutes", breedingMinutes, BREEDING_MINUTES_COMMENT);
-		config.get(species, "needsAttackAttr", true);
+		config.get(species, "needsAttackAttr", true, ATTACK_COMMENT);
 	}
 
 	/*

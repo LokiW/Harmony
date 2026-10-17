@@ -19,6 +19,8 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.util.StatCollector;
+import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -32,6 +34,12 @@ public class JournalOverlay {
 	private static final int BACKGROUND = 0xC0201810;
 	private static final int BORDER = 0xFF8B6B3E;
 	private static final int MAX_WIDTH = 200;
+	// Page being read, turned with a right click (ItemPetJournal). Kept when looking at another animal.
+	private static int page;
+
+	public static void nextPage() {
+		page++;
+	}
 
 	public static void register() {
 		MinecraftForge.EVENT_BUS.register(new JournalOverlay());
@@ -55,8 +63,15 @@ public class JournalOverlay {
 		if (animal == null) {
 			return;
 		}
-		List<String> lines = AnimalInfo.describe(animal, HarmonyProps.get(animal), true);
-		lines.add(0, "§l" + animal.getCommandSenderName());
+		List<List<String>> pages = AnimalInfo.pages(animal, HarmonyProps.get(animal));
+		if (pages.isEmpty()) {
+			return;
+		}
+		page %= pages.size();
+		List<String> lines = new ArrayList<String>(pages.get(page));
+		lines.add(0, "§l" + animal.getCommandSenderName() + "§r§7  "
+				+ StatCollector.translateToLocalFormatted("harmony.journal.page", page + 1, pages.size()));
+		lines.add("§8" + StatCollector.translateToLocal("harmony.journal.turn"));
 
 		FontRenderer font = mc.fontRenderer;
 		// No line gets wider than this, so the page always fits beside the crosshair

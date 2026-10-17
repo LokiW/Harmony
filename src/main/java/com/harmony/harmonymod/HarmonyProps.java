@@ -69,6 +69,9 @@ public class HarmonyProps implements IExtendedEntityProperties {
 	public int comforts;
 	public int bothers;
 
+	// Server only: whether the sheep was sheared last tick, null until first seen (see Produce)
+	public Boolean wasSheared;
+
 	// Player bonded with this animal (see Ownership), null while unbonded
 	public UUID ownerId;
 	public String ownerName;

@@ -1,5 +1,6 @@
 package com.harmony.harmonymod.tricks;
 
+import com.harmony.harmonymod.HarmonyAchievements;
 import com.harmony.harmonymod.HarmonyMod;
 import com.harmony.harmonymod.HarmonyProps;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -120,6 +121,7 @@ public class FollowTravel {
 			moved.setLocationAndAngles(player.posX, player.boundingBox.minY, player.posZ, player.rotationYaw, 0.0F);
 		}
 		target.spawnEntityInWorld(moved);
+		HarmonyAchievements.award(player, HarmonyAchievements.follow);
 		if (leashed) {
 			moved.dropItem(Items.lead, 1);
 		}

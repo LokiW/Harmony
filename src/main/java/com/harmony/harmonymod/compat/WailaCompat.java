@@ -26,7 +26,7 @@ public class WailaCompat implements IWailaEntityProvider {
 	@Override
 	public List<String> getWailaBody(Entity entity, List<String> tooltip, IWailaEntityAccessor accessor, IWailaConfigHandler config) {
 		if (entity instanceof EntityLiving) {
-			tooltip.addAll(AnimalInfo.describe((EntityLiving) entity, HarmonyProps.get(entity), false));
+			tooltip.addAll(AnimalInfo.describe((EntityLiving) entity, HarmonyProps.get(entity)));
 		}
 		return tooltip;
 	}

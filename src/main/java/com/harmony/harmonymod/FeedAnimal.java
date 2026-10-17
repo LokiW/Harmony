@@ -82,6 +82,9 @@ public class FeedAnimal {
 				// Learned from the reward
 				((WorldServer) target.worldObj).func_147487_a("heart", target.posX, target.posY + target.height + 0.3,
 						target.posZ, 7, 0.4, 0.3, 0.4, 0.0);
+				HarmonyAchievements.award(player, HarmonyAchievements.trick);
+			} else {
+				HarmonyAchievements.award(player, HarmonyAchievements.training);
 			}
 			// Show the learning question marks starting or stopping straight away
 			AnimalSync.syncNow(target);
@@ -95,6 +98,7 @@ public class FeedAnimal {
 			}
 			hp.kept = true;
 			int place = hp.tricks.setNextPlace(target.posX, target.posY, target.posZ);
+			HarmonyAchievements.award(player, HarmonyAchievements.place);
 			player.addChatComponentMessage(new ChatComponentTranslation("harmony.place.set", place, target.getCommandSenderName()));
 			AnimalSync.syncNow(target);
 		} else if ("item.appleGold".equals(itemName)) {
@@ -103,6 +107,7 @@ public class FeedAnimal {
 			}
 			hp.kept = true;
 			hp.tricks.setRespawn(target.posX, target.posY, target.posZ, target.dimension);
+			HarmonyAchievements.award(player, HarmonyAchievements.lifesaver);
 			// An enchanted golden apple makes it permanent, a plain one after that only moves the point
 			if (held_items.getItemDamage() == 1) {
 				hp.tricks.permanentRespawn = true;
